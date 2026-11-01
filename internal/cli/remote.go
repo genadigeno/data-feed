@@ -184,26 +184,22 @@ func ProgressLine(s *api.SessionDTO) string {
 	return b.String()
 }
 
-// Bottleneck names what a slow session is waiting for, or "".
+// Bottleneck says in words what a session is waiting for.
 func Bottleneck(p *api.PressureDTO) string {
 	if p == nil {
 		return ""
 	}
-	best, name := 0.0, ""
-	for _, c := range []struct {
-		seconds float64
-		what    string
-	}{
-		{p.OutputBlockedSeconds, "output: generators wait for the encoder"},
-		{p.GenerationStarvedSeconds, "generation: the encoder waits for records"},
-		{p.SinkBlockedSeconds, "delivery: waiting for parts to reach the Coordinator"},
-		{p.RateLimitedSeconds, "the configured rate"},
-	} {
-		if c.seconds > best {
-			best, name = c.seconds, c.what
-		}
+	switch p.LimitedBy {
+	case "output":
+		return "output: generators wait for the encoder"
+	case "generation":
+		return "generation: the encoder waits for records"
+	case "delivery":
+		return "delivery: waiting for parts to reach the Coordinator"
+	case "rate":
+		return "the configured rate"
 	}
-	return name
+	return ""
 }
 
 func (g *globals) sessionTable(items []api.SessionDTO) func(io.Writer) {

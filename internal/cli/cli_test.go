@@ -153,8 +153,7 @@ func TestBottleneck(t *testing.T) {
 	if Bottleneck(nil) != "" || Bottleneck(&api.PressureDTO{}) != "" {
 		t.Fatal("nothing is limiting")
 	}
-	got := Bottleneck(&api.PressureDTO{GenerationStarvedSeconds: 1, RateLimitedSeconds: 3})
-	if got != "the configured rate" {
+	if got := Bottleneck(&api.PressureDTO{LimitedBy: "rate"}); got != "the configured rate" {
 		t.Fatal(got)
 	}
 }

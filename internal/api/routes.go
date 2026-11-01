@@ -45,6 +45,8 @@ func (s *server) routes() []route {
 		{Method: "GET", Path: "/openapi.yaml", Handler: s.openAPI},
 		{Method: "GET", Path: "/metrics", Role: s.metricsRole(), Handler: s.metrics},
 		{Method: "GET", Path: "/whoami", Role: RoleViewer, Handler: s.whoAmI},
+		{Method: "POST", Path: "/auth/login", Handler: s.login},
+		{Method: "POST", Path: "/auth/logout", Handler: s.logout},
 		{Method: "GET", Path: "/dashboard", Role: RoleViewer, Handler: s.dashboard},
 		{Method: "GET", Path: "/events", Role: RoleViewer, Stream: true, Handler: s.events},
 

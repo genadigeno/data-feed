@@ -58,6 +58,23 @@ paths:
           content:
             application/json: {schema: {$ref: "#/components/schemas/Principal"}}
         default: {$ref: "#/components/responses/Error"}
+  /auth/login:
+    post:
+      summary: "Check a token and keep it in an HttpOnly cookie, for the web interface"
+      tags: [auth]
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Principal"}}
+  /auth/logout:
+    post:
+      summary: "Clear that cookie"
+      tags: [auth]
+      security: []
+      responses:
+        "204": {description: Done}
   /dashboard:
     get:
       summary: "Overview counters and recent sessions"

@@ -183,6 +183,39 @@ func TestDrainEvent(t *testing.T) {
 	}
 }
 
+func TestThroughputMeasuresBetweenReports(t *testing.T) {
+	var th Throughput
+	stale := 15 * time.Second
+	at := func(seconds int) time.Time { return epoch.Add(time.Duration(seconds) * time.Second) }
+	if got := th.Observe(0, at(0), stale); got != 0 {
+		t.Fatal(got)
+	}
+	// Ticks every 2 s, with a report of 10,000 records every 5 s: a steady 2,000 per second.
+	if got := th.Observe(0, at(2), stale); got != 0 {
+		t.Fatal(got)
+	}
+	if got := th.Observe(10000, at(5), stale); got != 2000 {
+		t.Fatalf("first report: %v", got)
+	}
+	if got := th.Observe(10000, at(6), stale); got != 2000 {
+		t.Fatalf("a tick with no news keeps the rate: %v", got)
+	}
+	if got := th.Observe(20000, at(10), stale); got != 2000 {
+		t.Fatalf("steady: %v", got)
+	}
+	if got := th.Observe(20000, at(20), stale); got != 2000 {
+		t.Fatalf("just before going stale: %v", got)
+	}
+	if got := th.Observe(20000, at(25), stale); got != 0 {
+		t.Fatalf("silence means stopped: %v", got)
+	}
+	// Records given up don't make a negative rate, and aren't counted twice when they return.
+	th.Observe(5000, at(26), stale)
+	if got := th.Observe(6000, at(27), stale); got != 1000 {
+		t.Fatalf("after loss: %v", got)
+	}
+}
+
 func TestCredentials(t *testing.T) {
 	id, secret, ok := ParseCredential("wrk_1.abc")
 	if !ok || id != "wrk_1" || secret != "abc" {

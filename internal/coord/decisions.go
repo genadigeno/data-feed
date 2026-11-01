@@ -129,6 +129,36 @@ func DrainEvent(s *store.Session, leased, pending int64, exhausted bool) string 
 	return ""
 }
 
+// Throughput follows a session's total records, which only move when a heartbeat or commit
+// says so. Measuring every tick would show bursts and silences that aren't there: this
+// measures from one change to the next.
+type Throughput struct {
+	Rate     float64
+	baseline uint64
+	at       time.Time
+	started  bool
+}
+
+// Observe takes the current total and returns the rate. stale is how long no news may mean
+// nothing is happening, rather than that the next report hasn't come yet.
+func (t *Throughput) Observe(total uint64, now time.Time, stale time.Duration) float64 {
+	switch {
+	case !t.started:
+		t.baseline, t.at, t.started = total, now, true
+	case total < t.baseline:
+		// In-flight records were given up, as when a lease is lost. They'll come round again.
+		t.baseline, t.at = total, now
+	case total > t.baseline:
+		if elapsed := now.Sub(t.at).Seconds(); elapsed > 0 {
+			t.Rate = float64(total-t.baseline) / elapsed
+			t.baseline, t.at = total, now
+		}
+	case now.Sub(t.at) >= stale:
+		t.Rate = 0
+	}
+	return t.Rate
+}
+
 // HashSecret is how credentials and tokens are stored.
 func HashSecret(secret string) []byte {
 	sum := sha256.Sum256([]byte(secret))

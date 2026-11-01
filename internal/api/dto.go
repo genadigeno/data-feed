@@ -67,6 +67,24 @@ type PressureDTO struct {
 	GenerationStarvedSeconds float64 `json:"generation_starved_seconds"`
 	SinkBlockedSeconds       float64 `json:"sink_blocked_seconds"`
 	RateLimitedSeconds       float64 `json:"rate_limited_seconds"`
+	// LimitedBy names what the session is waiting for most: output, generation, delivery or rate.
+	LimitedBy string `json:"limited_by,omitempty"`
+}
+
+// LimitedBy names a session's bottleneck. A rate limit holds generators back, which also
+// starves the encoder, so that wait isn't a sign that generation itself is slow.
+func LimitedBy(live coord.Live) string {
+	starved := max(live.EncWait-live.RateWait, 0)
+	best, name := time.Second, "" // below this, nothing is really limiting it
+	for _, c := range []struct {
+		d    time.Duration
+		what string
+	}{{live.GenBlocked, "output"}, {starved, "generation"}, {live.SinkBlocked, "delivery"}, {live.RateWait, "rate"}} {
+		if c.d >= best {
+			best, name = c.d, c.what
+		}
+	}
+	return name
 }
 
 // SessionDTO is a session.
@@ -137,8 +155,9 @@ func ToSessionDTO(s *store.Session, live coord.Live, now time.Time) SessionDTO {
 		LastActivityAt: s.LastActivityAt, CreatedBy: s.CreatedBy, RetryOf: s.RetryOf, Pinned: s.Pinned, ArtifactsDegrade: s.ArtifactsDegraded, Version: s.Version,
 		Limits:   LimitsDTO{DurationMS: limits.DurationMS, Rate: s.Rate, MaxWorkers: s.MaxWorkers},
 		Progress: ProgressDTO{Records: u64(s.Records), Bytes: i64(s.Bytes), InFlightRecords: u64(live.InFlight)},
-		Rates:    RatesDTO{Current: live.Rate, Average: AverageRate(s, now), Peak: s.PeakRate},
-		Errors:   ErrorsDTO{Count: s.ErrorCount, Last: s.LastError},
+		// A session shorter than the sampling interval has no recorded peak, but its average is one.
+		Rates:  RatesDTO{Current: live.Rate, Average: AverageRate(s, now), Peak: max(s.PeakRate, AverageRate(s, now))},
+		Errors: ErrorsDTO{Count: s.ErrorCount, Last: s.LastError},
 	}
 	if d.AvailableActions == nil {
 		d.AvailableActions = []string{}
@@ -162,7 +181,7 @@ func WithProgress(d *SessionDTO, p session.Progress, live coord.Live, records ui
 	}
 	d.Pressure = &PressureDTO{
 		OutputBlockedSeconds: live.GenBlocked.Seconds(), GenerationStarvedSeconds: live.EncWait.Seconds(),
-		SinkBlockedSeconds: live.SinkBlocked.Seconds(), RateLimitedSeconds: live.RateWait.Seconds(),
+		SinkBlockedSeconds: live.SinkBlocked.Seconds(), RateLimitedSeconds: live.RateWait.Seconds(), LimitedBy: LimitedBy(live),
 	}
 	if p.Expected > 0 {
 		d.Progress.ExpectedRecords = strconv.FormatFloat(p.Expected, 'f', 0, 64)

@@ -84,7 +84,10 @@ func TestRoutesAreUniqueAndHandled(t *testing.T) {
 }
 
 func TestChangingRoutesNeedAtLeastOperator(t *testing.T) {
-	open := map[string]bool{"POST /sessions/validate": true, "POST /schemas/validate": true, "POST /schemas/{id}/preview": true}
+	open := map[string]bool{
+		"POST /sessions/validate": true, "POST /schemas/validate": true, "POST /schemas/{id}/preview": true,
+		"POST /auth/login": true, "POST /auth/logout": true, // what signing in and out needs
+	}
 	for _, rt := range testServer().routes() {
 		key := rt.Method + " " + rt.Path
 		if rt.Method == "GET" || open[key] {
@@ -106,7 +109,7 @@ func TestChangingRoutesNeedAtLeastOperator(t *testing.T) {
 func TestOnlyHealthAndDocsAreOpen(t *testing.T) {
 	s := testServer()
 	s.o.Config.API.MetricsRequireAuth = true
-	want := []string{"/health", "/openapi.yaml", "/ready"}
+	want := []string{"/auth/login", "/auth/logout", "/health", "/openapi.yaml", "/ready"}
 	var got []string
 	for _, rt := range s.routes() {
 		if rt.Role == "" {
@@ -190,20 +193,55 @@ func TestTokens(t *testing.T) {
 
 func TestBearer(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
-	if bearer(r) != "" {
+	if token, _ := bearer(r); token != "" {
 		t.Fatal("found a token in nothing")
 	}
 	r.AddCookie(&http.Cookie{Name: SessionCookie, Value: "from-cookie"})
-	if bearer(r) != "from-cookie" {
+	if token, cookie := bearer(r); token != "from-cookie" || !cookie {
 		t.Fatal("cookie")
 	}
 	r.Header.Set("Authorization", "Bearer from-header")
-	if bearer(r) != "from-header" {
+	if token, cookie := bearer(r); token != "from-header" || cookie {
 		t.Fatal("the header goes first")
 	}
 	r.Header.Set("Authorization", "Basic abc")
-	if bearer(r) != "from-cookie" {
+	if token, _ := bearer(r); token != "from-cookie" {
 		t.Fatal("other schemes are not tokens")
+	}
+}
+
+func TestCrossSiteRisk(t *testing.T) {
+	cases := []struct {
+		method     string
+		fromCookie bool
+		header     string
+		want       bool
+	}{
+		{"POST", true, "", true},
+		{"DELETE", true, "", true},
+		{"PUT", true, "", true},
+		{"POST", true, "1", false},
+		{"GET", true, "", false},
+		{"HEAD", true, "", false},
+		{"POST", false, "", false}, // a token in a header can't be sent by another site
+	}
+	for _, tc := range cases {
+		if got := CrossSiteRisk(tc.method, tc.fromCookie, tc.header); got != tc.want {
+			t.Errorf("%+v: %v", tc, got)
+		}
+	}
+}
+
+func TestSessionCookieIsLockedDown(t *testing.T) {
+	c := sessionCookie("v", time.Hour, true)
+	if !c.HttpOnly || !c.Secure || c.SameSite != http.SameSiteStrictMode || c.MaxAge != 3600 || c.Path != "/" {
+		t.Fatalf("%+v", c)
+	}
+	if sessionCookie("v", time.Hour, false).Secure {
+		t.Fatal("Secure over plain HTTP would keep the browser from sending it")
+	}
+	if gone := sessionCookie("", -time.Hour, false); gone.MaxAge >= 0 {
+		t.Fatalf("%+v", gone)
 	}
 }
 
@@ -370,6 +408,35 @@ func TestWithProgress(t *testing.T) {
 	WithProgress(&unbounded, session.Progress{}, coord.Live{}, 900)
 	if unbounded.Progress.Fraction != nil {
 		t.Fatal("no fraction without an expected size")
+	}
+}
+
+func TestLimitedBy(t *testing.T) {
+	cases := []struct {
+		live coord.Live
+		want string
+	}{
+		{coord.Live{}, ""},
+		{coord.Live{EncWait: 100 * time.Millisecond}, ""},
+		{coord.Live{GenBlocked: 5 * time.Second, EncWait: 2 * time.Second}, "output"},
+		{coord.Live{EncWait: 5 * time.Second}, "generation"},
+		{coord.Live{SinkBlocked: 5 * time.Second, GenBlocked: 4 * time.Second}, "delivery"},
+		// Generators held back by the rate starve the encoder: that is the rate's doing.
+		{coord.Live{EncWait: 10 * time.Second, RateWait: 10 * time.Second}, "rate"},
+		{coord.Live{EncWait: 20 * time.Second, RateWait: 5 * time.Second}, "generation"},
+	}
+	for i, tc := range cases {
+		if got := LimitedBy(tc.live); got != tc.want {
+			t.Errorf("case %d: %q", i, got)
+		}
+	}
+}
+
+func TestPeakIsNeverBelowAverage(t *testing.T) {
+	started := at.Add(-time.Second)
+	d := ToSessionDTO(&store.Session{Records: 1000, StartedAt: &started, PeakRate: 0}, coord.Live{}, at)
+	if d.Rates.Peak != 1000 {
+		t.Fatal(d.Rates)
 	}
 }
 

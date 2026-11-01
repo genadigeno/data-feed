@@ -28,6 +28,7 @@ import (
 	"github.com/genadigeno/data-feed/internal/snapshot"
 	"github.com/genadigeno/data-feed/internal/store/sqlite"
 	"github.com/genadigeno/data-feed/internal/vocab"
+	"github.com/genadigeno/data-feed/internal/web"
 )
 
 const readinessTimeout = time.Second
@@ -103,6 +104,11 @@ func RunCoordinatorNotify(ctx context.Context, cfg *config.Config, logger *slog.
 		return fmt.Errorf("create the first API token: %w", err)
 	}
 
+	webHandler, err := web.Handler()
+	if err != nil {
+		return fmt.Errorf("web interface: %w", err)
+	}
+
 	var ready atomic.Bool
 	shuttingDown := make(chan struct{})
 	publicHandler := api.NewHandler(api.Options{
@@ -114,7 +120,7 @@ func RunCoordinatorNotify(ctx context.Context, cfg *config.Config, logger *slog.
 			return readinessChecks(ctx, ready.Load(), db, dir, cfg.Storage.MinFreeBytes)
 		},
 		Config: cfg, DB: db.Store(), Core: plane.Core, Sessions: plane.Sessions, Catalogs: plane.Catalogs,
-		Artifacts: plane.Store, Logs: plane.Logs, Hub: plane.Hub, Done: shuttingDown,
+		Artifacts: plane.Store, Logs: plane.Logs, Hub: plane.Hub, Done: shuttingDown, Extra: webHandler,
 	})
 	internalHandler := protocol.NewHandler(logger.With("component", "protocol"), buildinfo.Version, plane.Core)
 

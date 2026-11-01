@@ -70,15 +70,70 @@ func TokenUsable(t *store.APIToken, now time.Time) bool {
 	return t.RevokedAt == nil && (t.ExpiresAt == nil || now.Before(*t.ExpiresAt))
 }
 
+// UIHeader marks a request as made by the web interface's own script. A cookie travels with
+// any request the browser sends, but another site's page cannot set this header on one.
+const UIHeader = "X-Datafeed-UI"
+
 // bearer reads a token from the Authorization header or, for the web interface, its cookie.
-func bearer(r *http.Request) string {
+func bearer(r *http.Request) (token string, fromCookie bool) {
 	if token, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer "); ok {
-		return strings.TrimSpace(token)
+		return strings.TrimSpace(token), false
 	}
 	if c, err := r.Cookie(SessionCookie); err == nil {
-		return c.Value
+		return c.Value, true
 	}
-	return ""
+	return "", false
+}
+
+// CrossSiteRisk reports a request a cookie alone must not be enough for: one that changes
+// something, and doesn't show it came from the interface.
+func CrossSiteRisk(method string, fromCookie bool, uiHeader string) bool {
+	if !fromCookie || uiHeader != "" {
+		return false
+	}
+	return method != http.MethodGet && method != http.MethodHead && method != http.MethodOptions
+}
+
+// login checks a token and keeps it in a cookie scripts can't read. Tokens are long and
+// random, so the rate limit here is only there to keep this from being a free load test.
+func (s *server) login(w http.ResponseWriter, r *http.Request) error {
+	if ok, _ := s.limiters.allow("login", s.o.Clock.Now()); !ok {
+		return apperr.New(apperr.ResourceExhausted, "ERR_RATE_LIMITED", "too many attempts")
+	}
+	var req struct {
+		Token string `json:"token"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		return err
+	}
+	var row *store.APIToken
+	err := s.o.DB.Read(r.Context(), func(ctx context.Context, tx store.Tx) error {
+		var err error
+		row, err = tx.FindAPIToken(ctx, HashToken(strings.TrimSpace(req.Token)))
+		return err
+	})
+	if errors.Is(err, store.ErrNotFound) || (err == nil && !TokenUsable(row, s.o.Clock.Now())) {
+		return apperr.New(apperr.Unauthenticated, "ERR_UNAUTHENTICATED", "that token is not valid")
+	}
+	if err != nil {
+		return err
+	}
+	http.SetCookie(w, sessionCookie(strings.TrimSpace(req.Token), s.o.Config.Auth.WebSessionTTL, r.TLS != nil))
+	s.writeJSON(w, http.StatusOK, Principal{ID: row.ID, Name: row.Name, Role: row.Role})
+	return nil
+}
+
+func (s *server) logout(w http.ResponseWriter, r *http.Request) error {
+	http.SetCookie(w, sessionCookie("", -time.Hour, r.TLS != nil))
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// sessionCookie is out of reach of scripts and other sites.
+func sessionCookie(value string, ttl time.Duration, secure bool) *http.Cookie {
+	return &http.Cookie{
+		Name: SessionCookie, Value: value, Path: "/", MaxAge: int(ttl.Seconds()), HttpOnly: true, Secure: secure, SameSite: http.SameSiteStrictMode,
+	}
 }
 
 func unauthenticated() error {
@@ -90,9 +145,12 @@ func (s *server) authenticate(r *http.Request) (Principal, error) {
 	if s.o.Config.Auth.Mode != "token" {
 		return Principal{ID: "local", Name: "local", Role: RoleAdmin}, nil
 	}
-	token := bearer(r)
+	token, fromCookie := bearer(r)
 	if token == "" {
 		return Principal{}, unauthenticated()
+	}
+	if CrossSiteRisk(r.Method, fromCookie, r.Header.Get(UIHeader)) {
+		return Principal{}, apperr.New(apperr.PermissionDenied, "ERR_CROSS_SITE", "this request needs a token, or the "+UIHeader+" header")
 	}
 	var row *store.APIToken
 	err := s.o.DB.Read(r.Context(), func(ctx context.Context, tx store.Tx) error {

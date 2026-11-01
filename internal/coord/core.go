@@ -35,16 +35,17 @@ import (
 const LocalWorkerID = "local"
 
 const (
-	progressInterval  = 2 * time.Second
-	sampleInterval    = 10 * time.Second
-	maxSamples        = 8640 // 24 hours of 10-second buckets
-	gcInterval        = time.Hour
-	snapshotGCAge     = time.Hour
-	aiCacheMaxAge     = 90 * 24 * time.Hour
-	uploadSlack       = 1 << 20 // bytes beyond part_max_bytes, for the last record and footer
-	copyBufferBytes   = 256 << 10
-	disconnectAfter   = 3 // missed heartbeat intervals
-	maxCachedCompiled = 16
+	progressInterval     = 2 * time.Second
+	sampleInterval       = 10 * time.Second
+	maxSamples           = 8640 // 24 hours of 10-second buckets
+	gcInterval           = time.Hour
+	snapshotGCAge        = time.Hour
+	aiCacheMaxAge        = 90 * 24 * time.Hour
+	uploadSlack          = 1 << 20 // bytes beyond part_max_bytes, for the last record and footer
+	copyBufferBytes      = 256 << 10
+	disconnectAfter      = 3 // missed heartbeat intervals
+	staleAfterHeartbeats = 3
+	maxCachedCompiled    = 16
 )
 
 // Options configures a Core.
@@ -94,11 +95,9 @@ type Core struct {
 
 // liveStats tracks a session's rates, which need no durability.
 type liveStats struct {
-	lastCommitted uint64
+	throughput    Throughput
+	lastTotal     uint64
 	lastBytes     int64
-	lastInFlight  uint64
-	lastAt        time.Time
-	rate          float64
 	bucket        time.Time
 	bucketRecords uint64
 	bucketBytes   int64
@@ -1660,20 +1659,17 @@ func (c *Core) flushProgress(ctx context.Context) {
 		s := &rows[i]
 		c.mu.Lock()
 		inFlight := c.inFlightLocked(s.ID)
+		total := s.Records + inFlight
 		l := c.live[s.ID]
 		if l == nil {
-			l = &liveStats{lastCommitted: s.Records, lastBytes: s.Bytes, lastInFlight: inFlight, lastAt: now, bucket: now.Truncate(sampleInterval)}
+			l = &liveStats{lastTotal: total, lastBytes: s.Bytes, bucket: now.Truncate(sampleInterval)}
 			c.live[s.ID] = l
 		}
-		elapsed := now.Sub(l.lastAt).Seconds()
-		total, lastTotal := s.Records+inFlight, l.lastCommitted+l.lastInFlight
-		if elapsed > 0 && total >= lastTotal {
-			l.rate = float64(total-lastTotal) / elapsed
-		}
-		rate := l.rate
-		l.bucketRecords += s.Records - min(l.lastCommitted, s.Records)
+		rate := l.throughput.Observe(total, now, staleAfterHeartbeats*c.cfg.Coordinator.HeartbeatInterval)
+		// History counts what was generated, as committed parts may be far apart in time.
+		l.bucketRecords += total - min(l.lastTotal, total)
 		l.bucketBytes += s.Bytes - min(l.lastBytes, s.Bytes)
-		l.lastCommitted, l.lastBytes, l.lastInFlight, l.lastAt = s.Records, s.Bytes, inFlight, now
+		l.lastTotal, l.lastBytes = total, s.Bytes
 
 		var flush *store.Sample
 		if bucket := now.Truncate(sampleInterval); bucket.After(l.bucket) {
@@ -1737,7 +1733,7 @@ func (c *Core) LiveStats(session string) Live {
 	defer c.mu.Unlock()
 	out := Live{InFlight: c.inFlightLocked(session)}
 	if l := c.live[session]; l != nil {
-		out.Rate = l.rate
+		out.Rate = l.throughput.Rate
 	}
 	for _, p := range c.inFlight[session] {
 		out.GenBlocked += time.Duration(p.GenBlockedNanos)
