@@ -403,6 +403,9 @@ func (v *validator) field(path string, f *FieldDef, depth int64) {
 	if f.Unique && !f.Type.isScalar() {
 		v.add(join(path, "unique"), CodeUniqueUnsupported, "type %s cannot be unique", f.Type)
 	}
+	if f.Unique && f.Default != nil {
+		v.add(join(path, "default"), CodeUniqueUnsupported, "a default would repeat, so a unique field cannot have one")
+	}
 	if f.Unique && depth > 1 {
 		v.add(join(path, "unique"), CodeUniqueUnsupported, "only top-level fields can be unique, because uniqueness comes from the record index")
 	}

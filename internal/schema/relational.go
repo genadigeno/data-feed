@@ -147,6 +147,8 @@ func (v *validator) primaryKey(t *Table, path string) {
 		v.add(p, CodePrimaryKey, "a foreign key cannot be the primary key: give the table its own key")
 	case pk.Nullable:
 		v.add(p, CodePrimaryKey, "a primary key cannot be nullable")
+	case pk.Default != nil:
+		v.add(p, CodePrimaryKey, "a primary key cannot have a default, which would repeat")
 	}
 }
 
@@ -260,6 +262,8 @@ func (v *validator) reference(t *Table, f *FieldDef, path string, r *RelationalS
 		case SelectEarlier:
 			if ref.Table != t.Name {
 				v.add(join(sp, "mode"), CodeSelect, "earlier applies to self references only")
+			} else if t.Owner != nil {
+				v.add(join(sp, "mode"), CodeSelect, "earlier needs a table with its own count, not an owned one")
 			} else if !f.Nullable {
 				v.add(join(sp, "mode"), CodeSelect, "earlier needs nullable: true, because the first rows have no earlier row")
 			}
@@ -428,8 +432,13 @@ func (v *validator) distinctSelects(t *Table, r *RelationalSpec, spaces map[stri
 			continue
 		}
 		target := r.Table(f.Ref.Table)
-		if target == nil || target.Count == nil {
-			continue // an owned target's real row count is not known statically
+		if target == nil {
+			continue
+		}
+		if target.Count == nil {
+			v.add(join(join(join("tables", t.Name), "fields"), f.Name+".select.distinct"), CodeSelect,
+				"%s has no fixed row count, so distinct parents cannot be guaranteed", target.Name)
+			continue
 		}
 		if t.Owner.PerParent.Max > *target.Count {
 			v.add(join(join(join("tables", t.Name), "fields"), f.Name+".select.distinct"), CodeSelect,

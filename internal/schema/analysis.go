@@ -120,18 +120,45 @@ func decimalCapacity(f *FieldDef) Capacity {
 	if f.Scale != nil {
 		scale = *f.Scale
 	}
-	steps := new(big.Rat).Sub(hi, lo)
-	steps.Mul(steps, new(big.Rat).SetInt(pow10(scale)))
-	n := new(big.Int).Quo(steps.Num(), steps.Denom())
-	return Capacity{Supported: true, Known: true, N: n.Add(n, big.NewInt(1))}
+	first, last := DecimalGrid(lo, hi, scale)
+	n := new(big.Int).Sub(last, first)
+	n.Add(n, big.NewInt(1))
+	if n.Sign() < 0 {
+		n.SetInt64(0)
+	}
+	return Capacity{Supported: true, Known: true, N: n}
 }
 
+// DecimalGrid returns the first and last representable values in [lo, hi] at a scale,
+// as integers in units of 10^-scale. Bounds finer than the scale round inward.
+func DecimalGrid(lo, hi *big.Rat, scale int) (first, last *big.Int) {
+	unit := new(big.Rat).SetInt(pow10(scale))
+	return ceilRat(new(big.Rat).Mul(lo, unit)), floorRat(new(big.Rat).Mul(hi, unit))
+}
+
+func floorRat(r *big.Rat) *big.Int {
+	// Int.Div is Euclidean, so with a positive denominator this rounds toward -inf.
+	return new(big.Int).Div(r.Num(), r.Denom())
+}
+
+func ceilRat(r *big.Rat) *big.Int {
+	return new(big.Int).Neg(floorRat(new(big.Rat).Neg(r)))
+}
+
+// DefaultTemporalDays is the width of the range of a date or time field with at most
+// one bound: it ends at the session's reference time, or extends from the given bound.
+const DefaultTemporalDays = 3652
+
 func temporalCapacity(f *FieldDef) Capacity {
+	if f.Type == TypeTime && (f.Min == nil || f.Max == nil) {
+		return Capacity{Supported: true, Known: true, N: big.NewInt(86400)}
+	}
 	if f.Min == nil || f.Max == nil {
-		if f.Type == TypeTime {
-			return Capacity{Supported: true, Known: true, N: big.NewInt(86400)}
+		steps := int64(DefaultTemporalDays)
+		if f.Type != TypeDate {
+			steps *= 86400
 		}
-		return Capacity{Supported: true, Known: true}
+		return Capacity{Supported: true, Known: true, N: big.NewInt(steps + 1)}
 	}
 	lo, errLo := parseInstant(f.Type, f.Min.Text)
 	hi, errHi := parseInstant(f.Type, f.Max.Text)
@@ -284,6 +311,27 @@ func saturatingMul(a, b int64) int64 {
 	return a * b
 }
 
+// lengthBound is the longest a string or binary value can be.
+func lengthBound(f *FieldDef) int64 {
+	if f.MaxLength != nil {
+		return *f.MaxLength
+	}
+	if f.MinLength != nil && *f.MinLength > DefaultStringMaxLength {
+		return *f.MinLength
+	}
+	return DefaultStringMaxLength
+}
+
+// MaxRecordBytes bounds the serialized size of records with these fields. Definition
+// cycles must be ruled out first, which Validate does.
+func MaxRecordBytes(fields []FieldDef, defs []Definition) int64 {
+	m := make(map[string]*Definition, len(defs))
+	for i := range defs {
+		m[defs[i].Name] = &defs[i]
+	}
+	return fieldsMaxBytes(fields, m)
+}
+
 // sizer computes worst-case serialized sizes. Definitions are memoized, so definitions
 // that reference each other many times stay linear to evaluate.
 type sizer struct {
@@ -377,17 +425,9 @@ func (z *sizer) value(f *FieldDef) int64 {
 				return saturatingMul(info.MaxLen, bytesPerCharacter)
 			}
 		}
-		maxLen := int64(DefaultStringMaxLength)
-		if f.MaxLength != nil {
-			maxLen = *f.MaxLength
-		}
-		return saturatingMul(maxLen, bytesPerCharacter)
+		return saturatingMul(lengthBound(f), bytesPerCharacter)
 	case TypeBinary:
-		maxLen := int64(DefaultStringMaxLength)
-		if f.MaxLength != nil {
-			maxLen = *f.MaxLength
-		}
-		return saturatingAdd(maxLen/3*4, 4) // base64
+		return saturatingAdd(lengthBound(f)/3*4, 4) // base64
 	case TypeObject:
 		return z.fields(f.Fields)
 	case TypeNestedSchema:

@@ -113,11 +113,21 @@ func (a *patternAnalyzer) walk(re *syntax.Regexp) (minLen, maxLen int64, capacit
 	return 0, 0, nil, fmt.Errorf("unsupported pattern construct %s", re.Op)
 }
 
-// classSize counts the runes in a class given as lo-hi pairs.
+// Surrogate code points cannot be encoded in UTF-8, so no class really contains them.
+const (
+	surrogateMin = 0xD800
+	surrogateMax = 0xDFFF
+)
+
+// classSize counts the encodable runes in a class given as lo-hi pairs.
 func classSize(ranges []rune) int64 {
 	var n int64
 	for i := 0; i+1 < len(ranges); i += 2 {
-		n += int64(ranges[i+1]-ranges[i]) + 1
+		lo, hi := ranges[i], ranges[i+1]
+		n += int64(hi-lo) + 1
+		if overlapLo, overlapHi := max(lo, surrogateMin), min(hi, surrogateMax); overlapLo <= overlapHi {
+			n -= int64(overlapHi-overlapLo) + 1
+		}
 	}
 	return n
 }
