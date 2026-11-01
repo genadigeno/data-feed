@@ -35,6 +35,12 @@ const readinessTimeout = time.Second
 // RunCoordinator starts the Coordinator and blocks until ctx is cancelled, then shuts
 // down in order: stop accepting, drain requests, close the database, release the lock.
 func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger, clk clock.Clock) error {
+	return RunCoordinatorNotify(ctx, cfg, logger, clk, nil)
+}
+
+// RunCoordinatorNotify is RunCoordinator that also says, once ready, where the public API
+// listens. That is how a command can run its own Coordinator on a private port.
+func RunCoordinatorNotify(ctx context.Context, cfg *config.Config, logger *slog.Logger, clk clock.Clock, onReady func(publicAddr string)) error {
 	applyRuntimeLimits(cfg, logger)
 
 	dir, err := datadir.Open(cfg.Storage.DataDir)
@@ -145,6 +151,9 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 		"worker_addr", internal.addr,
 		"data_dir", dir.Root())
 	ready.Store(true)
+	if onReady != nil {
+		onReady(public.addr)
+	}
 
 	// Background work stops before the database closes.
 	workCtx, stopWork := context.WithCancel(context.Background())

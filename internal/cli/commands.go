@@ -92,7 +92,6 @@ func (g *globals) printVersion(short bool) error {
 }
 
 func newHealthCommand(g *globals) *cobra.Command {
-	var server string
 	var ready bool
 	var timeout time.Duration
 	cmd := &cobra.Command{
@@ -100,7 +99,7 @@ func newHealthCommand(g *globals) *cobra.Command {
 		Short: "Check a running Coordinator (exit code 6 if unavailable or not ready)",
 		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			base, err := g.serverURL(server)
+			base, err := g.serverURL(g.server)
 			if err != nil {
 				return err
 			}
@@ -140,7 +139,6 @@ func newHealthCommand(g *globals) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&server, "server", "", "Coordinator URL (default: $DATAFEED_SERVER, then server.listen from the configuration)")
 	cmd.Flags().BoolVar(&ready, "ready", false, "check readiness instead of liveness")
 	cmd.Flags().DurationVar(&timeout, "timeout", 5*time.Second, "request timeout")
 	return cmd
@@ -236,7 +234,8 @@ func (g *globals) validateAndReport(role config.Role) error {
 }
 
 func newWorkerCommand(g *globals) *cobra.Command {
-	cmd := &cobra.Command{Use: "worker", Short: "Run and inspect Worker processes"}
+	cmd := &cobra.Command{Use: "worker", Short: "Run and manage Worker processes"}
+	addWorkerManagement(g, cmd)
 
 	var coordinator, name, fingerprint, caFile, joinToken string
 	run := &cobra.Command{

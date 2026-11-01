@@ -34,6 +34,11 @@ type globals struct {
 	output     string
 	verbose    bool
 	quiet      bool
+	server     string
+	token      string
+	tokenFile  string
+	local      bool
+	yes        bool
 
 	stdout, stderr io.Writer
 }
@@ -72,6 +77,9 @@ func newRootCommand(g *globals) *cobra.Command {
 			if g.output != outputTable && g.output != outputJSON {
 				return usageError(fmt.Errorf("--output must be %s or %s", outputTable, outputJSON))
 			}
+			if g.local && g.server != "" {
+				return usageError(fmt.Errorf("--local and --server rule each other out"))
+			}
 			return nil
 		},
 	}
@@ -83,6 +91,11 @@ func newRootCommand(g *globals) *cobra.Command {
 	f.StringVarP(&g.output, "output", "o", outputTable, "output format: table or json")
 	f.BoolVarP(&g.verbose, "verbose", "v", false, "log at debug level")
 	f.BoolVarP(&g.quiet, "quiet", "q", false, "log warnings and errors only")
+	f.StringVar(&g.server, "server", "", "Coordinator URL (default: $DATAFEED_SERVER, then the configured listen address)")
+	f.StringVar(&g.token, "token", "", "API token (default: $DATAFEED_TOKEN)")
+	f.StringVar(&g.tokenFile, "token-file", "", "file holding the API token")
+	f.BoolVar(&g.local, "local", false, "run a Coordinator on --data-dir just for this command")
+	f.BoolVar(&g.yes, "yes", false, "answer yes to confirmations")
 
 	root.AddCommand(
 		newServeCommand(g),
@@ -91,6 +104,13 @@ func newRootCommand(g *globals) *cobra.Command {
 		newHealthCommand(g),
 		newConfigCommand(g),
 		newWorkerCommand(g),
+		newSessionCommand(g),
+		newSchemaCommand(g),
+		newDomainCommand(g),
+		newCatalogCommand(g),
+		newJobCommand(g),
+		newTokenCommand(g),
+		newDashboardCommand(g),
 	)
 	return root
 }

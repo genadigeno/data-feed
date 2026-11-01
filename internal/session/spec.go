@@ -48,11 +48,17 @@ func (d *Duration) UnmarshalText(b []byte) error {
 func (d Duration) MarshalText() ([]byte, error) { return []byte(time.Duration(d).String()), nil }
 
 // InlineSchema captures an embedded schema document as it was written, because field
-// order matters and generic decoding would lose it.
+// order matters and generic decoding would lose it. It may also be a string holding a
+// document, which is how a tool carries a YAML file inside a JSON request.
 type InlineSchema struct{ Doc []byte }
 
 // UnmarshalJSON implements json.Unmarshaler.
 func (s *InlineSchema) UnmarshalJSON(b []byte) error {
+	var text string
+	if json.Unmarshal(b, &text) == nil {
+		s.Doc = []byte(text)
+		return nil
+	}
 	s.Doc = bytes.Clone(b)
 	return nil
 }
@@ -72,6 +78,10 @@ func (s InlineSchema) MarshalJSON() ([]byte, error) {
 
 // UnmarshalYAML implements yaml.Unmarshaler.
 func (s *InlineSchema) UnmarshalYAML(n *yaml.Node) error {
+	if n.Kind == yaml.ScalarNode && n.Tag == "!!str" {
+		s.Doc = []byte(n.Value)
+		return nil
+	}
 	b, err := yaml.Marshal(n)
 	if err != nil {
 		return err

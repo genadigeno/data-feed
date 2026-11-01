@@ -104,6 +104,26 @@ func TestParseSpecRejectsUnknownKeys(t *testing.T) {
 	}
 }
 
+func TestInlineSchemaMayBeAString(t *testing.T) {
+	text := `kind: hybrid
+fields:
+  zeta: {type: uuid}
+  alpha: {type: uuid}
+`
+	quoted, err := json.Marshal(text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := `{"name":"a","mode":"batch","schema":{"inline":` + string(quoted) + `},"limits":{"count":1},"output":{"format":"ndjson"}}`
+	c, err := compile(t, doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if schema := string(c.Snapshot.Schema); strings.Index(schema, "zeta") > strings.Index(schema, "alpha") {
+		t.Fatalf("field order lost: %s", schema)
+	}
+}
+
 func TestParseSpecAcceptsJSON(t *testing.T) {
 	doc := `{"name":"a","mode":"batch","schema":{"inline":{"kind":"hybrid","fields":{"a":{"type":"uuid"}}}},"limits":{"count":1},"output":{"format":"csv"}}`
 	if _, err := compile(t, doc); err != nil {

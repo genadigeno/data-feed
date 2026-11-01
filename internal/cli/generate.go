@@ -74,6 +74,7 @@ Ctrl+C stops immediately.`,
 	f := cmd.Flags()
 	f.StringVar(&o.SchemaPath, "schema", "", "schema file (YAML or JSON); default: schemaless random data")
 	f.StringVar(&o.Mode, "mode", app.ModeBatch, "batch (a set quantity) or stream (until a stop condition)")
+	f.StringVar(&o.Catalog, "catalog", "", "built-in catalog to draw values from: builtin:<domain>")
 	f.Uint64Var(&o.Count, "count", 0, "records to generate; for a relational schema, its only root table's rows")
 	f.Float64Var(&o.Rate, "rate", 0, "records per second; 0 means as fast as possible")
 	f.DurationVar(&o.Duration, "duration", 0, "stream mode: stop after this long")

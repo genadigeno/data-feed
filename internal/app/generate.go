@@ -17,10 +17,12 @@ import (
 	"github.com/genadigeno/data-feed/internal/clock"
 	"github.com/genadigeno/data-feed/internal/config"
 	"github.com/genadigeno/data-feed/internal/gen"
+	"github.com/genadigeno/data-feed/internal/gen/value"
 	"github.com/genadigeno/data-feed/internal/output"
 	"github.com/genadigeno/data-feed/internal/pipeline"
 	"github.com/genadigeno/data-feed/internal/schema"
 	"github.com/genadigeno/data-feed/internal/serial"
+	"github.com/genadigeno/data-feed/internal/vocab"
 )
 
 // Generation modes.
@@ -59,6 +61,23 @@ type GenerateOptions struct {
 	Compression   string
 	Encoder       serial.Options
 	Stats         *pipeline.Stats
+	// Catalog is a built-in catalog's domain, as direct generation has no database.
+	Catalog string
+}
+
+// builtinVocabulary loads a built-in catalog. Saved catalogs live in a Coordinator's
+// database, which direct generation doesn't touch.
+func builtinVocabulary(ref string) (value.Vocabulary, error) {
+	usage := func(msg string) error { return apperr.New(apperr.InvalidArgument, codeGenerateUsage, msg) }
+	domain, ok := strings.CutPrefix(ref, vocab.BuiltinPrefix)
+	if !ok {
+		return nil, usage("direct generation can only use built-in catalogs, as builtin:<domain>: for a saved one, run a session")
+	}
+	doc, ok := vocab.Builtin(domain)
+	if !ok {
+		return nil, usage("no built-in catalog " + domain + ": there are " + strings.Join(vocab.Builtins(), ", "))
+	}
+	return vocab.Compile(&vocab.Content{Groups: doc.Groups})
 }
 
 // GenerateResult reports what was produced.
@@ -93,9 +112,13 @@ func Generate(ctx context.Context, cfg *config.Config, o GenerateOptions, stdout
 	}
 	result.Seed, result.ReferenceTime = seed, refTime
 
-	engine, err := gen.Build(gen.Input{
-		Schema: s, Seed: seed, ReferenceTime: refTime, MaxRows: o.Count, NestedRoot: o.NestedRoot,
-	})
+	input := gen.Input{Schema: s, Seed: seed, ReferenceTime: refTime, MaxRows: o.Count, NestedRoot: o.NestedRoot}
+	if o.Catalog != "" {
+		if input.Vocabulary, err = builtinVocabulary(o.Catalog); err != nil {
+			return result, err
+		}
+	}
+	engine, err := gen.Build(input)
 	if err != nil {
 		return result, apperr.Wrap(err, apperr.InvalidArgument, "ERR_VALIDATION", "schema cannot be generated")
 	}
