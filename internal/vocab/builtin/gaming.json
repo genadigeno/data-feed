@@ -1,0 +1,1603 @@
+{
+ "domain": "gaming",
+ "name": "Gaming",
+ "description": "Online games: players, items, matches and purchases.",
+ "groups": [
+  {
+   "key": "player_handle",
+   "name": "Player handle",
+   "description": "Fictional gamer tags",
+   "data_type": "string",
+   "category": "players",
+   "values": [
+    {
+     "value": "AzureBlade"
+    },
+    {
+     "value": "AzureComet"
+    },
+    {
+     "value": "AzureDrake"
+    },
+    {
+     "value": "AzureFox"
+    },
+    {
+     "value": "AzureGhost"
+    },
+    {
+     "value": "AzureGolem"
+    },
+    {
+     "value": "AzureHunter"
+    },
+    {
+     "value": "AzureKnight"
+    },
+    {
+     "value": "AzureMage"
+    },
+    {
+     "value": "AzureRanger"
+    },
+    {
+     "value": "AzureViper"
+    },
+    {
+     "value": "AzureWolf"
+    },
+    {
+     "value": "CosmicBlade"
+    },
+    {
+     "value": "CosmicComet"
+    },
+    {
+     "value": "CosmicDrake"
+    },
+    {
+     "value": "CosmicFalcon"
+    },
+    {
+     "value": "CosmicFox"
+    },
+    {
+     "value": "CosmicGhost"
+    },
+    {
+     "value": "CosmicGolem"
+    },
+    {
+     "value": "CosmicKnight"
+    },
+    {
+     "value": "CosmicMage"
+    },
+    {
+     "value": "CosmicRanger"
+    },
+    {
+     "value": "CosmicSage"
+    },
+    {
+     "value": "CosmicTitan"
+    },
+    {
+     "value": "CosmicViper"
+    },
+    {
+     "value": "CosmicWolf"
+    },
+    {
+     "value": "CrimsonBlade"
+    },
+    {
+     "value": "CrimsonComet"
+    },
+    {
+     "value": "CrimsonDrake"
+    },
+    {
+     "value": "CrimsonFalcon"
+    },
+    {
+     "value": "CrimsonFox"
+    },
+    {
+     "value": "CrimsonGhost"
+    },
+    {
+     "value": "CrimsonGolem"
+    },
+    {
+     "value": "CrimsonHunter"
+    },
+    {
+     "value": "CrimsonMage"
+    },
+    {
+     "value": "CrimsonRanger"
+    },
+    {
+     "value": "CrimsonSage"
+    },
+    {
+     "value": "CrimsonTitan"
+    },
+    {
+     "value": "CrimsonViper"
+    },
+    {
+     "value": "CrimsonWolf"
+    },
+    {
+     "value": "EmberComet"
+    },
+    {
+     "value": "EmberDrake"
+    },
+    {
+     "value": "EmberFalcon"
+    },
+    {
+     "value": "EmberFox"
+    },
+    {
+     "value": "EmberGhost"
+    },
+    {
+     "value": "EmberGolem"
+    },
+    {
+     "value": "EmberHunter"
+    },
+    {
+     "value": "EmberKnight"
+    },
+    {
+     "value": "EmberMage"
+    },
+    {
+     "value": "EmberSage"
+    },
+    {
+     "value": "EmberTitan"
+    },
+    {
+     "value": "EmberViper"
+    },
+    {
+     "value": "EmberWolf"
+    },
+    {
+     "value": "FrostBlade"
+    },
+    {
+     "value": "FrostComet"
+    },
+    {
+     "value": "FrostDrake"
+    },
+    {
+     "value": "FrostFox"
+    },
+    {
+     "value": "FrostGolem"
+    },
+    {
+     "value": "FrostHunter"
+    },
+    {
+     "value": "FrostKnight"
+    },
+    {
+     "value": "FrostMage"
+    },
+    {
+     "value": "FrostRanger"
+    },
+    {
+     "value": "FrostSage"
+    },
+    {
+     "value": "FrostTitan"
+    },
+    {
+     "value": "FrostViper"
+    },
+    {
+     "value": "FrostWolf"
+    },
+    {
+     "value": "IronBlade"
+    },
+    {
+     "value": "IronComet"
+    },
+    {
+     "value": "IronDrake"
+    },
+    {
+     "value": "IronFalcon"
+    },
+    {
+     "value": "IronFox"
+    },
+    {
+     "value": "IronGhost"
+    },
+    {
+     "value": "IronGolem"
+    },
+    {
+     "value": "IronKnight"
+    },
+    {
+     "value": "IronMage"
+    },
+    {
+     "value": "IronRanger"
+    },
+    {
+     "value": "IronSage"
+    },
+    {
+     "value": "IronTitan"
+    },
+    {
+     "value": "IronViper"
+    },
+    {
+     "value": "IronWolf"
+    },
+    {
+     "value": "LunarBlade"
+    },
+    {
+     "value": "LunarComet"
+    },
+    {
+     "value": "LunarDrake"
+    },
+    {
+     "value": "LunarFalcon"
+    },
+    {
+     "value": "LunarGolem"
+    },
+    {
+     "value": "LunarHunter"
+    },
+    {
+     "value": "LunarKnight"
+    },
+    {
+     "value": "LunarMage"
+    },
+    {
+     "value": "LunarRanger"
+    },
+    {
+     "value": "LunarTitan"
+    },
+    {
+     "value": "LunarViper"
+    },
+    {
+     "value": "LunarWolf"
+    },
+    {
+     "value": "NeonBlade"
+    },
+    {
+     "value": "NeonComet"
+    },
+    {
+     "value": "NeonDrake"
+    },
+    {
+     "value": "NeonFox"
+    },
+    {
+     "value": "NeonGhost"
+    },
+    {
+     "value": "NeonGolem"
+    },
+    {
+     "value": "NeonHunter"
+    },
+    {
+     "value": "NeonKnight"
+    },
+    {
+     "value": "NeonMage"
+    },
+    {
+     "value": "NeonRanger"
+    },
+    {
+     "value": "NeonSage"
+    },
+    {
+     "value": "NeonTitan"
+    },
+    {
+     "value": "NeonViper"
+    },
+    {
+     "value": "NeonWolf"
+    },
+    {
+     "value": "PixelBlade"
+    },
+    {
+     "value": "PixelComet"
+    },
+    {
+     "value": "PixelDrake"
+    },
+    {
+     "value": "PixelFalcon"
+    },
+    {
+     "value": "PixelFox"
+    },
+    {
+     "value": "PixelGolem"
+    },
+    {
+     "value": "PixelHunter"
+    },
+    {
+     "value": "PixelKnight"
+    },
+    {
+     "value": "PixelMage"
+    },
+    {
+     "value": "PixelRanger"
+    },
+    {
+     "value": "PixelSage"
+    },
+    {
+     "value": "PixelTitan"
+    },
+    {
+     "value": "PixelViper"
+    },
+    {
+     "value": "PixelWolf"
+    },
+    {
+     "value": "RogueBlade"
+    },
+    {
+     "value": "RogueComet"
+    },
+    {
+     "value": "RogueFalcon"
+    },
+    {
+     "value": "RogueFox"
+    },
+    {
+     "value": "RogueGhost"
+    },
+    {
+     "value": "RogueGolem"
+    },
+    {
+     "value": "RogueHunter"
+    },
+    {
+     "value": "RogueMage"
+    },
+    {
+     "value": "RogueRanger"
+    },
+    {
+     "value": "RogueSage"
+    },
+    {
+     "value": "RogueTitan"
+    },
+    {
+     "value": "RogueViper"
+    },
+    {
+     "value": "RogueWolf"
+    },
+    {
+     "value": "ShadowBlade"
+    },
+    {
+     "value": "ShadowComet"
+    },
+    {
+     "value": "ShadowDrake"
+    },
+    {
+     "value": "ShadowFalcon"
+    },
+    {
+     "value": "ShadowFox"
+    },
+    {
+     "value": "ShadowGhost"
+    },
+    {
+     "value": "ShadowKnight"
+    },
+    {
+     "value": "ShadowMage"
+    },
+    {
+     "value": "ShadowRanger"
+    },
+    {
+     "value": "ShadowSage"
+    },
+    {
+     "value": "ShadowViper"
+    },
+    {
+     "value": "ShadowWolf"
+    },
+    {
+     "value": "SilentBlade"
+    },
+    {
+     "value": "SilentComet"
+    },
+    {
+     "value": "SilentDrake"
+    },
+    {
+     "value": "SilentFalcon"
+    },
+    {
+     "value": "SilentFox"
+    },
+    {
+     "value": "SilentGhost"
+    },
+    {
+     "value": "SilentGolem"
+    },
+    {
+     "value": "SilentHunter"
+    },
+    {
+     "value": "SilentKnight"
+    },
+    {
+     "value": "SilentMage"
+    },
+    {
+     "value": "SilentSage"
+    },
+    {
+     "value": "SilentTitan"
+    },
+    {
+     "value": "SilentViper"
+    },
+    {
+     "value": "SilentWolf"
+    },
+    {
+     "value": "ThunderBlade"
+    },
+    {
+     "value": "ThunderComet"
+    },
+    {
+     "value": "ThunderDrake"
+    },
+    {
+     "value": "ThunderFalcon"
+    },
+    {
+     "value": "ThunderFox"
+    },
+    {
+     "value": "ThunderGolem"
+    },
+    {
+     "value": "ThunderHunter"
+    },
+    {
+     "value": "ThunderKnight"
+    },
+    {
+     "value": "ThunderMage"
+    },
+    {
+     "value": "ThunderRanger"
+    },
+    {
+     "value": "ThunderTitan"
+    },
+    {
+     "value": "ThunderViper"
+    },
+    {
+     "value": "ThunderWolf"
+    },
+    {
+     "value": "TurboBlade"
+    },
+    {
+     "value": "TurboComet"
+    },
+    {
+     "value": "TurboDrake"
+    },
+    {
+     "value": "TurboFalcon"
+    },
+    {
+     "value": "TurboFox"
+    },
+    {
+     "value": "TurboGhost"
+    },
+    {
+     "value": "TurboHunter"
+    },
+    {
+     "value": "TurboKnight"
+    },
+    {
+     "value": "TurboMage"
+    },
+    {
+     "value": "TurboRanger"
+    },
+    {
+     "value": "TurboSage"
+    },
+    {
+     "value": "TurboTitan"
+    },
+    {
+     "value": "TurboViper"
+    },
+    {
+     "value": "TurboWolf"
+    },
+    {
+     "value": "VortexBlade"
+    },
+    {
+     "value": "VortexComet"
+    },
+    {
+     "value": "VortexDrake"
+    },
+    {
+     "value": "VortexFalcon"
+    },
+    {
+     "value": "VortexFox"
+    },
+    {
+     "value": "VortexGhost"
+    },
+    {
+     "value": "VortexGolem"
+    },
+    {
+     "value": "VortexHunter"
+    },
+    {
+     "value": "VortexMage"
+    },
+    {
+     "value": "VortexRanger"
+    },
+    {
+     "value": "VortexSage"
+    },
+    {
+     "value": "VortexTitan"
+    },
+    {
+     "value": "VortexViper"
+    },
+    {
+     "value": "VortexWolf"
+    }
+   ]
+  },
+  {
+   "key": "item_rarity",
+   "name": "Item rarity",
+   "description": "Loot tiers",
+   "data_type": "enum",
+   "category": "items",
+   "values": [
+    {
+     "value": "COMMON",
+     "weight": 55
+    },
+    {
+     "value": "UNCOMMON",
+     "weight": 25
+    },
+    {
+     "value": "RARE",
+     "weight": 12
+    },
+    {
+     "value": "EPIC",
+     "weight": 5
+    },
+    {
+     "value": "LEGENDARY",
+     "weight": 2.5
+    },
+    {
+     "value": "MYTHIC",
+     "weight": 0.5
+    }
+   ]
+  },
+  {
+   "key": "item_type",
+   "name": "Item type",
+   "description": "Kinds of item",
+   "data_type": "enum",
+   "category": "items",
+   "values": [
+    {
+     "value": "WEAPON"
+    },
+    {
+     "value": "ARMOR"
+    },
+    {
+     "value": "CONSUMABLE"
+    },
+    {
+     "value": "MOUNT"
+    },
+    {
+     "value": "PET"
+    },
+    {
+     "value": "COSMETIC"
+    },
+    {
+     "value": "CRAFTING_MATERIAL"
+    },
+    {
+     "value": "QUEST_ITEM"
+    }
+   ]
+  },
+  {
+   "key": "item_name",
+   "name": "Item name",
+   "description": "Fictional items",
+   "data_type": "string",
+   "category": "items",
+   "values": [
+    {
+     "value": "Ancient Boots"
+    },
+    {
+     "value": "Ancient Bow"
+    },
+    {
+     "value": "Ancient Dagger"
+    },
+    {
+     "value": "Ancient Gauntlets"
+    },
+    {
+     "value": "Ancient Grimoire"
+    },
+    {
+     "value": "Ancient Helm"
+    },
+    {
+     "value": "Ancient Longsword"
+    },
+    {
+     "value": "Ancient Potion"
+    },
+    {
+     "value": "Ancient Ring"
+    },
+    {
+     "value": "Ancient Shield"
+    },
+    {
+     "value": "Ancient Staff"
+    },
+    {
+     "value": "Ancient Warhammer"
+    },
+    {
+     "value": "Blessed Amulet"
+    },
+    {
+     "value": "Blessed Boots"
+    },
+    {
+     "value": "Blessed Bow"
+    },
+    {
+     "value": "Blessed Cloak"
+    },
+    {
+     "value": "Blessed Dagger"
+    },
+    {
+     "value": "Blessed Gauntlets"
+    },
+    {
+     "value": "Blessed Grimoire"
+    },
+    {
+     "value": "Blessed Helm"
+    },
+    {
+     "value": "Blessed Potion"
+    },
+    {
+     "value": "Blessed Ring"
+    },
+    {
+     "value": "Blessed Shield"
+    },
+    {
+     "value": "Blessed Staff"
+    },
+    {
+     "value": "Blessed Warhammer"
+    },
+    {
+     "value": "Cursed Amulet"
+    },
+    {
+     "value": "Cursed Boots"
+    },
+    {
+     "value": "Cursed Bow"
+    },
+    {
+     "value": "Cursed Cloak"
+    },
+    {
+     "value": "Cursed Gauntlets"
+    },
+    {
+     "value": "Cursed Grimoire"
+    },
+    {
+     "value": "Cursed Helm"
+    },
+    {
+     "value": "Cursed Longsword"
+    },
+    {
+     "value": "Cursed Ring"
+    },
+    {
+     "value": "Cursed Shield"
+    },
+    {
+     "value": "Cursed Staff"
+    },
+    {
+     "value": "Cursed Warhammer"
+    },
+    {
+     "value": "Frozen Amulet"
+    },
+    {
+     "value": "Frozen Boots"
+    },
+    {
+     "value": "Frozen Bow"
+    },
+    {
+     "value": "Frozen Dagger"
+    },
+    {
+     "value": "Frozen Gauntlets"
+    },
+    {
+     "value": "Frozen Grimoire"
+    },
+    {
+     "value": "Frozen Helm"
+    },
+    {
+     "value": "Frozen Longsword"
+    },
+    {
+     "value": "Frozen Potion"
+    },
+    {
+     "value": "Frozen Staff"
+    },
+    {
+     "value": "Frozen Warhammer"
+    },
+    {
+     "value": "Gilded Amulet"
+    },
+    {
+     "value": "Gilded Boots"
+    },
+    {
+     "value": "Gilded Bow"
+    },
+    {
+     "value": "Gilded Cloak"
+    },
+    {
+     "value": "Gilded Dagger"
+    },
+    {
+     "value": "Gilded Grimoire"
+    },
+    {
+     "value": "Gilded Helm"
+    },
+    {
+     "value": "Gilded Potion"
+    },
+    {
+     "value": "Gilded Ring"
+    },
+    {
+     "value": "Gilded Shield"
+    },
+    {
+     "value": "Gilded Staff"
+    },
+    {
+     "value": "Gilded Warhammer"
+    },
+    {
+     "value": "Molten Amulet"
+    },
+    {
+     "value": "Molten Boots"
+    },
+    {
+     "value": "Molten Bow"
+    },
+    {
+     "value": "Molten Cloak"
+    },
+    {
+     "value": "Molten Dagger"
+    },
+    {
+     "value": "Molten Gauntlets"
+    },
+    {
+     "value": "Molten Grimoire"
+    },
+    {
+     "value": "Molten Helm"
+    },
+    {
+     "value": "Molten Longsword"
+    },
+    {
+     "value": "Molten Potion"
+    },
+    {
+     "value": "Molten Ring"
+    },
+    {
+     "value": "Molten Shield"
+    },
+    {
+     "value": "Molten Staff"
+    },
+    {
+     "value": "Molten Warhammer"
+    },
+    {
+     "value": "Obsidian Amulet"
+    },
+    {
+     "value": "Obsidian Boots"
+    },
+    {
+     "value": "Obsidian Bow"
+    },
+    {
+     "value": "Obsidian Cloak"
+    },
+    {
+     "value": "Obsidian Dagger"
+    },
+    {
+     "value": "Obsidian Gauntlets"
+    },
+    {
+     "value": "Obsidian Grimoire"
+    },
+    {
+     "value": "Obsidian Helm"
+    },
+    {
+     "value": "Obsidian Longsword"
+    },
+    {
+     "value": "Obsidian Potion"
+    },
+    {
+     "value": "Obsidian Ring"
+    },
+    {
+     "value": "Obsidian Shield"
+    },
+    {
+     "value": "Obsidian Staff"
+    },
+    {
+     "value": "Phantom Amulet"
+    },
+    {
+     "value": "Phantom Boots"
+    },
+    {
+     "value": "Phantom Bow"
+    },
+    {
+     "value": "Phantom Cloak"
+    },
+    {
+     "value": "Phantom Dagger"
+    },
+    {
+     "value": "Phantom Gauntlets"
+    },
+    {
+     "value": "Phantom Grimoire"
+    },
+    {
+     "value": "Phantom Helm"
+    },
+    {
+     "value": "Phantom Longsword"
+    },
+    {
+     "value": "Phantom Potion"
+    },
+    {
+     "value": "Phantom Ring"
+    },
+    {
+     "value": "Phantom Shield"
+    },
+    {
+     "value": "Phantom Staff"
+    },
+    {
+     "value": "Phantom Warhammer"
+    },
+    {
+     "value": "Radiant Amulet"
+    },
+    {
+     "value": "Radiant Bow"
+    },
+    {
+     "value": "Radiant Cloak"
+    },
+    {
+     "value": "Radiant Dagger"
+    },
+    {
+     "value": "Radiant Helm"
+    },
+    {
+     "value": "Radiant Longsword"
+    },
+    {
+     "value": "Radiant Potion"
+    },
+    {
+     "value": "Radiant Ring"
+    },
+    {
+     "value": "Radiant Shield"
+    },
+    {
+     "value": "Radiant Staff"
+    },
+    {
+     "value": "Radiant Warhammer"
+    },
+    {
+     "value": "Rusted Amulet"
+    },
+    {
+     "value": "Rusted Boots"
+    },
+    {
+     "value": "Rusted Bow"
+    },
+    {
+     "value": "Rusted Dagger"
+    },
+    {
+     "value": "Rusted Gauntlets"
+    },
+    {
+     "value": "Rusted Grimoire"
+    },
+    {
+     "value": "Rusted Helm"
+    },
+    {
+     "value": "Rusted Longsword"
+    },
+    {
+     "value": "Rusted Potion"
+    },
+    {
+     "value": "Rusted Ring"
+    },
+    {
+     "value": "Rusted Shield"
+    },
+    {
+     "value": "Rusted Staff"
+    },
+    {
+     "value": "Rusted Warhammer"
+    },
+    {
+     "value": "Stormforged Amulet"
+    },
+    {
+     "value": "Stormforged Boots"
+    },
+    {
+     "value": "Stormforged Cloak"
+    },
+    {
+     "value": "Stormforged Dagger"
+    },
+    {
+     "value": "Stormforged Gauntlets"
+    },
+    {
+     "value": "Stormforged Grimoire"
+    },
+    {
+     "value": "Stormforged Helm"
+    },
+    {
+     "value": "Stormforged Longsword"
+    },
+    {
+     "value": "Stormforged Potion"
+    },
+    {
+     "value": "Stormforged Ring"
+    },
+    {
+     "value": "Stormforged Shield"
+    },
+    {
+     "value": "Stormforged Staff"
+    },
+    {
+     "value": "Verdant Amulet"
+    },
+    {
+     "value": "Verdant Boots"
+    },
+    {
+     "value": "Verdant Bow"
+    },
+    {
+     "value": "Verdant Cloak"
+    },
+    {
+     "value": "Verdant Dagger"
+    },
+    {
+     "value": "Verdant Gauntlets"
+    },
+    {
+     "value": "Verdant Grimoire"
+    },
+    {
+     "value": "Verdant Helm"
+    },
+    {
+     "value": "Verdant Longsword"
+    },
+    {
+     "value": "Verdant Potion"
+    },
+    {
+     "value": "Verdant Ring"
+    },
+    {
+     "value": "Verdant Shield"
+    },
+    {
+     "value": "Verdant Staff"
+    }
+   ]
+  },
+  {
+   "key": "character_class",
+   "name": "Character class",
+   "description": "Playable classes",
+   "data_type": "string",
+   "category": "players",
+   "values": [
+    {
+     "value": "Warrior"
+    },
+    {
+     "value": "Mage"
+    },
+    {
+     "value": "Rogue"
+    },
+    {
+     "value": "Ranger"
+    },
+    {
+     "value": "Cleric"
+    },
+    {
+     "value": "Paladin"
+    },
+    {
+     "value": "Necromancer"
+    },
+    {
+     "value": "Bard"
+    },
+    {
+     "value": "Monk"
+    },
+    {
+     "value": "Druid"
+    },
+    {
+     "value": "Engineer"
+    },
+    {
+     "value": "Summoner"
+    }
+   ]
+  },
+  {
+   "key": "match_mode",
+   "name": "Match mode",
+   "description": "Ways to play",
+   "data_type": "enum",
+   "category": "matches",
+   "values": [
+    {
+     "value": "RANKED",
+     "weight": 30
+    },
+    {
+     "value": "CASUAL",
+     "weight": 25
+    },
+    {
+     "value": "TOURNAMENT",
+     "weight": 3
+    },
+    {
+     "value": "CO_OP",
+     "weight": 12
+    },
+    {
+     "value": "BATTLE_ROYALE",
+     "weight": 15
+    },
+    {
+     "value": "TEAM_DEATHMATCH",
+     "weight": 8
+    },
+    {
+     "value": "CAPTURE_THE_FLAG",
+     "weight": 4
+    },
+    {
+     "value": "TRAINING",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "match_result",
+   "name": "Match result",
+   "description": "How matches end",
+   "data_type": "enum",
+   "category": "matches",
+   "values": [
+    {
+     "value": "WIN",
+     "weight": 48
+    },
+    {
+     "value": "LOSS",
+     "weight": 48
+    },
+    {
+     "value": "DRAW",
+     "weight": 2
+    },
+    {
+     "value": "ABANDONED",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "purchase_type",
+   "name": "Purchase type",
+   "description": "What players buy",
+   "data_type": "enum",
+   "category": "economy",
+   "values": [
+    {
+     "value": "CURRENCY_PACK"
+    },
+    {
+     "value": "BATTLE_PASS"
+    },
+    {
+     "value": "SKIN"
+    },
+    {
+     "value": "LOOT_BOX"
+    },
+    {
+     "value": "EXPANSION"
+    },
+    {
+     "value": "SUBSCRIPTION"
+    },
+    {
+     "value": "BOOSTER"
+    }
+   ]
+  },
+  {
+   "key": "platform",
+   "name": "Platform",
+   "description": "Where they play",
+   "data_type": "enum",
+   "category": "players",
+   "values": [
+    {
+     "value": "PC",
+     "weight": 35
+    },
+    {
+     "value": "CONSOLE_A",
+     "weight": 15
+    },
+    {
+     "value": "CONSOLE_B",
+     "weight": 15
+    },
+    {
+     "value": "MOBILE_IOS",
+     "weight": 12
+    },
+    {
+     "value": "MOBILE_ANDROID",
+     "weight": 18
+    },
+    {
+     "value": "CLOUD",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "guild_name",
+   "name": "Guild",
+   "description": "Fictional guilds",
+   "data_type": "string",
+   "category": "players",
+   "values": [
+    {
+     "value": "Children of the Broken Crown"
+    },
+    {
+     "value": "Children of the Crimson Tide"
+    },
+    {
+     "value": "Children of the Endless Night"
+    },
+    {
+     "value": "Children of the Iron Oath"
+    },
+    {
+     "value": "Children of the Last Light"
+    },
+    {
+     "value": "Children of the Northern Star"
+    },
+    {
+     "value": "Children of the Silver Moon"
+    },
+    {
+     "value": "House of the Broken Crown"
+    },
+    {
+     "value": "House of the Crimson Tide"
+    },
+    {
+     "value": "House of the Endless Night"
+    },
+    {
+     "value": "House of the Hidden Flame"
+    },
+    {
+     "value": "House of the Iron Oath"
+    },
+    {
+     "value": "House of the Last Light"
+    },
+    {
+     "value": "House of the Northern Star"
+    },
+    {
+     "value": "House of the Silver Moon"
+    },
+    {
+     "value": "Keepers of the Crimson Tide"
+    },
+    {
+     "value": "Keepers of the Endless Night"
+    },
+    {
+     "value": "Keepers of the Hidden Flame"
+    },
+    {
+     "value": "Keepers of the Last Light"
+    },
+    {
+     "value": "Keepers of the Northern Star"
+    },
+    {
+     "value": "Keepers of the Silver Moon"
+    },
+    {
+     "value": "Knights of the Broken Crown"
+    },
+    {
+     "value": "Knights of the Endless Night"
+    },
+    {
+     "value": "Knights of the Hidden Flame"
+    },
+    {
+     "value": "Knights of the Iron Oath"
+    },
+    {
+     "value": "Knights of the Last Light"
+    },
+    {
+     "value": "Knights of the Northern Star"
+    },
+    {
+     "value": "Knights of the Silver Moon"
+    },
+    {
+     "value": "Legion of the Hidden Flame"
+    },
+    {
+     "value": "Legion of the Iron Oath"
+    },
+    {
+     "value": "Legion of the Last Light"
+    },
+    {
+     "value": "Legion of the Northern Star"
+    },
+    {
+     "value": "Legion of the Silver Moon"
+    },
+    {
+     "value": "Order of the Broken Crown"
+    },
+    {
+     "value": "Order of the Endless Night"
+    },
+    {
+     "value": "Order of the Hidden Flame"
+    },
+    {
+     "value": "Order of the Iron Oath"
+    },
+    {
+     "value": "Order of the Last Light"
+    },
+    {
+     "value": "Order of the Northern Star"
+    },
+    {
+     "value": "Order of the Silver Moon"
+    }
+   ]
+  },
+  {
+   "key": "zone_name",
+   "name": "Zone",
+   "description": "Fictional map locations",
+   "data_type": "string",
+   "category": "world",
+   "values": [
+    {
+     "value": "Burning Citadel"
+    },
+    {
+     "value": "Burning Isles"
+    },
+    {
+     "value": "Burning Marsh"
+    },
+    {
+     "value": "Burning Peaks"
+    },
+    {
+     "value": "Burning Ruins"
+    },
+    {
+     "value": "Burning Woods"
+    },
+    {
+     "value": "Emerald Caverns"
+    },
+    {
+     "value": "Emerald Citadel"
+    },
+    {
+     "value": "Emerald Isles"
+    },
+    {
+     "value": "Emerald Peaks"
+    },
+    {
+     "value": "Emerald Woods"
+    },
+    {
+     "value": "Forgotten Caverns"
+    },
+    {
+     "value": "Forgotten Citadel"
+    },
+    {
+     "value": "Forgotten Isles"
+    },
+    {
+     "value": "Forgotten Marsh"
+    },
+    {
+     "value": "Forgotten Peaks"
+    },
+    {
+     "value": "Forgotten Ruins"
+    },
+    {
+     "value": "Forgotten Sands"
+    },
+    {
+     "value": "Forgotten Woods"
+    },
+    {
+     "value": "Hollow Caverns"
+    },
+    {
+     "value": "Hollow Citadel"
+    },
+    {
+     "value": "Hollow Isles"
+    },
+    {
+     "value": "Hollow Marsh"
+    },
+    {
+     "value": "Hollow Peaks"
+    },
+    {
+     "value": "Hollow Woods"
+    },
+    {
+     "value": "Howling Citadel"
+    },
+    {
+     "value": "Howling Marsh"
+    },
+    {
+     "value": "Howling Peaks"
+    },
+    {
+     "value": "Howling Ruins"
+    },
+    {
+     "value": "Howling Sands"
+    },
+    {
+     "value": "Howling Woods"
+    },
+    {
+     "value": "Shattered Caverns"
+    },
+    {
+     "value": "Shattered Citadel"
+    },
+    {
+     "value": "Shattered Isles"
+    },
+    {
+     "value": "Shattered Peaks"
+    },
+    {
+     "value": "Shattered Ruins"
+    },
+    {
+     "value": "Shattered Sands"
+    },
+    {
+     "value": "Shattered Woods"
+    },
+    {
+     "value": "Sunken Caverns"
+    },
+    {
+     "value": "Sunken Peaks"
+    },
+    {
+     "value": "Sunken Ruins"
+    },
+    {
+     "value": "Sunken Woods"
+    },
+    {
+     "value": "Whispering Caverns"
+    },
+    {
+     "value": "Whispering Citadel"
+    },
+    {
+     "value": "Whispering Isles"
+    },
+    {
+     "value": "Whispering Marsh"
+    },
+    {
+     "value": "Whispering Peaks"
+    },
+    {
+     "value": "Whispering Ruins"
+    },
+    {
+     "value": "Whispering Sands"
+    },
+    {
+     "value": "Whispering Woods"
+    }
+   ]
+  }
+ ]
+}

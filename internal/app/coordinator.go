@@ -27,6 +27,7 @@ import (
 	"github.com/genadigeno/data-feed/internal/security"
 	"github.com/genadigeno/data-feed/internal/snapshot"
 	"github.com/genadigeno/data-feed/internal/store/sqlite"
+	"github.com/genadigeno/data-feed/internal/vocab"
 )
 
 const readinessTimeout = time.Second
@@ -144,6 +145,10 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 	var work errgroup.Group
 	work.Go(func() error {
 		plane.Core.Run(workCtx)
+		return nil
+	})
+	work.Go(func() error {
+		plane.Catalogs.Run(workCtx)
 		return nil
 	})
 	localCtx, stopLocal := context.WithCancel(workCtx)
@@ -300,5 +305,5 @@ func startServer(addr string, tlsConfig *tls.Config, srv *http.Server) (*running
 	return r, nil
 }
 
-// Vocabulary decodes the catalog a snapshot carries. Catalogs arrive with Phase 7.
-var Vocabulary snapshot.VocabularyDecoder
+// Vocabulary decodes the catalog a snapshot carries.
+var Vocabulary snapshot.VocabularyDecoder = vocab.Decode

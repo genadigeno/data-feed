@@ -1,0 +1,1088 @@
+{
+ "domain": "education",
+ "name": "Education",
+ "description": "Schools and online learning: courses, enrolment and grading.",
+ "groups": [
+  {
+   "key": "subject",
+   "name": "Subject",
+   "description": "Fields of study",
+   "data_type": "string",
+   "category": "curriculum",
+   "values": [
+    {
+     "value": "Mathematics"
+    },
+    {
+     "value": "Physics"
+    },
+    {
+     "value": "Chemistry"
+    },
+    {
+     "value": "Biology"
+    },
+    {
+     "value": "History"
+    },
+    {
+     "value": "Geography"
+    },
+    {
+     "value": "Literature"
+    },
+    {
+     "value": "Computer Science"
+    },
+    {
+     "value": "Economics"
+    },
+    {
+     "value": "Philosophy"
+    },
+    {
+     "value": "Psychology"
+    },
+    {
+     "value": "Sociology"
+    },
+    {
+     "value": "Art History"
+    },
+    {
+     "value": "Music Theory"
+    },
+    {
+     "value": "Statistics"
+    },
+    {
+     "value": "Environmental Science"
+    },
+    {
+     "value": "Political Science"
+    },
+    {
+     "value": "Linguistics"
+    },
+    {
+     "value": "Astronomy"
+    },
+    {
+     "value": "Engineering"
+    }
+   ]
+  },
+  {
+   "key": "course_title",
+   "name": "Course title",
+   "description": "Fictional course titles",
+   "data_type": "string",
+   "category": "curriculum",
+   "values": [
+    {
+     "value": "Advanced Algebra"
+    },
+    {
+     "value": "Advanced Astronomy"
+    },
+    {
+     "value": "Advanced Cell Biology"
+    },
+    {
+     "value": "Advanced Creative Writing"
+    },
+    {
+     "value": "Advanced Data Structures"
+    },
+    {
+     "value": "Advanced Ethics"
+    },
+    {
+     "value": "Advanced Linear Systems"
+    },
+    {
+     "value": "Advanced Machine Learning"
+    },
+    {
+     "value": "Advanced Microeconomics"
+    },
+    {
+     "value": "Advanced Modern Poetry"
+    },
+    {
+     "value": "Advanced Organic Chemistry"
+    },
+    {
+     "value": "Advanced Public Speaking"
+    },
+    {
+     "value": "Advanced Statistics"
+    },
+    {
+     "value": "Advanced Thermodynamics"
+    },
+    {
+     "value": "Advanced World History"
+    },
+    {
+     "value": "Applied Algebra"
+    },
+    {
+     "value": "Applied Cell Biology"
+    },
+    {
+     "value": "Applied Creative Writing"
+    },
+    {
+     "value": "Applied Data Structures"
+    },
+    {
+     "value": "Applied Linear Systems"
+    },
+    {
+     "value": "Applied Machine Learning"
+    },
+    {
+     "value": "Applied Microeconomics"
+    },
+    {
+     "value": "Applied Modern Poetry"
+    },
+    {
+     "value": "Applied Organic Chemistry"
+    },
+    {
+     "value": "Applied Public Speaking"
+    },
+    {
+     "value": "Applied Statistics"
+    },
+    {
+     "value": "Applied Thermodynamics"
+    },
+    {
+     "value": "Applied World History"
+    },
+    {
+     "value": "Foundations of Algebra"
+    },
+    {
+     "value": "Foundations of Astronomy"
+    },
+    {
+     "value": "Foundations of Cell Biology"
+    },
+    {
+     "value": "Foundations of Creative Writing"
+    },
+    {
+     "value": "Foundations of Data Structures"
+    },
+    {
+     "value": "Foundations of Ethics"
+    },
+    {
+     "value": "Foundations of Linear Systems"
+    },
+    {
+     "value": "Foundations of Machine Learning"
+    },
+    {
+     "value": "Foundations of Microeconomics"
+    },
+    {
+     "value": "Foundations of Modern Poetry"
+    },
+    {
+     "value": "Foundations of Organic Chemistry"
+    },
+    {
+     "value": "Foundations of Statistics"
+    },
+    {
+     "value": "Foundations of Thermodynamics"
+    },
+    {
+     "value": "Foundations of World History"
+    },
+    {
+     "value": "History of Algebra"
+    },
+    {
+     "value": "History of Cell Biology"
+    },
+    {
+     "value": "History of Creative Writing"
+    },
+    {
+     "value": "History of Data Structures"
+    },
+    {
+     "value": "History of Ethics"
+    },
+    {
+     "value": "History of Linear Systems"
+    },
+    {
+     "value": "History of Machine Learning"
+    },
+    {
+     "value": "History of Microeconomics"
+    },
+    {
+     "value": "History of Modern Poetry"
+    },
+    {
+     "value": "History of Organic Chemistry"
+    },
+    {
+     "value": "History of Public Speaking"
+    },
+    {
+     "value": "History of Statistics"
+    },
+    {
+     "value": "History of Thermodynamics"
+    },
+    {
+     "value": "History of World History"
+    },
+    {
+     "value": "Introduction to Algebra"
+    },
+    {
+     "value": "Introduction to Astronomy"
+    },
+    {
+     "value": "Introduction to Cell Biology"
+    },
+    {
+     "value": "Introduction to Creative Writing"
+    },
+    {
+     "value": "Introduction to Ethics"
+    },
+    {
+     "value": "Introduction to Linear Systems"
+    },
+    {
+     "value": "Introduction to Machine Learning"
+    },
+    {
+     "value": "Introduction to Microeconomics"
+    },
+    {
+     "value": "Introduction to Modern Poetry"
+    },
+    {
+     "value": "Introduction to Organic Chemistry"
+    },
+    {
+     "value": "Introduction to Public Speaking"
+    },
+    {
+     "value": "Introduction to Statistics"
+    },
+    {
+     "value": "Introduction to Thermodynamics"
+    },
+    {
+     "value": "Principles of Algebra"
+    },
+    {
+     "value": "Principles of Astronomy"
+    },
+    {
+     "value": "Principles of Cell Biology"
+    },
+    {
+     "value": "Principles of Creative Writing"
+    },
+    {
+     "value": "Principles of Data Structures"
+    },
+    {
+     "value": "Principles of Ethics"
+    },
+    {
+     "value": "Principles of Linear Systems"
+    },
+    {
+     "value": "Principles of Machine Learning"
+    },
+    {
+     "value": "Principles of Microeconomics"
+    },
+    {
+     "value": "Principles of Modern Poetry"
+    },
+    {
+     "value": "Principles of Organic Chemistry"
+    },
+    {
+     "value": "Principles of Public Speaking"
+    },
+    {
+     "value": "Principles of Statistics"
+    },
+    {
+     "value": "Principles of Thermodynamics"
+    },
+    {
+     "value": "Principles of World History"
+    },
+    {
+     "value": "Seminar in Algebra"
+    },
+    {
+     "value": "Seminar in Cell Biology"
+    },
+    {
+     "value": "Seminar in Creative Writing"
+    },
+    {
+     "value": "Seminar in Data Structures"
+    },
+    {
+     "value": "Seminar in Ethics"
+    },
+    {
+     "value": "Seminar in Linear Systems"
+    },
+    {
+     "value": "Seminar in Machine Learning"
+    },
+    {
+     "value": "Seminar in Microeconomics"
+    },
+    {
+     "value": "Seminar in Modern Poetry"
+    },
+    {
+     "value": "Seminar in Organic Chemistry"
+    },
+    {
+     "value": "Seminar in Public Speaking"
+    },
+    {
+     "value": "Seminar in Statistics"
+    },
+    {
+     "value": "Seminar in Thermodynamics"
+    },
+    {
+     "value": "Seminar in World History"
+    },
+    {
+     "value": "Topics in Algebra"
+    },
+    {
+     "value": "Topics in Astronomy"
+    },
+    {
+     "value": "Topics in Cell Biology"
+    },
+    {
+     "value": "Topics in Creative Writing"
+    },
+    {
+     "value": "Topics in Ethics"
+    },
+    {
+     "value": "Topics in Linear Systems"
+    },
+    {
+     "value": "Topics in Machine Learning"
+    },
+    {
+     "value": "Topics in Microeconomics"
+    },
+    {
+     "value": "Topics in Public Speaking"
+    },
+    {
+     "value": "Topics in Statistics"
+    },
+    {
+     "value": "Topics in Thermodynamics"
+    },
+    {
+     "value": "Topics in World History"
+    }
+   ]
+  },
+  {
+   "key": "enrollment_status",
+   "name": "Enrollment status",
+   "description": "Enrolment lifecycle",
+   "data_type": "enum",
+   "category": "workflow",
+   "values": [
+    {
+     "value": "APPLIED",
+     "weight": 5
+    },
+    {
+     "value": "ACCEPTED",
+     "weight": 5
+    },
+    {
+     "value": "ENROLLED",
+     "weight": 55
+    },
+    {
+     "value": "WAITLISTED",
+     "weight": 3
+    },
+    {
+     "value": "WITHDRAWN",
+     "weight": 5
+    },
+    {
+     "value": "COMPLETED",
+     "weight": 22
+    },
+    {
+     "value": "FAILED",
+     "weight": 3
+    },
+    {
+     "value": "DEFERRED",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "grade_letter",
+   "name": "Grade",
+   "description": "Letter grades",
+   "data_type": "enum",
+   "category": "assessment",
+   "values": [
+    {
+     "value": "A",
+     "weight": 15
+    },
+    {
+     "value": "A_MINUS",
+     "weight": 10
+    },
+    {
+     "value": "B_PLUS",
+     "weight": 12
+    },
+    {
+     "value": "B",
+     "weight": 18
+    },
+    {
+     "value": "B_MINUS",
+     "weight": 10
+    },
+    {
+     "value": "C_PLUS",
+     "weight": 8
+    },
+    {
+     "value": "C",
+     "weight": 12
+    },
+    {
+     "value": "D",
+     "weight": 6
+    },
+    {
+     "value": "F",
+     "weight": 6
+    },
+    {
+     "value": "INCOMPLETE",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "assessment_type",
+   "name": "Assessment type",
+   "description": "Kinds of assessment",
+   "data_type": "enum",
+   "category": "assessment",
+   "values": [
+    {
+     "value": "QUIZ"
+    },
+    {
+     "value": "MIDTERM"
+    },
+    {
+     "value": "FINAL_EXAM"
+    },
+    {
+     "value": "ESSAY"
+    },
+    {
+     "value": "PROJECT"
+    },
+    {
+     "value": "PRESENTATION"
+    },
+    {
+     "value": "LAB_REPORT"
+    },
+    {
+     "value": "PEER_REVIEW"
+    }
+   ]
+  },
+  {
+   "key": "delivery_mode",
+   "name": "Delivery mode",
+   "description": "How a course runs",
+   "data_type": "enum",
+   "category": "curriculum",
+   "values": [
+    {
+     "value": "IN_PERSON",
+     "weight": 40
+    },
+    {
+     "value": "ONLINE_LIVE",
+     "weight": 20
+    },
+    {
+     "value": "ONLINE_SELF_PACED",
+     "weight": 25
+    },
+    {
+     "value": "HYBRID",
+     "weight": 15
+    }
+   ]
+  },
+  {
+   "key": "academic_level",
+   "name": "Academic level",
+   "description": "Levels of study",
+   "data_type": "enum",
+   "category": "curriculum",
+   "values": [
+    {
+     "value": "PRIMARY"
+    },
+    {
+     "value": "SECONDARY"
+    },
+    {
+     "value": "UNDERGRADUATE"
+    },
+    {
+     "value": "POSTGRADUATE"
+    },
+    {
+     "value": "DOCTORAL"
+    },
+    {
+     "value": "PROFESSIONAL"
+    }
+   ]
+  },
+  {
+   "key": "campus_building",
+   "name": "Building",
+   "description": "Fictional campus buildings",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Ashford Annex"
+    },
+    {
+     "value": "Ashford Center"
+    },
+    {
+     "value": "Ashford Hall"
+    },
+    {
+     "value": "Ashford Laboratory"
+    },
+    {
+     "value": "Ashford Pavilion"
+    },
+    {
+     "value": "Elmhurst Center"
+    },
+    {
+     "value": "Elmhurst Hall"
+    },
+    {
+     "value": "Elmhurst Laboratory"
+    },
+    {
+     "value": "Engineering Annex"
+    },
+    {
+     "value": "Engineering Center"
+    },
+    {
+     "value": "Engineering Hall"
+    },
+    {
+     "value": "Engineering Laboratory"
+    },
+    {
+     "value": "Engineering Pavilion"
+    },
+    {
+     "value": "Founders Annex"
+    },
+    {
+     "value": "Founders Center"
+    },
+    {
+     "value": "Founders Hall"
+    },
+    {
+     "value": "Founders Laboratory"
+    },
+    {
+     "value": "Founders Pavilion"
+    },
+    {
+     "value": "Humanities Center"
+    },
+    {
+     "value": "Humanities Laboratory"
+    },
+    {
+     "value": "Humanities Pavilion"
+    },
+    {
+     "value": "Kingsley Annex"
+    },
+    {
+     "value": "Kingsley Center"
+    },
+    {
+     "value": "Kingsley Hall"
+    },
+    {
+     "value": "Kingsley Laboratory"
+    },
+    {
+     "value": "Kingsley Pavilion"
+    },
+    {
+     "value": "Library Center"
+    },
+    {
+     "value": "Library Laboratory"
+    },
+    {
+     "value": "Library Pavilion"
+    },
+    {
+     "value": "Maple Annex"
+    },
+    {
+     "value": "Maple Center"
+    },
+    {
+     "value": "Maple Hall"
+    },
+    {
+     "value": "Maple Laboratory"
+    },
+    {
+     "value": "Maple Pavilion"
+    },
+    {
+     "value": "Oak Annex"
+    },
+    {
+     "value": "Oak Center"
+    },
+    {
+     "value": "Oak Pavilion"
+    },
+    {
+     "value": "Science Annex"
+    },
+    {
+     "value": "Science Hall"
+    },
+    {
+     "value": "Science Pavilion"
+    }
+   ]
+  },
+  {
+   "key": "school_name",
+   "name": "School",
+   "description": "Fictional schools",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Ashford Academy"
+    },
+    {
+     "value": "Ashford College"
+    },
+    {
+     "value": "Ashford Community College"
+    },
+    {
+     "value": "Ashford High School"
+    },
+    {
+     "value": "Ashford Institute"
+    },
+    {
+     "value": "Ashford University"
+    },
+    {
+     "value": "Bluepeak Academy"
+    },
+    {
+     "value": "Bluepeak College"
+    },
+    {
+     "value": "Bluepeak Community College"
+    },
+    {
+     "value": "Bluepeak High School"
+    },
+    {
+     "value": "Bluepeak Institute"
+    },
+    {
+     "value": "Bluepeak University"
+    },
+    {
+     "value": "Brightfield Academy"
+    },
+    {
+     "value": "Brightfield College"
+    },
+    {
+     "value": "Brightfield Community College"
+    },
+    {
+     "value": "Brightfield High School"
+    },
+    {
+     "value": "Brightfield Institute"
+    },
+    {
+     "value": "Brightfield University"
+    },
+    {
+     "value": "Clearwater Academy"
+    },
+    {
+     "value": "Clearwater College"
+    },
+    {
+     "value": "Clearwater Community College"
+    },
+    {
+     "value": "Clearwater High School"
+    },
+    {
+     "value": "Clearwater Institute"
+    },
+    {
+     "value": "Clearwater University"
+    },
+    {
+     "value": "Elmhurst Academy"
+    },
+    {
+     "value": "Elmhurst College"
+    },
+    {
+     "value": "Elmhurst Community College"
+    },
+    {
+     "value": "Elmhurst High School"
+    },
+    {
+     "value": "Elmhurst Institute"
+    },
+    {
+     "value": "Elmhurst University"
+    },
+    {
+     "value": "Fairmont Academy"
+    },
+    {
+     "value": "Fairmont College"
+    },
+    {
+     "value": "Fairmont Community College"
+    },
+    {
+     "value": "Fairmont High School"
+    },
+    {
+     "value": "Fairmont Institute"
+    },
+    {
+     "value": "Fairmont University"
+    },
+    {
+     "value": "Greenvale Academy"
+    },
+    {
+     "value": "Greenvale College"
+    },
+    {
+     "value": "Greenvale Community College"
+    },
+    {
+     "value": "Greenvale High School"
+    },
+    {
+     "value": "Greenvale Institute"
+    },
+    {
+     "value": "Greenvale University"
+    },
+    {
+     "value": "Harborview Academy"
+    },
+    {
+     "value": "Harborview College"
+    },
+    {
+     "value": "Harborview Community College"
+    },
+    {
+     "value": "Harborview High School"
+    },
+    {
+     "value": "Harborview Institute"
+    },
+    {
+     "value": "Harborview University"
+    },
+    {
+     "value": "Ironwood Academy"
+    },
+    {
+     "value": "Ironwood College"
+    },
+    {
+     "value": "Ironwood Community College"
+    },
+    {
+     "value": "Ironwood High School"
+    },
+    {
+     "value": "Ironwood Institute"
+    },
+    {
+     "value": "Ironwood University"
+    },
+    {
+     "value": "Kingsley Academy"
+    },
+    {
+     "value": "Kingsley College"
+    },
+    {
+     "value": "Kingsley Community College"
+    },
+    {
+     "value": "Kingsley High School"
+    },
+    {
+     "value": "Kingsley Institute"
+    },
+    {
+     "value": "Kingsley University"
+    },
+    {
+     "value": "Lakeshore Academy"
+    },
+    {
+     "value": "Lakeshore College"
+    },
+    {
+     "value": "Lakeshore Community College"
+    },
+    {
+     "value": "Lakeshore High School"
+    },
+    {
+     "value": "Lakeshore Institute"
+    },
+    {
+     "value": "Lakeshore University"
+    },
+    {
+     "value": "Maplecrest Academy"
+    },
+    {
+     "value": "Maplecrest College"
+    },
+    {
+     "value": "Maplecrest Community College"
+    },
+    {
+     "value": "Maplecrest High School"
+    },
+    {
+     "value": "Maplecrest Institute"
+    },
+    {
+     "value": "Maplecrest University"
+    },
+    {
+     "value": "Northwind Academy"
+    },
+    {
+     "value": "Northwind College"
+    },
+    {
+     "value": "Northwind Community College"
+    },
+    {
+     "value": "Northwind High School"
+    },
+    {
+     "value": "Northwind Institute"
+    },
+    {
+     "value": "Northwind University"
+    },
+    {
+     "value": "Oakridge Academy"
+    },
+    {
+     "value": "Oakridge College"
+    },
+    {
+     "value": "Oakridge Community College"
+    },
+    {
+     "value": "Oakridge High School"
+    },
+    {
+     "value": "Oakridge Institute"
+    },
+    {
+     "value": "Oakridge University"
+    },
+    {
+     "value": "Redwood Academy"
+    },
+    {
+     "value": "Redwood College"
+    },
+    {
+     "value": "Redwood Community College"
+    },
+    {
+     "value": "Redwood High School"
+    },
+    {
+     "value": "Redwood Institute"
+    },
+    {
+     "value": "Redwood University"
+    },
+    {
+     "value": "Riverton Academy"
+    },
+    {
+     "value": "Riverton College"
+    },
+    {
+     "value": "Riverton Community College"
+    },
+    {
+     "value": "Riverton High School"
+    },
+    {
+     "value": "Riverton Institute"
+    },
+    {
+     "value": "Riverton University"
+    },
+    {
+     "value": "Silverline Academy"
+    },
+    {
+     "value": "Silverline College"
+    },
+    {
+     "value": "Silverline Community College"
+    },
+    {
+     "value": "Silverline High School"
+    },
+    {
+     "value": "Silverline Institute"
+    },
+    {
+     "value": "Silverline University"
+    },
+    {
+     "value": "Stonebridge Academy"
+    },
+    {
+     "value": "Stonebridge College"
+    },
+    {
+     "value": "Stonebridge Community College"
+    },
+    {
+     "value": "Stonebridge High School"
+    },
+    {
+     "value": "Stonebridge Institute"
+    },
+    {
+     "value": "Stonebridge University"
+    },
+    {
+     "value": "Summerhill Academy"
+    },
+    {
+     "value": "Summerhill College"
+    },
+    {
+     "value": "Summerhill Community College"
+    },
+    {
+     "value": "Summerhill High School"
+    },
+    {
+     "value": "Summerhill Institute"
+    },
+    {
+     "value": "Summerhill University"
+    },
+    {
+     "value": "Westbrook Academy"
+    },
+    {
+     "value": "Westbrook College"
+    },
+    {
+     "value": "Westbrook Community College"
+    },
+    {
+     "value": "Westbrook High School"
+    },
+    {
+     "value": "Westbrook Institute"
+    },
+    {
+     "value": "Westbrook University"
+    }
+   ]
+  }
+ ]
+}

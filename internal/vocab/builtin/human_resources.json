@@ -1,0 +1,818 @@
+{
+ "domain": "human_resources",
+ "name": "Human resources",
+ "description": "Employees, recruitment, leave and performance.",
+ "groups": [
+  {
+   "key": "job_title",
+   "name": "Job title",
+   "description": "Fictional job titles",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Assistant Accountant"
+    },
+    {
+     "value": "Assistant Customer Success Manager"
+    },
+    {
+     "value": "Assistant Data Analyst"
+    },
+    {
+     "value": "Assistant Designer"
+    },
+    {
+     "value": "Assistant Facilities Manager"
+    },
+    {
+     "value": "Assistant Legal Counsel"
+    },
+    {
+     "value": "Assistant Marketing Specialist"
+    },
+    {
+     "value": "Assistant Operations Coordinator"
+    },
+    {
+     "value": "Assistant Payroll Administrator"
+    },
+    {
+     "value": "Assistant Product Manager"
+    },
+    {
+     "value": "Assistant Project Manager"
+    },
+    {
+     "value": "Assistant Quality Analyst"
+    },
+    {
+     "value": "Assistant Recruiter"
+    },
+    {
+     "value": "Assistant Sales Representative"
+    },
+    {
+     "value": "Assistant Software Engineer"
+    },
+    {
+     "value": "Associate Accountant"
+    },
+    {
+     "value": "Associate Customer Success Manager"
+    },
+    {
+     "value": "Associate Data Analyst"
+    },
+    {
+     "value": "Associate Designer"
+    },
+    {
+     "value": "Associate Facilities Manager"
+    },
+    {
+     "value": "Associate Legal Counsel"
+    },
+    {
+     "value": "Associate Marketing Specialist"
+    },
+    {
+     "value": "Associate Operations Coordinator"
+    },
+    {
+     "value": "Associate Product Manager"
+    },
+    {
+     "value": "Associate Project Manager"
+    },
+    {
+     "value": "Associate Quality Analyst"
+    },
+    {
+     "value": "Associate Recruiter"
+    },
+    {
+     "value": "Associate Sales Representative"
+    },
+    {
+     "value": "Associate Software Engineer"
+    },
+    {
+     "value": "Head of Accountant"
+    },
+    {
+     "value": "Head of Customer Success Manager"
+    },
+    {
+     "value": "Head of Data Analyst"
+    },
+    {
+     "value": "Head of Designer"
+    },
+    {
+     "value": "Head of Facilities Manager"
+    },
+    {
+     "value": "Head of Legal Counsel"
+    },
+    {
+     "value": "Head of Marketing Specialist"
+    },
+    {
+     "value": "Head of Operations Coordinator"
+    },
+    {
+     "value": "Head of Payroll Administrator"
+    },
+    {
+     "value": "Head of Product Manager"
+    },
+    {
+     "value": "Head of Project Manager"
+    },
+    {
+     "value": "Head of Quality Analyst"
+    },
+    {
+     "value": "Head of Recruiter"
+    },
+    {
+     "value": "Head of Sales Representative"
+    },
+    {
+     "value": "Head of Software Engineer"
+    },
+    {
+     "value": "Junior Accountant"
+    },
+    {
+     "value": "Junior Customer Success Manager"
+    },
+    {
+     "value": "Junior Data Analyst"
+    },
+    {
+     "value": "Junior Designer"
+    },
+    {
+     "value": "Junior Facilities Manager"
+    },
+    {
+     "value": "Junior Legal Counsel"
+    },
+    {
+     "value": "Junior Marketing Specialist"
+    },
+    {
+     "value": "Junior Operations Coordinator"
+    },
+    {
+     "value": "Junior Payroll Administrator"
+    },
+    {
+     "value": "Junior Product Manager"
+    },
+    {
+     "value": "Junior Project Manager"
+    },
+    {
+     "value": "Junior Quality Analyst"
+    },
+    {
+     "value": "Junior Sales Representative"
+    },
+    {
+     "value": "Junior Software Engineer"
+    },
+    {
+     "value": "Lead Accountant"
+    },
+    {
+     "value": "Lead Customer Success Manager"
+    },
+    {
+     "value": "Lead Data Analyst"
+    },
+    {
+     "value": "Lead Designer"
+    },
+    {
+     "value": "Lead Facilities Manager"
+    },
+    {
+     "value": "Lead Legal Counsel"
+    },
+    {
+     "value": "Lead Marketing Specialist"
+    },
+    {
+     "value": "Lead Operations Coordinator"
+    },
+    {
+     "value": "Lead Payroll Administrator"
+    },
+    {
+     "value": "Lead Product Manager"
+    },
+    {
+     "value": "Lead Project Manager"
+    },
+    {
+     "value": "Lead Quality Analyst"
+    },
+    {
+     "value": "Lead Recruiter"
+    },
+    {
+     "value": "Lead Sales Representative"
+    },
+    {
+     "value": "Lead Software Engineer"
+    },
+    {
+     "value": "Principal Accountant"
+    },
+    {
+     "value": "Principal Customer Success Manager"
+    },
+    {
+     "value": "Principal Data Analyst"
+    },
+    {
+     "value": "Principal Designer"
+    },
+    {
+     "value": "Principal Facilities Manager"
+    },
+    {
+     "value": "Principal Legal Counsel"
+    },
+    {
+     "value": "Principal Marketing Specialist"
+    },
+    {
+     "value": "Principal Operations Coordinator"
+    },
+    {
+     "value": "Principal Payroll Administrator"
+    },
+    {
+     "value": "Principal Product Manager"
+    },
+    {
+     "value": "Principal Project Manager"
+    },
+    {
+     "value": "Principal Quality Analyst"
+    },
+    {
+     "value": "Principal Recruiter"
+    },
+    {
+     "value": "Principal Sales Representative"
+    },
+    {
+     "value": "Principal Software Engineer"
+    },
+    {
+     "value": "Regional Accountant"
+    },
+    {
+     "value": "Regional Customer Success Manager"
+    },
+    {
+     "value": "Regional Designer"
+    },
+    {
+     "value": "Regional Facilities Manager"
+    },
+    {
+     "value": "Regional Legal Counsel"
+    },
+    {
+     "value": "Regional Marketing Specialist"
+    },
+    {
+     "value": "Regional Operations Coordinator"
+    },
+    {
+     "value": "Regional Payroll Administrator"
+    },
+    {
+     "value": "Regional Product Manager"
+    },
+    {
+     "value": "Regional Project Manager"
+    },
+    {
+     "value": "Regional Quality Analyst"
+    },
+    {
+     "value": "Regional Recruiter"
+    },
+    {
+     "value": "Regional Sales Representative"
+    },
+    {
+     "value": "Regional Software Engineer"
+    },
+    {
+     "value": "Senior Accountant"
+    },
+    {
+     "value": "Senior Customer Success Manager"
+    },
+    {
+     "value": "Senior Data Analyst"
+    },
+    {
+     "value": "Senior Designer"
+    },
+    {
+     "value": "Senior Facilities Manager"
+    },
+    {
+     "value": "Senior Legal Counsel"
+    },
+    {
+     "value": "Senior Marketing Specialist"
+    },
+    {
+     "value": "Senior Operations Coordinator"
+    },
+    {
+     "value": "Senior Payroll Administrator"
+    },
+    {
+     "value": "Senior Product Manager"
+    },
+    {
+     "value": "Senior Project Manager"
+    },
+    {
+     "value": "Senior Quality Analyst"
+    },
+    {
+     "value": "Senior Recruiter"
+    },
+    {
+     "value": "Senior Software Engineer"
+    },
+    {
+     "value": "Staff Accountant"
+    },
+    {
+     "value": "Staff Customer Success Manager"
+    },
+    {
+     "value": "Staff Designer"
+    },
+    {
+     "value": "Staff Facilities Manager"
+    },
+    {
+     "value": "Staff Legal Counsel"
+    },
+    {
+     "value": "Staff Marketing Specialist"
+    },
+    {
+     "value": "Staff Operations Coordinator"
+    },
+    {
+     "value": "Staff Payroll Administrator"
+    },
+    {
+     "value": "Staff Product Manager"
+    },
+    {
+     "value": "Staff Project Manager"
+    },
+    {
+     "value": "Staff Quality Analyst"
+    },
+    {
+     "value": "Staff Recruiter"
+    },
+    {
+     "value": "Staff Sales Representative"
+    },
+    {
+     "value": "Staff Software Engineer"
+    }
+   ]
+  },
+  {
+   "key": "department",
+   "name": "Department",
+   "description": "Company departments",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Engineering"
+    },
+    {
+     "value": "Finance"
+    },
+    {
+     "value": "Human Resources"
+    },
+    {
+     "value": "Legal"
+    },
+    {
+     "value": "Marketing"
+    },
+    {
+     "value": "Operations"
+    },
+    {
+     "value": "Product"
+    },
+    {
+     "value": "Sales"
+    },
+    {
+     "value": "Customer Support"
+    },
+    {
+     "value": "Research"
+    },
+    {
+     "value": "Procurement"
+    },
+    {
+     "value": "Facilities"
+    },
+    {
+     "value": "Security"
+    },
+    {
+     "value": "Data & Analytics"
+    },
+    {
+     "value": "Communications"
+    },
+    {
+     "value": "Internal Audit"
+    }
+   ]
+  },
+  {
+   "key": "employment_type",
+   "name": "Employment type",
+   "description": "Contract kinds",
+   "data_type": "enum",
+   "category": "employment",
+   "values": [
+    {
+     "value": "FULL_TIME",
+     "weight": 72
+    },
+    {
+     "value": "PART_TIME",
+     "weight": 10
+    },
+    {
+     "value": "CONTRACTOR",
+     "weight": 9
+    },
+    {
+     "value": "INTERN",
+     "weight": 4
+    },
+    {
+     "value": "TEMPORARY",
+     "weight": 3
+    },
+    {
+     "value": "SEASONAL",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "employee_status",
+   "name": "Employee status",
+   "description": "Employment lifecycle",
+   "data_type": "enum",
+   "category": "employment",
+   "values": [
+    {
+     "value": "ONBOARDING",
+     "weight": 3
+    },
+    {
+     "value": "ACTIVE",
+     "weight": 80
+    },
+    {
+     "value": "ON_LEAVE",
+     "weight": 5
+    },
+    {
+     "value": "NOTICE_PERIOD",
+     "weight": 2
+    },
+    {
+     "value": "TERMINATED",
+     "weight": 9
+    },
+    {
+     "value": "RETIRED",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "key": "leave_type",
+   "name": "Leave type",
+   "description": "Kinds of absence",
+   "data_type": "enum",
+   "category": "absence",
+   "values": [
+    {
+     "value": "ANNUAL",
+     "weight": 55
+    },
+    {
+     "value": "SICK",
+     "weight": 25
+    },
+    {
+     "value": "PARENTAL",
+     "weight": 8
+    },
+    {
+     "value": "BEREAVEMENT",
+     "weight": 3
+    },
+    {
+     "value": "UNPAID",
+     "weight": 4
+    },
+    {
+     "value": "STUDY",
+     "weight": 3
+    },
+    {
+     "value": "JURY_DUTY",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "leave_status",
+   "name": "Leave status",
+   "description": "Request lifecycle",
+   "data_type": "enum",
+   "category": "absence",
+   "values": [
+    {
+     "value": "REQUESTED",
+     "weight": 8
+    },
+    {
+     "value": "APPROVED",
+     "weight": 25
+    },
+    {
+     "value": "REJECTED",
+     "weight": 4
+    },
+    {
+     "value": "TAKEN",
+     "weight": 58
+    },
+    {
+     "value": "CANCELLED",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "application_stage",
+   "name": "Application stage",
+   "description": "Recruitment pipeline",
+   "data_type": "enum",
+   "category": "recruitment",
+   "values": [
+    {
+     "value": "APPLIED",
+     "weight": 25
+    },
+    {
+     "value": "SCREENING",
+     "weight": 12
+    },
+    {
+     "value": "PHONE_INTERVIEW",
+     "weight": 8
+    },
+    {
+     "value": "ONSITE_INTERVIEW",
+     "weight": 5
+    },
+    {
+     "value": "OFFER",
+     "weight": 2
+    },
+    {
+     "value": "HIRED",
+     "weight": 2
+    },
+    {
+     "value": "REJECTED",
+     "weight": 40
+    },
+    {
+     "value": "WITHDRAWN",
+     "weight": 6
+    }
+   ]
+  },
+  {
+   "key": "performance_rating",
+   "name": "Performance rating",
+   "description": "Review outcomes",
+   "data_type": "enum",
+   "category": "performance",
+   "values": [
+    {
+     "value": "EXCEEDS_EXPECTATIONS",
+     "weight": 18
+    },
+    {
+     "value": "MEETS_EXPECTATIONS",
+     "weight": 60
+    },
+    {
+     "value": "PARTIALLY_MEETS",
+     "weight": 12
+    },
+    {
+     "value": "NEEDS_IMPROVEMENT",
+     "weight": 4
+    },
+    {
+     "value": "TOO_EARLY_TO_RATE",
+     "weight": 6
+    }
+   ]
+  },
+  {
+   "key": "skill",
+   "name": "Skill",
+   "description": "Workplace skills",
+   "data_type": "string",
+   "category": "performance",
+   "values": [
+    {
+     "value": "Project Planning"
+    },
+    {
+     "value": "Public Speaking"
+    },
+    {
+     "value": "Negotiation"
+    },
+    {
+     "value": "SQL"
+    },
+    {
+     "value": "Python"
+    },
+    {
+     "value": "Budgeting"
+    },
+    {
+     "value": "Stakeholder Management"
+    },
+    {
+     "value": "Technical Writing"
+    },
+    {
+     "value": "Data Visualization"
+    },
+    {
+     "value": "Coaching"
+    },
+    {
+     "value": "Conflict Resolution"
+    },
+    {
+     "value": "Excel Modelling"
+    },
+    {
+     "value": "Market Research"
+    },
+    {
+     "value": "UX Research"
+    },
+    {
+     "value": "Contract Review"
+    },
+    {
+     "value": "Incident Response"
+    },
+    {
+     "value": "Agile Delivery"
+    },
+    {
+     "value": "Vendor Management"
+    },
+    {
+     "value": "Cloud Infrastructure"
+    },
+    {
+     "value": "Time Management"
+    }
+   ]
+  },
+  {
+   "key": "office_location",
+   "name": "Office",
+   "description": "Fictional offices",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Central Campus"
+    },
+    {
+     "value": "Central House"
+    },
+    {
+     "value": "Central Tower"
+    },
+    {
+     "value": "Central Works"
+    },
+    {
+     "value": "Harbor Campus"
+    },
+    {
+     "value": "Harbor House"
+    },
+    {
+     "value": "Harbor Plaza"
+    },
+    {
+     "value": "Harbor Tower"
+    },
+    {
+     "value": "Harbor Works"
+    },
+    {
+     "value": "Northgate Campus"
+    },
+    {
+     "value": "Northgate House"
+    },
+    {
+     "value": "Northgate Plaza"
+    },
+    {
+     "value": "Northgate Works"
+    },
+    {
+     "value": "Parkview Campus"
+    },
+    {
+     "value": "Parkview House"
+    },
+    {
+     "value": "Parkview Tower"
+    },
+    {
+     "value": "Parkview Works"
+    },
+    {
+     "value": "Riverside Campus"
+    },
+    {
+     "value": "Riverside Plaza"
+    },
+    {
+     "value": "Riverside Tower"
+    },
+    {
+     "value": "Riverside Works"
+    },
+    {
+     "value": "Westfield House"
+    },
+    {
+     "value": "Westfield Plaza"
+    },
+    {
+     "value": "Westfield Tower"
+    },
+    {
+     "value": "Westfield Works"
+    }
+   ]
+  }
+ ]
+}

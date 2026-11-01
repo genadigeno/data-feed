@@ -1,0 +1,823 @@
+{
+ "domain": "insurance",
+ "name": "Insurance",
+ "description": "Policies, claims and underwriting.",
+ "groups": [
+  {
+   "key": "policy_type",
+   "name": "Policy type",
+   "description": "Lines of business",
+   "data_type": "enum",
+   "category": "policies",
+   "values": [
+    {
+     "value": "AUTO",
+     "weight": 30
+    },
+    {
+     "value": "HOME",
+     "weight": 20
+    },
+    {
+     "value": "RENTERS",
+     "weight": 10
+    },
+    {
+     "value": "LIFE",
+     "weight": 10
+    },
+    {
+     "value": "HEALTH",
+     "weight": 10
+    },
+    {
+     "value": "TRAVEL",
+     "weight": 6
+    },
+    {
+     "value": "PET",
+     "weight": 4
+    },
+    {
+     "value": "BUSINESS_LIABILITY",
+     "weight": 5
+    },
+    {
+     "value": "CYBER",
+     "weight": 3
+    },
+    {
+     "value": "MARINE",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "policy_status",
+   "name": "Policy status",
+   "description": "Policy lifecycle",
+   "data_type": "enum",
+   "category": "policies",
+   "values": [
+    {
+     "value": "QUOTED",
+     "weight": 8
+    },
+    {
+     "value": "BOUND",
+     "weight": 3
+    },
+    {
+     "value": "ACTIVE",
+     "weight": 62
+    },
+    {
+     "value": "LAPSED",
+     "weight": 3
+    },
+    {
+     "value": "CANCELLED",
+     "weight": 6
+    },
+    {
+     "value": "EXPIRED",
+     "weight": 6
+    },
+    {
+     "value": "RENEWED",
+     "weight": 12
+    }
+   ]
+  },
+  {
+   "key": "claim_status",
+   "name": "Claim status",
+   "description": "Claim lifecycle",
+   "data_type": "enum",
+   "category": "claims",
+   "values": [
+    {
+     "value": "REPORTED",
+     "weight": 8
+    },
+    {
+     "value": "UNDER_INVESTIGATION",
+     "weight": 10
+    },
+    {
+     "value": "APPROVED",
+     "weight": 10
+    },
+    {
+     "value": "DENIED",
+     "weight": 6
+    },
+    {
+     "value": "SETTLED",
+     "weight": 40
+    },
+    {
+     "value": "REOPENED",
+     "weight": 1
+    },
+    {
+     "value": "CLOSED",
+     "weight": 25
+    }
+   ]
+  },
+  {
+   "key": "loss_type",
+   "name": "Loss type",
+   "description": "What happened",
+   "data_type": "enum",
+   "category": "claims",
+   "values": [
+    {
+     "value": "COLLISION"
+    },
+    {
+     "value": "THEFT"
+    },
+    {
+     "value": "FIRE"
+    },
+    {
+     "value": "WATER_DAMAGE"
+    },
+    {
+     "value": "HAIL"
+    },
+    {
+     "value": "WINDSTORM"
+    },
+    {
+     "value": "VANDALISM"
+    },
+    {
+     "value": "LIABILITY"
+    },
+    {
+     "value": "MEDICAL_EXPENSE"
+    },
+    {
+     "value": "TRIP_CANCELLATION"
+    }
+   ]
+  },
+  {
+   "key": "payment_frequency",
+   "name": "Payment frequency",
+   "description": "How premiums are paid",
+   "data_type": "enum",
+   "category": "billing",
+   "values": [
+    {
+     "value": "MONTHLY",
+     "weight": 55
+    },
+    {
+     "value": "QUARTERLY",
+     "weight": 10
+    },
+    {
+     "value": "SEMI_ANNUAL",
+     "weight": 10
+    },
+    {
+     "value": "ANNUAL",
+     "weight": 25
+    }
+   ]
+  },
+  {
+   "key": "underwriting_decision",
+   "name": "Underwriting decision",
+   "description": "Risk outcome",
+   "data_type": "enum",
+   "category": "underwriting",
+   "values": [
+    {
+     "value": "STANDARD_RATES",
+     "weight": 55
+    },
+    {
+     "value": "PREFERRED_RATES",
+     "weight": 22
+    },
+    {
+     "value": "RATED_UP",
+     "weight": 12
+    },
+    {
+     "value": "DECLINED",
+     "weight": 6
+    },
+    {
+     "value": "REFERRED",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "distribution_channel",
+   "name": "Channel",
+   "description": "How policies are sold",
+   "data_type": "enum",
+   "category": "sales",
+   "values": [
+    {
+     "value": "DIRECT_ONLINE"
+    },
+    {
+     "value": "TIED_AGENT"
+    },
+    {
+     "value": "INDEPENDENT_BROKER"
+    },
+    {
+     "value": "BANK_PARTNER"
+    },
+    {
+     "value": "AGGREGATOR"
+    },
+    {
+     "value": "AFFINITY_GROUP"
+    }
+   ]
+  },
+  {
+   "key": "insurer_name",
+   "name": "Insurer",
+   "description": "Fictional insurers",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Ashford Assurance"
+    },
+    {
+     "value": "Ashford Indemnity"
+    },
+    {
+     "value": "Ashford Insurance"
+    },
+    {
+     "value": "Ashford Life"
+    },
+    {
+     "value": "Ashford Mutual"
+    },
+    {
+     "value": "Ashford Underwriters"
+    },
+    {
+     "value": "Bluepeak Assurance"
+    },
+    {
+     "value": "Bluepeak Indemnity"
+    },
+    {
+     "value": "Bluepeak Insurance"
+    },
+    {
+     "value": "Bluepeak Life"
+    },
+    {
+     "value": "Bluepeak Mutual"
+    },
+    {
+     "value": "Bluepeak Underwriters"
+    },
+    {
+     "value": "Brightfield Assurance"
+    },
+    {
+     "value": "Brightfield Indemnity"
+    },
+    {
+     "value": "Brightfield Insurance"
+    },
+    {
+     "value": "Brightfield Life"
+    },
+    {
+     "value": "Brightfield Mutual"
+    },
+    {
+     "value": "Brightfield Underwriters"
+    },
+    {
+     "value": "Clearwater Assurance"
+    },
+    {
+     "value": "Clearwater Indemnity"
+    },
+    {
+     "value": "Clearwater Insurance"
+    },
+    {
+     "value": "Clearwater Life"
+    },
+    {
+     "value": "Clearwater Mutual"
+    },
+    {
+     "value": "Clearwater Underwriters"
+    },
+    {
+     "value": "Elmhurst Assurance"
+    },
+    {
+     "value": "Elmhurst Indemnity"
+    },
+    {
+     "value": "Elmhurst Insurance"
+    },
+    {
+     "value": "Elmhurst Life"
+    },
+    {
+     "value": "Elmhurst Mutual"
+    },
+    {
+     "value": "Elmhurst Underwriters"
+    },
+    {
+     "value": "Fairmont Assurance"
+    },
+    {
+     "value": "Fairmont Indemnity"
+    },
+    {
+     "value": "Fairmont Insurance"
+    },
+    {
+     "value": "Fairmont Life"
+    },
+    {
+     "value": "Fairmont Mutual"
+    },
+    {
+     "value": "Fairmont Underwriters"
+    },
+    {
+     "value": "Greenvale Assurance"
+    },
+    {
+     "value": "Greenvale Indemnity"
+    },
+    {
+     "value": "Greenvale Insurance"
+    },
+    {
+     "value": "Greenvale Life"
+    },
+    {
+     "value": "Greenvale Mutual"
+    },
+    {
+     "value": "Greenvale Underwriters"
+    },
+    {
+     "value": "Harborview Assurance"
+    },
+    {
+     "value": "Harborview Indemnity"
+    },
+    {
+     "value": "Harborview Insurance"
+    },
+    {
+     "value": "Harborview Life"
+    },
+    {
+     "value": "Harborview Mutual"
+    },
+    {
+     "value": "Harborview Underwriters"
+    },
+    {
+     "value": "Ironwood Assurance"
+    },
+    {
+     "value": "Ironwood Indemnity"
+    },
+    {
+     "value": "Ironwood Insurance"
+    },
+    {
+     "value": "Ironwood Life"
+    },
+    {
+     "value": "Ironwood Mutual"
+    },
+    {
+     "value": "Ironwood Underwriters"
+    },
+    {
+     "value": "Kingsley Assurance"
+    },
+    {
+     "value": "Kingsley Indemnity"
+    },
+    {
+     "value": "Kingsley Insurance"
+    },
+    {
+     "value": "Kingsley Life"
+    },
+    {
+     "value": "Kingsley Mutual"
+    },
+    {
+     "value": "Kingsley Underwriters"
+    },
+    {
+     "value": "Lakeshore Assurance"
+    },
+    {
+     "value": "Lakeshore Indemnity"
+    },
+    {
+     "value": "Lakeshore Insurance"
+    },
+    {
+     "value": "Lakeshore Life"
+    },
+    {
+     "value": "Lakeshore Mutual"
+    },
+    {
+     "value": "Lakeshore Underwriters"
+    },
+    {
+     "value": "Maplecrest Assurance"
+    },
+    {
+     "value": "Maplecrest Indemnity"
+    },
+    {
+     "value": "Maplecrest Insurance"
+    },
+    {
+     "value": "Maplecrest Life"
+    },
+    {
+     "value": "Maplecrest Mutual"
+    },
+    {
+     "value": "Maplecrest Underwriters"
+    },
+    {
+     "value": "Northwind Assurance"
+    },
+    {
+     "value": "Northwind Indemnity"
+    },
+    {
+     "value": "Northwind Insurance"
+    },
+    {
+     "value": "Northwind Life"
+    },
+    {
+     "value": "Northwind Mutual"
+    },
+    {
+     "value": "Northwind Underwriters"
+    },
+    {
+     "value": "Oakridge Assurance"
+    },
+    {
+     "value": "Oakridge Indemnity"
+    },
+    {
+     "value": "Oakridge Insurance"
+    },
+    {
+     "value": "Oakridge Life"
+    },
+    {
+     "value": "Oakridge Mutual"
+    },
+    {
+     "value": "Oakridge Underwriters"
+    },
+    {
+     "value": "Redwood Assurance"
+    },
+    {
+     "value": "Redwood Indemnity"
+    },
+    {
+     "value": "Redwood Insurance"
+    },
+    {
+     "value": "Redwood Life"
+    },
+    {
+     "value": "Redwood Mutual"
+    },
+    {
+     "value": "Redwood Underwriters"
+    },
+    {
+     "value": "Riverton Assurance"
+    },
+    {
+     "value": "Riverton Indemnity"
+    },
+    {
+     "value": "Riverton Insurance"
+    },
+    {
+     "value": "Riverton Life"
+    },
+    {
+     "value": "Riverton Mutual"
+    },
+    {
+     "value": "Riverton Underwriters"
+    },
+    {
+     "value": "Silverline Assurance"
+    },
+    {
+     "value": "Silverline Indemnity"
+    },
+    {
+     "value": "Silverline Insurance"
+    },
+    {
+     "value": "Silverline Life"
+    },
+    {
+     "value": "Silverline Mutual"
+    },
+    {
+     "value": "Silverline Underwriters"
+    },
+    {
+     "value": "Stonebridge Assurance"
+    },
+    {
+     "value": "Stonebridge Indemnity"
+    },
+    {
+     "value": "Stonebridge Insurance"
+    },
+    {
+     "value": "Stonebridge Life"
+    },
+    {
+     "value": "Stonebridge Mutual"
+    },
+    {
+     "value": "Stonebridge Underwriters"
+    },
+    {
+     "value": "Summerhill Assurance"
+    },
+    {
+     "value": "Summerhill Indemnity"
+    },
+    {
+     "value": "Summerhill Insurance"
+    },
+    {
+     "value": "Summerhill Life"
+    },
+    {
+     "value": "Summerhill Mutual"
+    },
+    {
+     "value": "Summerhill Underwriters"
+    },
+    {
+     "value": "Westbrook Assurance"
+    },
+    {
+     "value": "Westbrook Indemnity"
+    },
+    {
+     "value": "Westbrook Insurance"
+    },
+    {
+     "value": "Westbrook Life"
+    },
+    {
+     "value": "Westbrook Mutual"
+    },
+    {
+     "value": "Westbrook Underwriters"
+    }
+   ]
+  },
+  {
+   "key": "coverage_name",
+   "name": "Coverage",
+   "description": "Fictional coverage names",
+   "data_type": "string",
+   "category": "policies",
+   "values": [
+    {
+     "value": "Basic Accident"
+    },
+    {
+     "value": "Basic Collision"
+    },
+    {
+     "value": "Basic Liability"
+    },
+    {
+     "value": "Basic Medical"
+    },
+    {
+     "value": "Basic Roadside"
+    },
+    {
+     "value": "Basic Travel"
+    },
+    {
+     "value": "Commercial Accident"
+    },
+    {
+     "value": "Commercial Contents"
+    },
+    {
+     "value": "Commercial Liability"
+    },
+    {
+     "value": "Commercial Medical"
+    },
+    {
+     "value": "Commercial Property"
+    },
+    {
+     "value": "Commercial Roadside"
+    },
+    {
+     "value": "Commercial Travel"
+    },
+    {
+     "value": "Comprehensive Accident"
+    },
+    {
+     "value": "Comprehensive Collision"
+    },
+    {
+     "value": "Comprehensive Contents"
+    },
+    {
+     "value": "Comprehensive Liability"
+    },
+    {
+     "value": "Comprehensive Medical"
+    },
+    {
+     "value": "Comprehensive Property"
+    },
+    {
+     "value": "Essential Collision"
+    },
+    {
+     "value": "Essential Contents"
+    },
+    {
+     "value": "Essential Medical"
+    },
+    {
+     "value": "Essential Roadside"
+    },
+    {
+     "value": "Extended Contents"
+    },
+    {
+     "value": "Extended Liability"
+    },
+    {
+     "value": "Extended Medical"
+    },
+    {
+     "value": "Extended Property"
+    },
+    {
+     "value": "Extended Roadside"
+    },
+    {
+     "value": "Extended Travel"
+    },
+    {
+     "value": "Family Accident"
+    },
+    {
+     "value": "Family Collision"
+    },
+    {
+     "value": "Family Contents"
+    },
+    {
+     "value": "Family Liability"
+    },
+    {
+     "value": "Family Medical"
+    },
+    {
+     "value": "Family Property"
+    },
+    {
+     "value": "Family Roadside"
+    },
+    {
+     "value": "Family Travel"
+    },
+    {
+     "value": "Personal Accident"
+    },
+    {
+     "value": "Personal Collision"
+    },
+    {
+     "value": "Personal Liability"
+    },
+    {
+     "value": "Personal Medical"
+    },
+    {
+     "value": "Personal Roadside"
+    },
+    {
+     "value": "Personal Travel"
+    },
+    {
+     "value": "Premier Accident"
+    },
+    {
+     "value": "Premier Collision"
+    },
+    {
+     "value": "Premier Contents"
+    },
+    {
+     "value": "Premier Liability"
+    },
+    {
+     "value": "Premier Medical"
+    },
+    {
+     "value": "Premier Roadside"
+    },
+    {
+     "value": "Premier Travel"
+    }
+   ]
+  },
+  {
+   "key": "adjuster_note",
+   "name": "Adjuster note",
+   "description": "Short claim notes",
+   "data_type": "string",
+   "category": "claims",
+   "values": [
+    {
+     "value": "Photos received from policyholder"
+    },
+    {
+     "value": "Awaiting repair estimate"
+    },
+    {
+     "value": "Third party contacted"
+    },
+    {
+     "value": "Inspection scheduled"
+    },
+    {
+     "value": "Police report on file"
+    },
+    {
+     "value": "Coverage confirmed"
+    },
+    {
+     "value": "Deductible explained to customer"
+    },
+    {
+     "value": "Supplement requested by shop"
+    },
+    {
+     "value": "Rental authorized"
+    },
+    {
+     "value": "Payment issued"
+    },
+    {
+     "value": "Subrogation opened"
+    },
+    {
+     "value": "File closed with no payment"
+    }
+   ]
+  }
+ ]
+}

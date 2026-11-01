@@ -1,0 +1,951 @@
+{
+ "domain": "retail",
+ "name": "Retail",
+ "description": "Physical stores: staff, stock, promotions and tills.",
+ "groups": [
+  {
+   "key": "department",
+   "name": "Department",
+   "description": "Store departments",
+   "data_type": "string",
+   "category": "store",
+   "values": [
+    {
+     "value": "Produce"
+    },
+    {
+     "value": "Bakery"
+    },
+    {
+     "value": "Dairy"
+    },
+    {
+     "value": "Frozen Foods"
+    },
+    {
+     "value": "Meat & Seafood"
+    },
+    {
+     "value": "Deli"
+    },
+    {
+     "value": "Household"
+    },
+    {
+     "value": "Health & Beauty"
+    },
+    {
+     "value": "Seasonal"
+    },
+    {
+     "value": "Stationery"
+    },
+    {
+     "value": "Pet Care"
+    },
+    {
+     "value": "Beverages"
+    },
+    {
+     "value": "Snacks"
+    },
+    {
+     "value": "Pharmacy"
+    },
+    {
+     "value": "Floral"
+    },
+    {
+     "value": "Customer Service"
+    }
+   ]
+  },
+  {
+   "key": "store_name",
+   "name": "Store",
+   "description": "Fictional stores",
+   "data_type": "string",
+   "category": "store",
+   "values": [
+    {
+     "value": "Ashford Express"
+    },
+    {
+     "value": "Ashford Market"
+    },
+    {
+     "value": "Ashford Outlet"
+    },
+    {
+     "value": "Ashford Plaza"
+    },
+    {
+     "value": "Ashford Superstore"
+    },
+    {
+     "value": "Bluepeak Corner Shop"
+    },
+    {
+     "value": "Bluepeak Express"
+    },
+    {
+     "value": "Bluepeak Market"
+    },
+    {
+     "value": "Bluepeak Superstore"
+    },
+    {
+     "value": "Brightfield Express"
+    },
+    {
+     "value": "Brightfield Mall"
+    },
+    {
+     "value": "Brightfield Market"
+    },
+    {
+     "value": "Brightfield Outlet"
+    },
+    {
+     "value": "Brightfield Plaza"
+    },
+    {
+     "value": "Clearwater Corner Shop"
+    },
+    {
+     "value": "Clearwater Mall"
+    },
+    {
+     "value": "Clearwater Market"
+    },
+    {
+     "value": "Clearwater Superstore"
+    },
+    {
+     "value": "Elmhurst Corner Shop"
+    },
+    {
+     "value": "Elmhurst Express"
+    },
+    {
+     "value": "Elmhurst Market"
+    },
+    {
+     "value": "Elmhurst Outlet"
+    },
+    {
+     "value": "Elmhurst Superstore"
+    },
+    {
+     "value": "Fairmont Corner Shop"
+    },
+    {
+     "value": "Fairmont Express"
+    },
+    {
+     "value": "Fairmont Mall"
+    },
+    {
+     "value": "Fairmont Market"
+    },
+    {
+     "value": "Fairmont Plaza"
+    },
+    {
+     "value": "Fairmont Superstore"
+    },
+    {
+     "value": "Greenvale Corner Shop"
+    },
+    {
+     "value": "Greenvale Express"
+    },
+    {
+     "value": "Greenvale Mall"
+    },
+    {
+     "value": "Greenvale Market"
+    },
+    {
+     "value": "Greenvale Outlet"
+    },
+    {
+     "value": "Greenvale Plaza"
+    },
+    {
+     "value": "Greenvale Superstore"
+    },
+    {
+     "value": "Harborview Corner Shop"
+    },
+    {
+     "value": "Harborview Express"
+    },
+    {
+     "value": "Harborview Market"
+    },
+    {
+     "value": "Harborview Plaza"
+    },
+    {
+     "value": "Harborview Superstore"
+    },
+    {
+     "value": "Ironwood Corner Shop"
+    },
+    {
+     "value": "Ironwood Express"
+    },
+    {
+     "value": "Ironwood Mall"
+    },
+    {
+     "value": "Ironwood Market"
+    },
+    {
+     "value": "Ironwood Plaza"
+    },
+    {
+     "value": "Ironwood Superstore"
+    },
+    {
+     "value": "Kingsley Corner Shop"
+    },
+    {
+     "value": "Kingsley Mall"
+    },
+    {
+     "value": "Kingsley Plaza"
+    },
+    {
+     "value": "Kingsley Superstore"
+    },
+    {
+     "value": "Lakeshore Express"
+    },
+    {
+     "value": "Lakeshore Market"
+    },
+    {
+     "value": "Lakeshore Plaza"
+    },
+    {
+     "value": "Lakeshore Superstore"
+    },
+    {
+     "value": "Maplecrest Corner Shop"
+    },
+    {
+     "value": "Maplecrest Express"
+    },
+    {
+     "value": "Maplecrest Market"
+    },
+    {
+     "value": "Maplecrest Plaza"
+    },
+    {
+     "value": "Maplecrest Superstore"
+    },
+    {
+     "value": "Northwind Express"
+    },
+    {
+     "value": "Northwind Market"
+    },
+    {
+     "value": "Northwind Outlet"
+    },
+    {
+     "value": "Northwind Plaza"
+    },
+    {
+     "value": "Northwind Superstore"
+    },
+    {
+     "value": "Oakridge Corner Shop"
+    },
+    {
+     "value": "Oakridge Express"
+    },
+    {
+     "value": "Oakridge Mall"
+    },
+    {
+     "value": "Oakridge Market"
+    },
+    {
+     "value": "Oakridge Superstore"
+    },
+    {
+     "value": "Redwood Corner Shop"
+    },
+    {
+     "value": "Redwood Express"
+    },
+    {
+     "value": "Redwood Market"
+    },
+    {
+     "value": "Redwood Outlet"
+    },
+    {
+     "value": "Redwood Superstore"
+    },
+    {
+     "value": "Riverton Corner Shop"
+    },
+    {
+     "value": "Riverton Express"
+    },
+    {
+     "value": "Riverton Outlet"
+    },
+    {
+     "value": "Riverton Plaza"
+    },
+    {
+     "value": "Silverline Corner Shop"
+    },
+    {
+     "value": "Silverline Express"
+    },
+    {
+     "value": "Silverline Mall"
+    },
+    {
+     "value": "Silverline Market"
+    },
+    {
+     "value": "Silverline Outlet"
+    },
+    {
+     "value": "Silverline Superstore"
+    },
+    {
+     "value": "Stonebridge Corner Shop"
+    },
+    {
+     "value": "Stonebridge Express"
+    },
+    {
+     "value": "Stonebridge Mall"
+    },
+    {
+     "value": "Stonebridge Outlet"
+    },
+    {
+     "value": "Stonebridge Plaza"
+    },
+    {
+     "value": "Summerhill Corner Shop"
+    },
+    {
+     "value": "Summerhill Mall"
+    },
+    {
+     "value": "Summerhill Outlet"
+    },
+    {
+     "value": "Summerhill Plaza"
+    },
+    {
+     "value": "Summerhill Superstore"
+    },
+    {
+     "value": "Westbrook Express"
+    },
+    {
+     "value": "Westbrook Mall"
+    },
+    {
+     "value": "Westbrook Market"
+    },
+    {
+     "value": "Westbrook Outlet"
+    },
+    {
+     "value": "Westbrook Superstore"
+    }
+   ]
+  },
+  {
+   "key": "store_format",
+   "name": "Store format",
+   "description": "Kinds of store",
+   "data_type": "enum",
+   "category": "store",
+   "values": [
+    {
+     "value": "HYPERMARKET"
+    },
+    {
+     "value": "SUPERMARKET"
+    },
+    {
+     "value": "CONVENIENCE"
+    },
+    {
+     "value": "DISCOUNT"
+    },
+    {
+     "value": "DEPARTMENT_STORE"
+    },
+    {
+     "value": "POP_UP"
+    },
+    {
+     "value": "OUTLET"
+    }
+   ]
+  },
+  {
+   "key": "tender_type",
+   "name": "Tender type",
+   "description": "How customers pay",
+   "data_type": "enum",
+   "category": "tills",
+   "values": [
+    {
+     "value": "CASH",
+     "weight": 15
+    },
+    {
+     "value": "CARD",
+     "weight": 30
+    },
+    {
+     "value": "CONTACTLESS",
+     "weight": 30
+    },
+    {
+     "value": "MOBILE_WALLET",
+     "weight": 18
+    },
+    {
+     "value": "GIFT_VOUCHER",
+     "weight": 4
+    },
+    {
+     "value": "LOYALTY_POINTS",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "promotion_type",
+   "name": "Promotion type",
+   "description": "Kinds of offer",
+   "data_type": "enum",
+   "category": "promotions",
+   "values": [
+    {
+     "value": "PERCENT_OFF"
+    },
+    {
+     "value": "BUY_ONE_GET_ONE"
+    },
+    {
+     "value": "MULTI_BUY"
+    },
+    {
+     "value": "LOYALTY_PRICE"
+    },
+    {
+     "value": "CLEARANCE"
+    },
+    {
+     "value": "BUNDLE"
+    },
+    {
+     "value": "COUPON"
+    }
+   ]
+  },
+  {
+   "key": "stock_movement",
+   "name": "Stock movement",
+   "description": "Inventory events",
+   "data_type": "enum",
+   "category": "inventory",
+   "values": [
+    {
+     "value": "GOODS_RECEIVED",
+     "weight": 15
+    },
+    {
+     "value": "SOLD",
+     "weight": 55
+    },
+    {
+     "value": "RETURNED_BY_CUSTOMER",
+     "weight": 4
+    },
+    {
+     "value": "DAMAGED",
+     "weight": 2
+    },
+    {
+     "value": "SHRINKAGE",
+     "weight": 2
+    },
+    {
+     "value": "TRANSFER_IN",
+     "weight": 8
+    },
+    {
+     "value": "TRANSFER_OUT",
+     "weight": 8
+    },
+    {
+     "value": "CYCLE_COUNT_ADJUSTMENT",
+     "weight": 6
+    }
+   ]
+  },
+  {
+   "key": "loyalty_tier",
+   "name": "Loyalty tier",
+   "description": "Member levels",
+   "data_type": "enum",
+   "category": "customers",
+   "values": [
+    {
+     "value": "BRONZE",
+     "weight": 55
+    },
+    {
+     "value": "SILVER",
+     "weight": 28
+    },
+    {
+     "value": "GOLD",
+     "weight": 13
+    },
+    {
+     "value": "PLATINUM",
+     "weight": 4
+    }
+   ]
+  },
+  {
+   "key": "staff_role",
+   "name": "Staff role",
+   "description": "Store jobs",
+   "data_type": "enum",
+   "category": "staff",
+   "values": [
+    {
+     "value": "CASHIER",
+     "weight": 30
+    },
+    {
+     "value": "SHELF_STACKER",
+     "weight": 30
+    },
+    {
+     "value": "SUPERVISOR",
+     "weight": 10
+    },
+    {
+     "value": "STORE_MANAGER",
+     "weight": 3
+    },
+    {
+     "value": "STOCK_CONTROLLER",
+     "weight": 8
+    },
+    {
+     "value": "DELI_ASSISTANT",
+     "weight": 10
+    },
+    {
+     "value": "SECURITY",
+     "weight": 4
+    },
+    {
+     "value": "CLEANER",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "promotion_name",
+   "name": "Promotion name",
+   "description": "Fictional campaign names",
+   "data_type": "string",
+   "category": "promotions",
+   "values": [
+    {
+     "value": "Autumn Bonanza"
+    },
+    {
+     "value": "Autumn Clearance"
+    },
+    {
+     "value": "Autumn Deals"
+    },
+    {
+     "value": "Autumn Sale"
+    },
+    {
+     "value": "Autumn Specials"
+    },
+    {
+     "value": "Back to School Bonanza"
+    },
+    {
+     "value": "Back to School Clearance"
+    },
+    {
+     "value": "Back to School Sale"
+    },
+    {
+     "value": "Back to School Savings"
+    },
+    {
+     "value": "Back to School Specials"
+    },
+    {
+     "value": "Family Bonanza"
+    },
+    {
+     "value": "Family Clearance"
+    },
+    {
+     "value": "Family Sale"
+    },
+    {
+     "value": "Family Savings"
+    },
+    {
+     "value": "Harvest Clearance"
+    },
+    {
+     "value": "Harvest Deals"
+    },
+    {
+     "value": "Harvest Sale"
+    },
+    {
+     "value": "Harvest Savings"
+    },
+    {
+     "value": "Harvest Specials"
+    },
+    {
+     "value": "Holiday Bonanza"
+    },
+    {
+     "value": "Holiday Clearance"
+    },
+    {
+     "value": "Holiday Deals"
+    },
+    {
+     "value": "Holiday Sale"
+    },
+    {
+     "value": "Holiday Specials"
+    },
+    {
+     "value": "Midweek Bonanza"
+    },
+    {
+     "value": "Midweek Clearance"
+    },
+    {
+     "value": "Midweek Sale"
+    },
+    {
+     "value": "Midweek Savings"
+    },
+    {
+     "value": "Midweek Specials"
+    },
+    {
+     "value": "Spring Bonanza"
+    },
+    {
+     "value": "Spring Clearance"
+    },
+    {
+     "value": "Spring Deals"
+    },
+    {
+     "value": "Spring Savings"
+    },
+    {
+     "value": "Spring Specials"
+    },
+    {
+     "value": "Summer Bonanza"
+    },
+    {
+     "value": "Summer Clearance"
+    },
+    {
+     "value": "Summer Deals"
+    },
+    {
+     "value": "Summer Sale"
+    },
+    {
+     "value": "Summer Savings"
+    },
+    {
+     "value": "Summer Specials"
+    },
+    {
+     "value": "Weekend Clearance"
+    },
+    {
+     "value": "Weekend Deals"
+    },
+    {
+     "value": "Weekend Sale"
+    },
+    {
+     "value": "Weekend Savings"
+    },
+    {
+     "value": "Weekend Specials"
+    },
+    {
+     "value": "Winter Clearance"
+    },
+    {
+     "value": "Winter Deals"
+    },
+    {
+     "value": "Winter Sale"
+    },
+    {
+     "value": "Winter Savings"
+    },
+    {
+     "value": "Winter Specials"
+    }
+   ]
+  },
+  {
+   "key": "private_label_product",
+   "name": "Own-brand product",
+   "description": "Fictional own-brand goods",
+   "data_type": "string",
+   "category": "products",
+   "values": [
+    {
+     "value": "Everyday Dark Chocolate"
+    },
+    {
+     "value": "Everyday Dish Soap"
+    },
+    {
+     "value": "Everyday Granola"
+    },
+    {
+     "value": "Everyday Ground Coffee"
+    },
+    {
+     "value": "Everyday Laundry Liquid"
+    },
+    {
+     "value": "Everyday Olive Oil"
+    },
+    {
+     "value": "Everyday Paper Towels"
+    },
+    {
+     "value": "Everyday Pasta Sauce"
+    },
+    {
+     "value": "Everyday Sourdough Loaf"
+    },
+    {
+     "value": "Everyday Sparkling Water"
+    },
+    {
+     "value": "Everyday Tomato Soup"
+    },
+    {
+     "value": "Everyday Whole Milk"
+    },
+    {
+     "value": "Fairmont Dark Chocolate"
+    },
+    {
+     "value": "Fairmont Dish Soap"
+    },
+    {
+     "value": "Fairmont Granola"
+    },
+    {
+     "value": "Fairmont Ground Coffee"
+    },
+    {
+     "value": "Fairmont Laundry Liquid"
+    },
+    {
+     "value": "Fairmont Olive Oil"
+    },
+    {
+     "value": "Fairmont Paper Towels"
+    },
+    {
+     "value": "Fairmont Pasta Sauce"
+    },
+    {
+     "value": "Fairmont Sourdough Loaf"
+    },
+    {
+     "value": "Fairmont Sparkling Water"
+    },
+    {
+     "value": "Fairmont Tomato Soup"
+    },
+    {
+     "value": "Fairmont Whole Milk"
+    },
+    {
+     "value": "Greenvale Dark Chocolate"
+    },
+    {
+     "value": "Greenvale Dish Soap"
+    },
+    {
+     "value": "Greenvale Granola"
+    },
+    {
+     "value": "Greenvale Ground Coffee"
+    },
+    {
+     "value": "Greenvale Laundry Liquid"
+    },
+    {
+     "value": "Greenvale Olive Oil"
+    },
+    {
+     "value": "Greenvale Paper Towels"
+    },
+    {
+     "value": "Greenvale Sourdough Loaf"
+    },
+    {
+     "value": "Greenvale Sparkling Water"
+    },
+    {
+     "value": "Greenvale Tomato Soup"
+    },
+    {
+     "value": "Greenvale Whole Milk"
+    },
+    {
+     "value": "Harvest Table Dish Soap"
+    },
+    {
+     "value": "Harvest Table Granola"
+    },
+    {
+     "value": "Harvest Table Ground Coffee"
+    },
+    {
+     "value": "Harvest Table Laundry Liquid"
+    },
+    {
+     "value": "Harvest Table Olive Oil"
+    },
+    {
+     "value": "Harvest Table Paper Towels"
+    },
+    {
+     "value": "Harvest Table Pasta Sauce"
+    },
+    {
+     "value": "Harvest Table Sourdough Loaf"
+    },
+    {
+     "value": "Harvest Table Sparkling Water"
+    },
+    {
+     "value": "Harvest Table Tomato Soup"
+    },
+    {
+     "value": "Harvest Table Whole Milk"
+    },
+    {
+     "value": "Hearth Dark Chocolate"
+    },
+    {
+     "value": "Hearth Dish Soap"
+    },
+    {
+     "value": "Hearth Granola"
+    },
+    {
+     "value": "Hearth Ground Coffee"
+    },
+    {
+     "value": "Hearth Laundry Liquid"
+    },
+    {
+     "value": "Hearth Olive Oil"
+    },
+    {
+     "value": "Hearth Paper Towels"
+    },
+    {
+     "value": "Hearth Pasta Sauce"
+    },
+    {
+     "value": "Hearth Sourdough Loaf"
+    },
+    {
+     "value": "Hearth Sparkling Water"
+    },
+    {
+     "value": "Hearth Tomato Soup"
+    },
+    {
+     "value": "Hearth Whole Milk"
+    },
+    {
+     "value": "Simply Dark Chocolate"
+    },
+    {
+     "value": "Simply Dish Soap"
+    },
+    {
+     "value": "Simply Granola"
+    },
+    {
+     "value": "Simply Ground Coffee"
+    },
+    {
+     "value": "Simply Laundry Liquid"
+    },
+    {
+     "value": "Simply Olive Oil"
+    },
+    {
+     "value": "Simply Paper Towels"
+    },
+    {
+     "value": "Simply Pasta Sauce"
+    },
+    {
+     "value": "Simply Sourdough Loaf"
+    },
+    {
+     "value": "Simply Sparkling Water"
+    },
+    {
+     "value": "Simply Tomato Soup"
+    },
+    {
+     "value": "Simply Whole Milk"
+    }
+   ]
+  }
+ ]
+}

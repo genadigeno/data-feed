@@ -1,0 +1,862 @@
+{
+ "domain": "logistics",
+ "name": "Logistics",
+ "description": "Freight, warehouses and delivery tracking.",
+ "groups": [
+  {
+   "key": "shipment_status",
+   "name": "Shipment status",
+   "description": "Shipment lifecycle",
+   "data_type": "enum",
+   "category": "workflow",
+   "values": [
+    {
+     "value": "BOOKED",
+     "weight": 6
+    },
+    {
+     "value": "PICKED_UP",
+     "weight": 6
+    },
+    {
+     "value": "IN_TRANSIT",
+     "weight": 25
+    },
+    {
+     "value": "AT_HUB",
+     "weight": 10
+    },
+    {
+     "value": "OUT_FOR_DELIVERY",
+     "weight": 6
+    },
+    {
+     "value": "DELIVERED",
+     "weight": 40
+    },
+    {
+     "value": "DELAYED",
+     "weight": 4
+    },
+    {
+     "value": "EXCEPTION",
+     "weight": 2
+    },
+    {
+     "value": "RETURNED",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "key": "transport_mode",
+   "name": "Transport mode",
+   "description": "How freight moves",
+   "data_type": "enum",
+   "category": "transport",
+   "values": [
+    {
+     "value": "ROAD",
+     "weight": 50
+    },
+    {
+     "value": "RAIL",
+     "weight": 8
+    },
+    {
+     "value": "AIR",
+     "weight": 8
+    },
+    {
+     "value": "OCEAN",
+     "weight": 14
+    },
+    {
+     "value": "INTERMODAL",
+     "weight": 5
+    },
+    {
+     "value": "COURIER",
+     "weight": 15
+    }
+   ]
+  },
+  {
+   "key": "vehicle_type",
+   "name": "Vehicle type",
+   "description": "Fleet vehicles",
+   "data_type": "enum",
+   "category": "transport",
+   "values": [
+    {
+     "value": "VAN"
+    },
+    {
+     "value": "BOX_TRUCK"
+    },
+    {
+     "value": "TRACTOR_TRAILER"
+    },
+    {
+     "value": "REFRIGERATED_TRUCK"
+    },
+    {
+     "value": "FLATBED"
+    },
+    {
+     "value": "CARGO_BIKE"
+    },
+    {
+     "value": "TANKER"
+    }
+   ]
+  },
+  {
+   "key": "exception_reason",
+   "name": "Exception reason",
+   "description": "Why deliveries go wrong",
+   "data_type": "enum",
+   "category": "tracking",
+   "values": [
+    {
+     "value": "ADDRESS_NOT_FOUND"
+    },
+    {
+     "value": "RECIPIENT_ABSENT"
+    },
+    {
+     "value": "WEATHER_DELAY"
+    },
+    {
+     "value": "CUSTOMS_HOLD"
+    },
+    {
+     "value": "DAMAGED_PACKAGE"
+    },
+    {
+     "value": "VEHICLE_BREAKDOWN"
+    },
+    {
+     "value": "REFUSED_BY_RECIPIENT"
+    },
+    {
+     "value": "MISSORTED"
+    }
+   ]
+  },
+  {
+   "key": "container_type",
+   "name": "Container type",
+   "description": "Freight containers",
+   "data_type": "enum",
+   "category": "transport",
+   "values": [
+    {
+     "value": "DRY_20FT"
+    },
+    {
+     "value": "DRY_40FT"
+    },
+    {
+     "value": "HIGH_CUBE_40FT"
+    },
+    {
+     "value": "REEFER_40FT"
+    },
+    {
+     "value": "OPEN_TOP"
+    },
+    {
+     "value": "FLAT_RACK"
+    },
+    {
+     "value": "TANK_CONTAINER"
+    }
+   ]
+  },
+  {
+   "key": "incoterm",
+   "name": "Incoterm",
+   "description": "Trade terms",
+   "data_type": "enum",
+   "category": "trade",
+   "values": [
+    {
+     "value": "EXW"
+    },
+    {
+     "value": "FCA"
+    },
+    {
+     "value": "FAS"
+    },
+    {
+     "value": "FOB"
+    },
+    {
+     "value": "CFR"
+    },
+    {
+     "value": "CIF"
+    },
+    {
+     "value": "CPT"
+    },
+    {
+     "value": "CIP"
+    },
+    {
+     "value": "DAP"
+    },
+    {
+     "value": "DPU"
+    },
+    {
+     "value": "DDP"
+    }
+   ]
+  },
+  {
+   "key": "warehouse_name",
+   "name": "Warehouse",
+   "description": "Fictional warehouses",
+   "data_type": "string",
+   "category": "facilities",
+   "values": [
+    {
+     "value": "Airport Cross-Dock"
+    },
+    {
+     "value": "Airport Distribution Center"
+    },
+    {
+     "value": "Airport Fulfilment Center"
+    },
+    {
+     "value": "Airport Sorting Hub"
+    },
+    {
+     "value": "Airport Storage Depot"
+    },
+    {
+     "value": "Central Cross-Dock"
+    },
+    {
+     "value": "Central Distribution Center"
+    },
+    {
+     "value": "Central Fulfilment Center"
+    },
+    {
+     "value": "Central Sorting Hub"
+    },
+    {
+     "value": "Central Storage Depot"
+    },
+    {
+     "value": "East Cross-Dock"
+    },
+    {
+     "value": "East Distribution Center"
+    },
+    {
+     "value": "East Fulfilment Center"
+    },
+    {
+     "value": "East Sorting Hub"
+    },
+    {
+     "value": "East Storage Depot"
+    },
+    {
+     "value": "Harbor Cross-Dock"
+    },
+    {
+     "value": "Harbor Distribution Center"
+    },
+    {
+     "value": "Harbor Fulfilment Center"
+    },
+    {
+     "value": "Harbor Sorting Hub"
+    },
+    {
+     "value": "Harbor Storage Depot"
+    },
+    {
+     "value": "Hilltop Cross-Dock"
+    },
+    {
+     "value": "Hilltop Distribution Center"
+    },
+    {
+     "value": "Hilltop Fulfilment Center"
+    },
+    {
+     "value": "Hilltop Sorting Hub"
+    },
+    {
+     "value": "Hilltop Storage Depot"
+    },
+    {
+     "value": "Lakeside Cross-Dock"
+    },
+    {
+     "value": "Lakeside Distribution Center"
+    },
+    {
+     "value": "Lakeside Fulfilment Center"
+    },
+    {
+     "value": "Lakeside Sorting Hub"
+    },
+    {
+     "value": "Lakeside Storage Depot"
+    },
+    {
+     "value": "North Cross-Dock"
+    },
+    {
+     "value": "North Distribution Center"
+    },
+    {
+     "value": "North Fulfilment Center"
+    },
+    {
+     "value": "North Sorting Hub"
+    },
+    {
+     "value": "North Storage Depot"
+    },
+    {
+     "value": "Rail Yard Cross-Dock"
+    },
+    {
+     "value": "Rail Yard Distribution Center"
+    },
+    {
+     "value": "Rail Yard Fulfilment Center"
+    },
+    {
+     "value": "Rail Yard Sorting Hub"
+    },
+    {
+     "value": "Rail Yard Storage Depot"
+    },
+    {
+     "value": "South Cross-Dock"
+    },
+    {
+     "value": "South Distribution Center"
+    },
+    {
+     "value": "South Fulfilment Center"
+    },
+    {
+     "value": "South Sorting Hub"
+    },
+    {
+     "value": "South Storage Depot"
+    },
+    {
+     "value": "West Cross-Dock"
+    },
+    {
+     "value": "West Distribution Center"
+    },
+    {
+     "value": "West Fulfilment Center"
+    },
+    {
+     "value": "West Sorting Hub"
+    },
+    {
+     "value": "West Storage Depot"
+    }
+   ]
+  },
+  {
+   "key": "commodity",
+   "name": "Commodity",
+   "description": "Kinds of cargo",
+   "data_type": "string",
+   "category": "trade",
+   "values": [
+    {
+     "value": "Consumer Electronics"
+    },
+    {
+     "value": "Furniture"
+    },
+    {
+     "value": "Frozen Food"
+    },
+    {
+     "value": "Fresh Produce"
+    },
+    {
+     "value": "Pharmaceuticals"
+    },
+    {
+     "value": "Auto Parts"
+    },
+    {
+     "value": "Building Materials"
+    },
+    {
+     "value": "Textiles"
+    },
+    {
+     "value": "Paper Products"
+    },
+    {
+     "value": "Chemicals"
+    },
+    {
+     "value": "Machinery"
+    },
+    {
+     "value": "Beverages"
+    },
+    {
+     "value": "Toys"
+    },
+    {
+     "value": "Plastics"
+    },
+    {
+     "value": "Steel Coils"
+    },
+    {
+     "value": "Medical Supplies"
+    },
+    {
+     "value": "Footwear"
+    },
+    {
+     "value": "Household Appliances"
+    },
+    {
+     "value": "Garden Equipment"
+    },
+    {
+     "value": "Office Equipment"
+    }
+   ]
+  },
+  {
+   "key": "carrier_name",
+   "name": "Carrier",
+   "description": "Fictional carriers",
+   "data_type": "string",
+   "category": "transport",
+   "values": [
+    {
+     "value": "Ashford Cargo"
+    },
+    {
+     "value": "Ashford Freight"
+    },
+    {
+     "value": "Ashford Haulage"
+    },
+    {
+     "value": "Ashford Logistics"
+    },
+    {
+     "value": "Ashford Shipping"
+    },
+    {
+     "value": "Ashford Transport"
+    },
+    {
+     "value": "Bluepeak Cargo"
+    },
+    {
+     "value": "Bluepeak Freight"
+    },
+    {
+     "value": "Bluepeak Haulage"
+    },
+    {
+     "value": "Bluepeak Logistics"
+    },
+    {
+     "value": "Bluepeak Shipping"
+    },
+    {
+     "value": "Bluepeak Transport"
+    },
+    {
+     "value": "Brightfield Cargo"
+    },
+    {
+     "value": "Brightfield Freight"
+    },
+    {
+     "value": "Brightfield Haulage"
+    },
+    {
+     "value": "Brightfield Logistics"
+    },
+    {
+     "value": "Brightfield Shipping"
+    },
+    {
+     "value": "Brightfield Transport"
+    },
+    {
+     "value": "Clearwater Cargo"
+    },
+    {
+     "value": "Clearwater Freight"
+    },
+    {
+     "value": "Clearwater Haulage"
+    },
+    {
+     "value": "Clearwater Logistics"
+    },
+    {
+     "value": "Clearwater Shipping"
+    },
+    {
+     "value": "Clearwater Transport"
+    },
+    {
+     "value": "Elmhurst Cargo"
+    },
+    {
+     "value": "Elmhurst Freight"
+    },
+    {
+     "value": "Elmhurst Haulage"
+    },
+    {
+     "value": "Elmhurst Logistics"
+    },
+    {
+     "value": "Elmhurst Shipping"
+    },
+    {
+     "value": "Elmhurst Transport"
+    },
+    {
+     "value": "Fairmont Cargo"
+    },
+    {
+     "value": "Fairmont Freight"
+    },
+    {
+     "value": "Fairmont Haulage"
+    },
+    {
+     "value": "Fairmont Logistics"
+    },
+    {
+     "value": "Fairmont Shipping"
+    },
+    {
+     "value": "Fairmont Transport"
+    },
+    {
+     "value": "Greenvale Cargo"
+    },
+    {
+     "value": "Greenvale Freight"
+    },
+    {
+     "value": "Greenvale Haulage"
+    },
+    {
+     "value": "Greenvale Logistics"
+    },
+    {
+     "value": "Greenvale Shipping"
+    },
+    {
+     "value": "Greenvale Transport"
+    },
+    {
+     "value": "Harborview Cargo"
+    },
+    {
+     "value": "Harborview Freight"
+    },
+    {
+     "value": "Harborview Haulage"
+    },
+    {
+     "value": "Harborview Logistics"
+    },
+    {
+     "value": "Harborview Shipping"
+    },
+    {
+     "value": "Harborview Transport"
+    },
+    {
+     "value": "Ironwood Cargo"
+    },
+    {
+     "value": "Ironwood Freight"
+    },
+    {
+     "value": "Ironwood Haulage"
+    },
+    {
+     "value": "Ironwood Logistics"
+    },
+    {
+     "value": "Ironwood Shipping"
+    },
+    {
+     "value": "Ironwood Transport"
+    },
+    {
+     "value": "Kingsley Cargo"
+    },
+    {
+     "value": "Kingsley Freight"
+    },
+    {
+     "value": "Kingsley Haulage"
+    },
+    {
+     "value": "Kingsley Logistics"
+    },
+    {
+     "value": "Kingsley Shipping"
+    },
+    {
+     "value": "Kingsley Transport"
+    },
+    {
+     "value": "Lakeshore Cargo"
+    },
+    {
+     "value": "Lakeshore Freight"
+    },
+    {
+     "value": "Lakeshore Haulage"
+    },
+    {
+     "value": "Lakeshore Logistics"
+    },
+    {
+     "value": "Lakeshore Shipping"
+    },
+    {
+     "value": "Lakeshore Transport"
+    },
+    {
+     "value": "Maplecrest Cargo"
+    },
+    {
+     "value": "Maplecrest Freight"
+    },
+    {
+     "value": "Maplecrest Haulage"
+    },
+    {
+     "value": "Maplecrest Logistics"
+    },
+    {
+     "value": "Maplecrest Shipping"
+    },
+    {
+     "value": "Maplecrest Transport"
+    },
+    {
+     "value": "Northwind Cargo"
+    },
+    {
+     "value": "Northwind Freight"
+    },
+    {
+     "value": "Northwind Haulage"
+    },
+    {
+     "value": "Northwind Logistics"
+    },
+    {
+     "value": "Northwind Shipping"
+    },
+    {
+     "value": "Northwind Transport"
+    },
+    {
+     "value": "Oakridge Cargo"
+    },
+    {
+     "value": "Oakridge Freight"
+    },
+    {
+     "value": "Oakridge Haulage"
+    },
+    {
+     "value": "Oakridge Logistics"
+    },
+    {
+     "value": "Oakridge Shipping"
+    },
+    {
+     "value": "Oakridge Transport"
+    },
+    {
+     "value": "Redwood Cargo"
+    },
+    {
+     "value": "Redwood Freight"
+    },
+    {
+     "value": "Redwood Haulage"
+    },
+    {
+     "value": "Redwood Logistics"
+    },
+    {
+     "value": "Redwood Shipping"
+    },
+    {
+     "value": "Redwood Transport"
+    },
+    {
+     "value": "Riverton Cargo"
+    },
+    {
+     "value": "Riverton Freight"
+    },
+    {
+     "value": "Riverton Haulage"
+    },
+    {
+     "value": "Riverton Logistics"
+    },
+    {
+     "value": "Riverton Shipping"
+    },
+    {
+     "value": "Riverton Transport"
+    },
+    {
+     "value": "Silverline Cargo"
+    },
+    {
+     "value": "Silverline Freight"
+    },
+    {
+     "value": "Silverline Haulage"
+    },
+    {
+     "value": "Silverline Logistics"
+    },
+    {
+     "value": "Silverline Shipping"
+    },
+    {
+     "value": "Silverline Transport"
+    },
+    {
+     "value": "Stonebridge Cargo"
+    },
+    {
+     "value": "Stonebridge Freight"
+    },
+    {
+     "value": "Stonebridge Haulage"
+    },
+    {
+     "value": "Stonebridge Logistics"
+    },
+    {
+     "value": "Stonebridge Shipping"
+    },
+    {
+     "value": "Stonebridge Transport"
+    },
+    {
+     "value": "Summerhill Cargo"
+    },
+    {
+     "value": "Summerhill Freight"
+    },
+    {
+     "value": "Summerhill Haulage"
+    },
+    {
+     "value": "Summerhill Logistics"
+    },
+    {
+     "value": "Summerhill Shipping"
+    },
+    {
+     "value": "Summerhill Transport"
+    },
+    {
+     "value": "Westbrook Cargo"
+    },
+    {
+     "value": "Westbrook Freight"
+    },
+    {
+     "value": "Westbrook Haulage"
+    },
+    {
+     "value": "Westbrook Logistics"
+    },
+    {
+     "value": "Westbrook Shipping"
+    },
+    {
+     "value": "Westbrook Transport"
+    }
+   ]
+  },
+  {
+   "key": "warehouse_zone",
+   "name": "Warehouse zone",
+   "description": "Areas in a warehouse",
+   "data_type": "string",
+   "category": "facilities",
+   "values": [
+    {
+     "value": "Receiving Dock"
+    },
+    {
+     "value": "Bulk Storage"
+    },
+    {
+     "value": "Pick Face"
+    },
+    {
+     "value": "Cold Room"
+    },
+    {
+     "value": "Hazmat Cage"
+    },
+    {
+     "value": "Returns Bay"
+    },
+    {
+     "value": "Packing Line"
+    },
+    {
+     "value": "Staging Lane"
+    },
+    {
+     "value": "Mezzanine"
+    },
+    {
+     "value": "High Bay"
+    },
+    {
+     "value": "Quarantine"
+    },
+    {
+     "value": "Shipping Dock"
+    }
+   ]
+  }
+ ]
+}

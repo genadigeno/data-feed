@@ -1,0 +1,1977 @@
+{
+ "domain": "ecommerce",
+ "name": "E-commerce",
+ "description": "Online retail: products, orders, shipping and payment.",
+ "groups": [
+  {
+   "key": "product_category",
+   "name": "Product category",
+   "description": "Store departments",
+   "data_type": "string",
+   "category": "catalog",
+   "values": [
+    {
+     "value": "Electronics"
+    },
+    {
+     "value": "Home & Kitchen"
+    },
+    {
+     "value": "Clothing"
+    },
+    {
+     "value": "Shoes"
+    },
+    {
+     "value": "Beauty"
+    },
+    {
+     "value": "Sports & Outdoors"
+    },
+    {
+     "value": "Toys & Games"
+    },
+    {
+     "value": "Books"
+    },
+    {
+     "value": "Grocery"
+    },
+    {
+     "value": "Office Supplies"
+    },
+    {
+     "value": "Pet Supplies"
+    },
+    {
+     "value": "Garden"
+    },
+    {
+     "value": "Automotive"
+    },
+    {
+     "value": "Baby"
+    },
+    {
+     "value": "Jewelry"
+    },
+    {
+     "value": "Luggage"
+    },
+    {
+     "value": "Musical Instruments"
+    },
+    {
+     "value": "Health"
+    },
+    {
+     "value": "Tools & Hardware"
+    },
+    {
+     "value": "Arts & Crafts"
+    }
+   ]
+  },
+  {
+   "key": "product_name",
+   "name": "Product name",
+   "description": "Fictional product names",
+   "data_type": "string",
+   "category": "catalog",
+   "values": [
+    {
+     "value": "Aero Air Purifier"
+    },
+    {
+     "value": "Aero Backpack"
+    },
+    {
+     "value": "Aero Bluetooth Speaker"
+    },
+    {
+     "value": "Aero Cast Iron Pan"
+    },
+    {
+     "value": "Aero Coffee Grinder"
+    },
+    {
+     "value": "Aero Desk Lamp"
+    },
+    {
+     "value": "Aero Hiking Boots"
+    },
+    {
+     "value": "Aero Mechanical Keyboard"
+    },
+    {
+     "value": "Aero Office Chair"
+    },
+    {
+     "value": "Aero Rain Jacket"
+    },
+    {
+     "value": "Aero Running Shoes"
+    },
+    {
+     "value": "Aero Smart Watch"
+    },
+    {
+     "value": "Aero Standing Desk"
+    },
+    {
+     "value": "Aero Sunglasses"
+    },
+    {
+     "value": "Aero Throw Blanket"
+    },
+    {
+     "value": "Aero Travel Mug"
+    },
+    {
+     "value": "Aero Wall Clock"
+    },
+    {
+     "value": "Aero Water Bottle"
+    },
+    {
+     "value": "Aero Wireless Earbuds"
+    },
+    {
+     "value": "Aero Yoga Mat"
+    },
+    {
+     "value": "Cobalt Air Purifier"
+    },
+    {
+     "value": "Cobalt Backpack"
+    },
+    {
+     "value": "Cobalt Bluetooth Speaker"
+    },
+    {
+     "value": "Cobalt Cast Iron Pan"
+    },
+    {
+     "value": "Cobalt Coffee Grinder"
+    },
+    {
+     "value": "Cobalt Desk Lamp"
+    },
+    {
+     "value": "Cobalt Hiking Boots"
+    },
+    {
+     "value": "Cobalt Mechanical Keyboard"
+    },
+    {
+     "value": "Cobalt Office Chair"
+    },
+    {
+     "value": "Cobalt Rain Jacket"
+    },
+    {
+     "value": "Cobalt Running Shoes"
+    },
+    {
+     "value": "Cobalt Smart Watch"
+    },
+    {
+     "value": "Cobalt Standing Desk"
+    },
+    {
+     "value": "Cobalt Sunglasses"
+    },
+    {
+     "value": "Cobalt Throw Blanket"
+    },
+    {
+     "value": "Cobalt Travel Mug"
+    },
+    {
+     "value": "Cobalt Wall Clock"
+    },
+    {
+     "value": "Cobalt Water Bottle"
+    },
+    {
+     "value": "Cobalt Wireless Earbuds"
+    },
+    {
+     "value": "Cobalt Yoga Mat"
+    },
+    {
+     "value": "Drift Air Purifier"
+    },
+    {
+     "value": "Drift Backpack"
+    },
+    {
+     "value": "Drift Bluetooth Speaker"
+    },
+    {
+     "value": "Drift Cast Iron Pan"
+    },
+    {
+     "value": "Drift Coffee Grinder"
+    },
+    {
+     "value": "Drift Desk Lamp"
+    },
+    {
+     "value": "Drift Hiking Boots"
+    },
+    {
+     "value": "Drift Mechanical Keyboard"
+    },
+    {
+     "value": "Drift Office Chair"
+    },
+    {
+     "value": "Drift Rain Jacket"
+    },
+    {
+     "value": "Drift Running Shoes"
+    },
+    {
+     "value": "Drift Smart Watch"
+    },
+    {
+     "value": "Drift Standing Desk"
+    },
+    {
+     "value": "Drift Sunglasses"
+    },
+    {
+     "value": "Drift Throw Blanket"
+    },
+    {
+     "value": "Drift Travel Mug"
+    },
+    {
+     "value": "Drift Wall Clock"
+    },
+    {
+     "value": "Drift Water Bottle"
+    },
+    {
+     "value": "Drift Wireless Earbuds"
+    },
+    {
+     "value": "Drift Yoga Mat"
+    },
+    {
+     "value": "Ember Air Purifier"
+    },
+    {
+     "value": "Ember Backpack"
+    },
+    {
+     "value": "Ember Bluetooth Speaker"
+    },
+    {
+     "value": "Ember Cast Iron Pan"
+    },
+    {
+     "value": "Ember Coffee Grinder"
+    },
+    {
+     "value": "Ember Desk Lamp"
+    },
+    {
+     "value": "Ember Hiking Boots"
+    },
+    {
+     "value": "Ember Mechanical Keyboard"
+    },
+    {
+     "value": "Ember Office Chair"
+    },
+    {
+     "value": "Ember Rain Jacket"
+    },
+    {
+     "value": "Ember Running Shoes"
+    },
+    {
+     "value": "Ember Smart Watch"
+    },
+    {
+     "value": "Ember Standing Desk"
+    },
+    {
+     "value": "Ember Sunglasses"
+    },
+    {
+     "value": "Ember Throw Blanket"
+    },
+    {
+     "value": "Ember Travel Mug"
+    },
+    {
+     "value": "Ember Wall Clock"
+    },
+    {
+     "value": "Ember Water Bottle"
+    },
+    {
+     "value": "Ember Wireless Earbuds"
+    },
+    {
+     "value": "Ember Yoga Mat"
+    },
+    {
+     "value": "Fern Air Purifier"
+    },
+    {
+     "value": "Fern Backpack"
+    },
+    {
+     "value": "Fern Bluetooth Speaker"
+    },
+    {
+     "value": "Fern Cast Iron Pan"
+    },
+    {
+     "value": "Fern Coffee Grinder"
+    },
+    {
+     "value": "Fern Desk Lamp"
+    },
+    {
+     "value": "Fern Hiking Boots"
+    },
+    {
+     "value": "Fern Mechanical Keyboard"
+    },
+    {
+     "value": "Fern Office Chair"
+    },
+    {
+     "value": "Fern Rain Jacket"
+    },
+    {
+     "value": "Fern Running Shoes"
+    },
+    {
+     "value": "Fern Smart Watch"
+    },
+    {
+     "value": "Fern Standing Desk"
+    },
+    {
+     "value": "Fern Sunglasses"
+    },
+    {
+     "value": "Fern Throw Blanket"
+    },
+    {
+     "value": "Fern Travel Mug"
+    },
+    {
+     "value": "Fern Wall Clock"
+    },
+    {
+     "value": "Fern Water Bottle"
+    },
+    {
+     "value": "Fern Wireless Earbuds"
+    },
+    {
+     "value": "Fern Yoga Mat"
+    },
+    {
+     "value": "Luma Air Purifier"
+    },
+    {
+     "value": "Luma Backpack"
+    },
+    {
+     "value": "Luma Bluetooth Speaker"
+    },
+    {
+     "value": "Luma Cast Iron Pan"
+    },
+    {
+     "value": "Luma Coffee Grinder"
+    },
+    {
+     "value": "Luma Desk Lamp"
+    },
+    {
+     "value": "Luma Hiking Boots"
+    },
+    {
+     "value": "Luma Mechanical Keyboard"
+    },
+    {
+     "value": "Luma Office Chair"
+    },
+    {
+     "value": "Luma Rain Jacket"
+    },
+    {
+     "value": "Luma Running Shoes"
+    },
+    {
+     "value": "Luma Smart Watch"
+    },
+    {
+     "value": "Luma Standing Desk"
+    },
+    {
+     "value": "Luma Sunglasses"
+    },
+    {
+     "value": "Luma Throw Blanket"
+    },
+    {
+     "value": "Luma Travel Mug"
+    },
+    {
+     "value": "Luma Wall Clock"
+    },
+    {
+     "value": "Luma Water Bottle"
+    },
+    {
+     "value": "Luma Wireless Earbuds"
+    },
+    {
+     "value": "Luma Yoga Mat"
+    },
+    {
+     "value": "Marlow Air Purifier"
+    },
+    {
+     "value": "Marlow Backpack"
+    },
+    {
+     "value": "Marlow Bluetooth Speaker"
+    },
+    {
+     "value": "Marlow Cast Iron Pan"
+    },
+    {
+     "value": "Marlow Coffee Grinder"
+    },
+    {
+     "value": "Marlow Desk Lamp"
+    },
+    {
+     "value": "Marlow Hiking Boots"
+    },
+    {
+     "value": "Marlow Mechanical Keyboard"
+    },
+    {
+     "value": "Marlow Office Chair"
+    },
+    {
+     "value": "Marlow Rain Jacket"
+    },
+    {
+     "value": "Marlow Running Shoes"
+    },
+    {
+     "value": "Marlow Smart Watch"
+    },
+    {
+     "value": "Marlow Standing Desk"
+    },
+    {
+     "value": "Marlow Sunglasses"
+    },
+    {
+     "value": "Marlow Throw Blanket"
+    },
+    {
+     "value": "Marlow Travel Mug"
+    },
+    {
+     "value": "Marlow Wall Clock"
+    },
+    {
+     "value": "Marlow Water Bottle"
+    },
+    {
+     "value": "Marlow Wireless Earbuds"
+    },
+    {
+     "value": "Marlow Yoga Mat"
+    },
+    {
+     "value": "Nimbus Air Purifier"
+    },
+    {
+     "value": "Nimbus Backpack"
+    },
+    {
+     "value": "Nimbus Bluetooth Speaker"
+    },
+    {
+     "value": "Nimbus Cast Iron Pan"
+    },
+    {
+     "value": "Nimbus Coffee Grinder"
+    },
+    {
+     "value": "Nimbus Desk Lamp"
+    },
+    {
+     "value": "Nimbus Hiking Boots"
+    },
+    {
+     "value": "Nimbus Mechanical Keyboard"
+    },
+    {
+     "value": "Nimbus Office Chair"
+    },
+    {
+     "value": "Nimbus Rain Jacket"
+    },
+    {
+     "value": "Nimbus Running Shoes"
+    },
+    {
+     "value": "Nimbus Smart Watch"
+    },
+    {
+     "value": "Nimbus Standing Desk"
+    },
+    {
+     "value": "Nimbus Sunglasses"
+    },
+    {
+     "value": "Nimbus Throw Blanket"
+    },
+    {
+     "value": "Nimbus Travel Mug"
+    },
+    {
+     "value": "Nimbus Wall Clock"
+    },
+    {
+     "value": "Nimbus Water Bottle"
+    },
+    {
+     "value": "Nimbus Wireless Earbuds"
+    },
+    {
+     "value": "Nimbus Yoga Mat"
+    },
+    {
+     "value": "Orbit Air Purifier"
+    },
+    {
+     "value": "Orbit Backpack"
+    },
+    {
+     "value": "Orbit Bluetooth Speaker"
+    },
+    {
+     "value": "Orbit Cast Iron Pan"
+    },
+    {
+     "value": "Orbit Coffee Grinder"
+    },
+    {
+     "value": "Orbit Desk Lamp"
+    },
+    {
+     "value": "Orbit Hiking Boots"
+    },
+    {
+     "value": "Orbit Mechanical Keyboard"
+    },
+    {
+     "value": "Orbit Office Chair"
+    },
+    {
+     "value": "Orbit Rain Jacket"
+    },
+    {
+     "value": "Orbit Running Shoes"
+    },
+    {
+     "value": "Orbit Smart Watch"
+    },
+    {
+     "value": "Orbit Standing Desk"
+    },
+    {
+     "value": "Orbit Sunglasses"
+    },
+    {
+     "value": "Orbit Throw Blanket"
+    },
+    {
+     "value": "Orbit Travel Mug"
+    },
+    {
+     "value": "Orbit Wall Clock"
+    },
+    {
+     "value": "Orbit Water Bottle"
+    },
+    {
+     "value": "Orbit Wireless Earbuds"
+    },
+    {
+     "value": "Orbit Yoga Mat"
+    },
+    {
+     "value": "Pulse Air Purifier"
+    },
+    {
+     "value": "Pulse Backpack"
+    },
+    {
+     "value": "Pulse Bluetooth Speaker"
+    },
+    {
+     "value": "Pulse Cast Iron Pan"
+    },
+    {
+     "value": "Pulse Coffee Grinder"
+    },
+    {
+     "value": "Pulse Desk Lamp"
+    },
+    {
+     "value": "Pulse Hiking Boots"
+    },
+    {
+     "value": "Pulse Mechanical Keyboard"
+    },
+    {
+     "value": "Pulse Office Chair"
+    },
+    {
+     "value": "Pulse Rain Jacket"
+    },
+    {
+     "value": "Pulse Running Shoes"
+    },
+    {
+     "value": "Pulse Smart Watch"
+    },
+    {
+     "value": "Pulse Standing Desk"
+    },
+    {
+     "value": "Pulse Sunglasses"
+    },
+    {
+     "value": "Pulse Throw Blanket"
+    },
+    {
+     "value": "Pulse Travel Mug"
+    },
+    {
+     "value": "Pulse Wall Clock"
+    },
+    {
+     "value": "Pulse Water Bottle"
+    },
+    {
+     "value": "Pulse Wireless Earbuds"
+    },
+    {
+     "value": "Pulse Yoga Mat"
+    },
+    {
+     "value": "Quill Air Purifier"
+    },
+    {
+     "value": "Quill Backpack"
+    },
+    {
+     "value": "Quill Bluetooth Speaker"
+    },
+    {
+     "value": "Quill Cast Iron Pan"
+    },
+    {
+     "value": "Quill Coffee Grinder"
+    },
+    {
+     "value": "Quill Desk Lamp"
+    },
+    {
+     "value": "Quill Hiking Boots"
+    },
+    {
+     "value": "Quill Mechanical Keyboard"
+    },
+    {
+     "value": "Quill Office Chair"
+    },
+    {
+     "value": "Quill Rain Jacket"
+    },
+    {
+     "value": "Quill Running Shoes"
+    },
+    {
+     "value": "Quill Smart Watch"
+    },
+    {
+     "value": "Quill Standing Desk"
+    },
+    {
+     "value": "Quill Sunglasses"
+    },
+    {
+     "value": "Quill Throw Blanket"
+    },
+    {
+     "value": "Quill Travel Mug"
+    },
+    {
+     "value": "Quill Wall Clock"
+    },
+    {
+     "value": "Quill Water Bottle"
+    },
+    {
+     "value": "Quill Wireless Earbuds"
+    },
+    {
+     "value": "Quill Yoga Mat"
+    },
+    {
+     "value": "Sage Air Purifier"
+    },
+    {
+     "value": "Sage Backpack"
+    },
+    {
+     "value": "Sage Bluetooth Speaker"
+    },
+    {
+     "value": "Sage Cast Iron Pan"
+    },
+    {
+     "value": "Sage Coffee Grinder"
+    },
+    {
+     "value": "Sage Desk Lamp"
+    },
+    {
+     "value": "Sage Hiking Boots"
+    },
+    {
+     "value": "Sage Mechanical Keyboard"
+    },
+    {
+     "value": "Sage Office Chair"
+    },
+    {
+     "value": "Sage Rain Jacket"
+    },
+    {
+     "value": "Sage Running Shoes"
+    },
+    {
+     "value": "Sage Smart Watch"
+    },
+    {
+     "value": "Sage Standing Desk"
+    },
+    {
+     "value": "Sage Sunglasses"
+    },
+    {
+     "value": "Sage Throw Blanket"
+    },
+    {
+     "value": "Sage Travel Mug"
+    },
+    {
+     "value": "Sage Wall Clock"
+    },
+    {
+     "value": "Sage Water Bottle"
+    },
+    {
+     "value": "Sage Wireless Earbuds"
+    },
+    {
+     "value": "Sage Yoga Mat"
+    },
+    {
+     "value": "Terra Air Purifier"
+    },
+    {
+     "value": "Terra Backpack"
+    },
+    {
+     "value": "Terra Bluetooth Speaker"
+    },
+    {
+     "value": "Terra Cast Iron Pan"
+    },
+    {
+     "value": "Terra Coffee Grinder"
+    },
+    {
+     "value": "Terra Desk Lamp"
+    },
+    {
+     "value": "Terra Hiking Boots"
+    },
+    {
+     "value": "Terra Mechanical Keyboard"
+    },
+    {
+     "value": "Terra Office Chair"
+    },
+    {
+     "value": "Terra Rain Jacket"
+    },
+    {
+     "value": "Terra Running Shoes"
+    },
+    {
+     "value": "Terra Smart Watch"
+    },
+    {
+     "value": "Terra Standing Desk"
+    },
+    {
+     "value": "Terra Sunglasses"
+    },
+    {
+     "value": "Terra Throw Blanket"
+    },
+    {
+     "value": "Terra Travel Mug"
+    },
+    {
+     "value": "Terra Wall Clock"
+    },
+    {
+     "value": "Terra Water Bottle"
+    },
+    {
+     "value": "Terra Wireless Earbuds"
+    },
+    {
+     "value": "Terra Yoga Mat"
+    },
+    {
+     "value": "Tundra Air Purifier"
+    },
+    {
+     "value": "Tundra Backpack"
+    },
+    {
+     "value": "Tundra Bluetooth Speaker"
+    },
+    {
+     "value": "Tundra Cast Iron Pan"
+    },
+    {
+     "value": "Tundra Coffee Grinder"
+    },
+    {
+     "value": "Tundra Desk Lamp"
+    },
+    {
+     "value": "Tundra Hiking Boots"
+    },
+    {
+     "value": "Tundra Mechanical Keyboard"
+    },
+    {
+     "value": "Tundra Office Chair"
+    },
+    {
+     "value": "Tundra Rain Jacket"
+    },
+    {
+     "value": "Tundra Running Shoes"
+    },
+    {
+     "value": "Tundra Smart Watch"
+    },
+    {
+     "value": "Tundra Standing Desk"
+    },
+    {
+     "value": "Tundra Sunglasses"
+    },
+    {
+     "value": "Tundra Throw Blanket"
+    },
+    {
+     "value": "Tundra Travel Mug"
+    },
+    {
+     "value": "Tundra Wall Clock"
+    },
+    {
+     "value": "Tundra Water Bottle"
+    },
+    {
+     "value": "Tundra Wireless Earbuds"
+    },
+    {
+     "value": "Tundra Yoga Mat"
+    },
+    {
+     "value": "Vela Air Purifier"
+    },
+    {
+     "value": "Vela Backpack"
+    },
+    {
+     "value": "Vela Bluetooth Speaker"
+    },
+    {
+     "value": "Vela Cast Iron Pan"
+    },
+    {
+     "value": "Vela Coffee Grinder"
+    },
+    {
+     "value": "Vela Desk Lamp"
+    },
+    {
+     "value": "Vela Hiking Boots"
+    },
+    {
+     "value": "Vela Mechanical Keyboard"
+    },
+    {
+     "value": "Vela Office Chair"
+    },
+    {
+     "value": "Vela Rain Jacket"
+    },
+    {
+     "value": "Vela Running Shoes"
+    },
+    {
+     "value": "Vela Smart Watch"
+    },
+    {
+     "value": "Vela Standing Desk"
+    },
+    {
+     "value": "Vela Sunglasses"
+    },
+    {
+     "value": "Vela Throw Blanket"
+    },
+    {
+     "value": "Vela Travel Mug"
+    },
+    {
+     "value": "Vela Wall Clock"
+    },
+    {
+     "value": "Vela Water Bottle"
+    },
+    {
+     "value": "Vela Wireless Earbuds"
+    },
+    {
+     "value": "Vela Yoga Mat"
+    }
+   ]
+  },
+  {
+   "key": "brand",
+   "name": "Brand",
+   "description": "Fictional brands",
+   "data_type": "string",
+   "category": "catalog",
+   "values": [
+    {
+     "value": "Aero Craft"
+    },
+    {
+     "value": "Aero Gear"
+    },
+    {
+     "value": "Aero Goods"
+    },
+    {
+     "value": "Aero Labs"
+    },
+    {
+     "value": "Aero Works"
+    },
+    {
+     "value": "Cobalt Craft"
+    },
+    {
+     "value": "Cobalt Gear"
+    },
+    {
+     "value": "Cobalt Goods"
+    },
+    {
+     "value": "Cobalt Home"
+    },
+    {
+     "value": "Cobalt Labs"
+    },
+    {
+     "value": "Cobalt Living"
+    },
+    {
+     "value": "Cobalt Supply"
+    },
+    {
+     "value": "Cobalt Works"
+    },
+    {
+     "value": "Fern Craft"
+    },
+    {
+     "value": "Fern Gear"
+    },
+    {
+     "value": "Fern Home"
+    },
+    {
+     "value": "Fern Labs"
+    },
+    {
+     "value": "Fern Living"
+    },
+    {
+     "value": "Fern Supply"
+    },
+    {
+     "value": "Luma Craft"
+    },
+    {
+     "value": "Luma Gear"
+    },
+    {
+     "value": "Luma Goods"
+    },
+    {
+     "value": "Luma Home"
+    },
+    {
+     "value": "Luma Living"
+    },
+    {
+     "value": "Luma Works"
+    },
+    {
+     "value": "Nimbus Craft"
+    },
+    {
+     "value": "Nimbus Gear"
+    },
+    {
+     "value": "Nimbus Goods"
+    },
+    {
+     "value": "Nimbus Home"
+    },
+    {
+     "value": "Nimbus Living"
+    },
+    {
+     "value": "Nimbus Supply"
+    },
+    {
+     "value": "Nimbus Works"
+    },
+    {
+     "value": "Orbit Gear"
+    },
+    {
+     "value": "Orbit Goods"
+    },
+    {
+     "value": "Orbit Home"
+    },
+    {
+     "value": "Orbit Labs"
+    },
+    {
+     "value": "Orbit Supply"
+    },
+    {
+     "value": "Orbit Works"
+    },
+    {
+     "value": "Pulse Craft"
+    },
+    {
+     "value": "Pulse Gear"
+    },
+    {
+     "value": "Pulse Goods"
+    },
+    {
+     "value": "Pulse Home"
+    },
+    {
+     "value": "Pulse Labs"
+    },
+    {
+     "value": "Pulse Works"
+    },
+    {
+     "value": "Quill Craft"
+    },
+    {
+     "value": "Quill Home"
+    },
+    {
+     "value": "Quill Labs"
+    },
+    {
+     "value": "Quill Living"
+    },
+    {
+     "value": "Quill Supply"
+    },
+    {
+     "value": "Terra Craft"
+    },
+    {
+     "value": "Terra Goods"
+    },
+    {
+     "value": "Terra Labs"
+    },
+    {
+     "value": "Terra Living"
+    },
+    {
+     "value": "Terra Supply"
+    },
+    {
+     "value": "Terra Works"
+    },
+    {
+     "value": "Vela Craft"
+    },
+    {
+     "value": "Vela Gear"
+    },
+    {
+     "value": "Vela Goods"
+    },
+    {
+     "value": "Vela Home"
+    },
+    {
+     "value": "Vela Labs"
+    }
+   ]
+  },
+  {
+   "key": "color",
+   "name": "Color",
+   "description": "Product colors",
+   "data_type": "string",
+   "category": "catalog",
+   "values": [
+    {
+     "value": "Black"
+    },
+    {
+     "value": "White"
+    },
+    {
+     "value": "Navy"
+    },
+    {
+     "value": "Charcoal"
+    },
+    {
+     "value": "Forest Green"
+    },
+    {
+     "value": "Burgundy"
+    },
+    {
+     "value": "Sand"
+    },
+    {
+     "value": "Sky Blue"
+    },
+    {
+     "value": "Coral"
+    },
+    {
+     "value": "Mustard"
+    },
+    {
+     "value": "Lavender"
+    },
+    {
+     "value": "Olive"
+    },
+    {
+     "value": "Graphite"
+    },
+    {
+     "value": "Ivory"
+    },
+    {
+     "value": "Rust"
+    },
+    {
+     "value": "Teal"
+    },
+    {
+     "value": "Blush"
+    },
+    {
+     "value": "Slate"
+    },
+    {
+     "value": "Copper"
+    },
+    {
+     "value": "Silver"
+    }
+   ]
+  },
+  {
+   "key": "size_label",
+   "name": "Size",
+   "description": "Apparel sizes",
+   "data_type": "string",
+   "category": "catalog",
+   "values": [
+    {
+     "value": "XXS",
+     "weight": 1
+    },
+    {
+     "value": "XS",
+     "weight": 3
+    },
+    {
+     "value": "S",
+     "weight": 8
+    },
+    {
+     "value": "M",
+     "weight": 12
+    },
+    {
+     "value": "L",
+     "weight": 12
+    },
+    {
+     "value": "XL",
+     "weight": 8
+    },
+    {
+     "value": "XXL",
+     "weight": 4
+    },
+    {
+     "value": "3XL",
+     "weight": 2
+    },
+    {
+     "value": "One Size",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "order_status",
+   "name": "Order status",
+   "description": "Order lifecycle",
+   "data_type": "enum",
+   "category": "workflow",
+   "values": [
+    {
+     "value": "PENDING",
+     "weight": 5
+    },
+    {
+     "value": "CONFIRMED",
+     "weight": 8
+    },
+    {
+     "value": "PACKED",
+     "weight": 6
+    },
+    {
+     "value": "SHIPPED",
+     "weight": 15
+    },
+    {
+     "value": "OUT_FOR_DELIVERY",
+     "weight": 5
+    },
+    {
+     "value": "DELIVERED",
+     "weight": 50
+    },
+    {
+     "value": "CANCELLED",
+     "weight": 4
+    },
+    {
+     "value": "RETURNED",
+     "weight": 3
+    },
+    {
+     "value": "REFUNDED",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "payment_method",
+   "name": "Payment method",
+   "description": "How orders are paid",
+   "data_type": "enum",
+   "category": "payment",
+   "values": [
+    {
+     "value": "CARD",
+     "weight": 50
+    },
+    {
+     "value": "DEBIT_CARD",
+     "weight": 15
+    },
+    {
+     "value": "DIGITAL_WALLET",
+     "weight": 20
+    },
+    {
+     "value": "BANK_TRANSFER",
+     "weight": 3
+    },
+    {
+     "value": "BUY_NOW_PAY_LATER",
+     "weight": 6
+    },
+    {
+     "value": "GIFT_CARD",
+     "weight": 3
+    },
+    {
+     "value": "CASH_ON_DELIVERY",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "shipping_method",
+   "name": "Shipping method",
+   "description": "Delivery options",
+   "data_type": "enum",
+   "category": "fulfilment",
+   "values": [
+    {
+     "value": "STANDARD",
+     "weight": 50
+    },
+    {
+     "value": "EXPRESS",
+     "weight": 15
+    },
+    {
+     "value": "NEXT_DAY",
+     "weight": 8
+    },
+    {
+     "value": "SAME_DAY",
+     "weight": 3
+    },
+    {
+     "value": "ECONOMY",
+     "weight": 15
+    },
+    {
+     "value": "PICKUP_POINT",
+     "weight": 6
+    },
+    {
+     "value": "STORE_PICKUP",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "carrier",
+   "name": "Carrier",
+   "description": "Fictional carriers",
+   "data_type": "string",
+   "category": "fulfilment",
+   "values": [
+    {
+     "value": "Atlas Courier"
+    },
+    {
+     "value": "Atlas Express"
+    },
+    {
+     "value": "Atlas Freight"
+    },
+    {
+     "value": "Atlas Logistics"
+    },
+    {
+     "value": "Atlas Parcel"
+    },
+    {
+     "value": "Blue Arrow Courier"
+    },
+    {
+     "value": "Blue Arrow Express"
+    },
+    {
+     "value": "Blue Arrow Freight"
+    },
+    {
+     "value": "Blue Arrow Logistics"
+    },
+    {
+     "value": "Blue Arrow Parcel"
+    },
+    {
+     "value": "Comet Express"
+    },
+    {
+     "value": "Comet Logistics"
+    },
+    {
+     "value": "Comet Parcel"
+    },
+    {
+     "value": "Meridian Courier"
+    },
+    {
+     "value": "Meridian Freight"
+    },
+    {
+     "value": "Northern Courier"
+    },
+    {
+     "value": "Northern Express"
+    },
+    {
+     "value": "Northern Logistics"
+    },
+    {
+     "value": "Northern Parcel"
+    },
+    {
+     "value": "Pacific Courier"
+    },
+    {
+     "value": "Pacific Freight"
+    },
+    {
+     "value": "Pacific Logistics"
+    },
+    {
+     "value": "Pacific Parcel"
+    },
+    {
+     "value": "Rapid Courier"
+    },
+    {
+     "value": "Rapid Freight"
+    },
+    {
+     "value": "Rapid Logistics"
+    },
+    {
+     "value": "Rapid Parcel"
+    },
+    {
+     "value": "Swift Express"
+    },
+    {
+     "value": "Swift Logistics"
+    },
+    {
+     "value": "Swift Parcel"
+    }
+   ]
+  },
+  {
+   "key": "return_reason",
+   "name": "Return reason",
+   "description": "Why items come back",
+   "data_type": "enum",
+   "category": "fulfilment",
+   "values": [
+    {
+     "value": "WRONG_SIZE"
+    },
+    {
+     "value": "DAMAGED_IN_TRANSIT"
+    },
+    {
+     "value": "NOT_AS_DESCRIBED"
+    },
+    {
+     "value": "CHANGED_MIND"
+    },
+    {
+     "value": "ARRIVED_LATE"
+    },
+    {
+     "value": "DEFECTIVE"
+    },
+    {
+     "value": "WRONG_ITEM"
+    },
+    {
+     "value": "BETTER_PRICE_FOUND"
+    }
+   ]
+  },
+  {
+   "key": "review_title",
+   "name": "Review title",
+   "description": "Short review headlines",
+   "data_type": "string",
+   "category": "content",
+   "values": [
+    {
+     "value": "Exactly as described"
+    },
+    {
+     "value": "Great value for money"
+    },
+    {
+     "value": "Better than expected"
+    },
+    {
+     "value": "Solid build quality"
+    },
+    {
+     "value": "Fast delivery"
+    },
+    {
+     "value": "Does the job"
+    },
+    {
+     "value": "Would buy again"
+    },
+    {
+     "value": "Not quite what I hoped"
+    },
+    {
+     "value": "Fits perfectly"
+    },
+    {
+     "value": "A little smaller than expected"
+    },
+    {
+     "value": "Excellent quality"
+    },
+    {
+     "value": "Works as advertised"
+    },
+    {
+     "value": "Good gift idea"
+    },
+    {
+     "value": "Stopped working quickly"
+    },
+    {
+     "value": "Comfortable and light"
+    },
+    {
+     "value": "Easy to set up"
+    },
+    {
+     "value": "Looks great at home"
+    },
+    {
+     "value": "Decent for the price"
+    },
+    {
+     "value": "Packaging was damaged"
+    },
+    {
+     "value": "Highly recommended"
+    }
+   ]
+  },
+  {
+   "key": "marketplace_seller",
+   "name": "Seller",
+   "description": "Fictional marketplace sellers",
+   "data_type": "string",
+   "category": "catalog",
+   "values": [
+    {
+     "value": "Ashford Direct"
+    },
+    {
+     "value": "Ashford Emporium"
+    },
+    {
+     "value": "Ashford Marketplace"
+    },
+    {
+     "value": "Ashford Outlet"
+    },
+    {
+     "value": "Ashford Retail"
+    },
+    {
+     "value": "Ashford Trading"
+    },
+    {
+     "value": "Bluepeak Direct"
+    },
+    {
+     "value": "Bluepeak Emporium"
+    },
+    {
+     "value": "Bluepeak Marketplace"
+    },
+    {
+     "value": "Bluepeak Outlet"
+    },
+    {
+     "value": "Bluepeak Retail"
+    },
+    {
+     "value": "Bluepeak Trading"
+    },
+    {
+     "value": "Brightfield Direct"
+    },
+    {
+     "value": "Brightfield Emporium"
+    },
+    {
+     "value": "Brightfield Marketplace"
+    },
+    {
+     "value": "Brightfield Outlet"
+    },
+    {
+     "value": "Brightfield Retail"
+    },
+    {
+     "value": "Brightfield Trading"
+    },
+    {
+     "value": "Clearwater Direct"
+    },
+    {
+     "value": "Clearwater Emporium"
+    },
+    {
+     "value": "Clearwater Marketplace"
+    },
+    {
+     "value": "Clearwater Outlet"
+    },
+    {
+     "value": "Clearwater Retail"
+    },
+    {
+     "value": "Clearwater Trading"
+    },
+    {
+     "value": "Elmhurst Direct"
+    },
+    {
+     "value": "Elmhurst Emporium"
+    },
+    {
+     "value": "Elmhurst Marketplace"
+    },
+    {
+     "value": "Elmhurst Outlet"
+    },
+    {
+     "value": "Elmhurst Retail"
+    },
+    {
+     "value": "Elmhurst Trading"
+    },
+    {
+     "value": "Fairmont Direct"
+    },
+    {
+     "value": "Fairmont Emporium"
+    },
+    {
+     "value": "Fairmont Marketplace"
+    },
+    {
+     "value": "Fairmont Outlet"
+    },
+    {
+     "value": "Fairmont Retail"
+    },
+    {
+     "value": "Fairmont Trading"
+    },
+    {
+     "value": "Greenvale Direct"
+    },
+    {
+     "value": "Greenvale Emporium"
+    },
+    {
+     "value": "Greenvale Marketplace"
+    },
+    {
+     "value": "Greenvale Outlet"
+    },
+    {
+     "value": "Greenvale Retail"
+    },
+    {
+     "value": "Greenvale Trading"
+    },
+    {
+     "value": "Harborview Direct"
+    },
+    {
+     "value": "Harborview Emporium"
+    },
+    {
+     "value": "Harborview Marketplace"
+    },
+    {
+     "value": "Harborview Outlet"
+    },
+    {
+     "value": "Harborview Retail"
+    },
+    {
+     "value": "Harborview Trading"
+    },
+    {
+     "value": "Ironwood Direct"
+    },
+    {
+     "value": "Ironwood Emporium"
+    },
+    {
+     "value": "Ironwood Marketplace"
+    },
+    {
+     "value": "Ironwood Outlet"
+    },
+    {
+     "value": "Ironwood Retail"
+    },
+    {
+     "value": "Ironwood Trading"
+    },
+    {
+     "value": "Kingsley Direct"
+    },
+    {
+     "value": "Kingsley Emporium"
+    },
+    {
+     "value": "Kingsley Marketplace"
+    },
+    {
+     "value": "Kingsley Outlet"
+    },
+    {
+     "value": "Kingsley Retail"
+    },
+    {
+     "value": "Kingsley Trading"
+    },
+    {
+     "value": "Lakeshore Direct"
+    },
+    {
+     "value": "Lakeshore Emporium"
+    },
+    {
+     "value": "Lakeshore Marketplace"
+    },
+    {
+     "value": "Lakeshore Outlet"
+    },
+    {
+     "value": "Lakeshore Retail"
+    },
+    {
+     "value": "Lakeshore Trading"
+    },
+    {
+     "value": "Maplecrest Direct"
+    },
+    {
+     "value": "Maplecrest Emporium"
+    },
+    {
+     "value": "Maplecrest Marketplace"
+    },
+    {
+     "value": "Maplecrest Outlet"
+    },
+    {
+     "value": "Maplecrest Retail"
+    },
+    {
+     "value": "Maplecrest Trading"
+    },
+    {
+     "value": "Northwind Direct"
+    },
+    {
+     "value": "Northwind Emporium"
+    },
+    {
+     "value": "Northwind Marketplace"
+    },
+    {
+     "value": "Northwind Outlet"
+    },
+    {
+     "value": "Northwind Retail"
+    },
+    {
+     "value": "Northwind Trading"
+    },
+    {
+     "value": "Oakridge Direct"
+    },
+    {
+     "value": "Oakridge Emporium"
+    },
+    {
+     "value": "Oakridge Marketplace"
+    },
+    {
+     "value": "Oakridge Outlet"
+    },
+    {
+     "value": "Oakridge Retail"
+    },
+    {
+     "value": "Oakridge Trading"
+    },
+    {
+     "value": "Redwood Direct"
+    },
+    {
+     "value": "Redwood Emporium"
+    },
+    {
+     "value": "Redwood Marketplace"
+    },
+    {
+     "value": "Redwood Outlet"
+    },
+    {
+     "value": "Redwood Retail"
+    },
+    {
+     "value": "Redwood Trading"
+    },
+    {
+     "value": "Riverton Direct"
+    },
+    {
+     "value": "Riverton Emporium"
+    },
+    {
+     "value": "Riverton Marketplace"
+    },
+    {
+     "value": "Riverton Outlet"
+    },
+    {
+     "value": "Riverton Retail"
+    },
+    {
+     "value": "Riverton Trading"
+    },
+    {
+     "value": "Silverline Direct"
+    },
+    {
+     "value": "Silverline Emporium"
+    },
+    {
+     "value": "Silverline Marketplace"
+    },
+    {
+     "value": "Silverline Outlet"
+    },
+    {
+     "value": "Silverline Retail"
+    },
+    {
+     "value": "Silverline Trading"
+    },
+    {
+     "value": "Stonebridge Direct"
+    },
+    {
+     "value": "Stonebridge Emporium"
+    },
+    {
+     "value": "Stonebridge Marketplace"
+    },
+    {
+     "value": "Stonebridge Outlet"
+    },
+    {
+     "value": "Stonebridge Retail"
+    },
+    {
+     "value": "Stonebridge Trading"
+    },
+    {
+     "value": "Summerhill Direct"
+    },
+    {
+     "value": "Summerhill Emporium"
+    },
+    {
+     "value": "Summerhill Marketplace"
+    },
+    {
+     "value": "Summerhill Outlet"
+    },
+    {
+     "value": "Summerhill Retail"
+    },
+    {
+     "value": "Summerhill Trading"
+    },
+    {
+     "value": "Westbrook Direct"
+    },
+    {
+     "value": "Westbrook Emporium"
+    },
+    {
+     "value": "Westbrook Marketplace"
+    },
+    {
+     "value": "Westbrook Outlet"
+    },
+    {
+     "value": "Westbrook Retail"
+    },
+    {
+     "value": "Westbrook Trading"
+    }
+   ]
+  }
+ ]
+}

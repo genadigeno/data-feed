@@ -1,0 +1,776 @@
+{
+ "domain": "telecommunications",
+ "name": "Telecommunications",
+ "description": "Mobile and broadband plans, subscribers and network events.",
+ "groups": [
+  {
+   "key": "plan_name",
+   "name": "Plan name",
+   "description": "Fictional tariff plans",
+   "data_type": "string",
+   "category": "products",
+   "values": [
+    {
+     "value": "Basic 5G"
+    },
+    {
+     "value": "Basic Connect"
+    },
+    {
+     "value": "Basic Essentials"
+    },
+    {
+     "value": "Basic Flex"
+    },
+    {
+     "value": "Basic Lite"
+    },
+    {
+     "value": "Basic Plus"
+    },
+    {
+     "value": "Basic Share"
+    },
+    {
+     "value": "Business 5G"
+    },
+    {
+     "value": "Business Essentials"
+    },
+    {
+     "value": "Business Flex"
+    },
+    {
+     "value": "Business Lite"
+    },
+    {
+     "value": "Business Plus"
+    },
+    {
+     "value": "Business Share"
+    },
+    {
+     "value": "Data 5G"
+    },
+    {
+     "value": "Data Connect"
+    },
+    {
+     "value": "Data Essentials"
+    },
+    {
+     "value": "Data Flex"
+    },
+    {
+     "value": "Data Lite"
+    },
+    {
+     "value": "Data Plus"
+    },
+    {
+     "value": "Data Share"
+    },
+    {
+     "value": "Family 5G"
+    },
+    {
+     "value": "Family Essentials"
+    },
+    {
+     "value": "Family Flex"
+    },
+    {
+     "value": "Family Lite"
+    },
+    {
+     "value": "Family Max"
+    },
+    {
+     "value": "Family Plus"
+    },
+    {
+     "value": "Family Share"
+    },
+    {
+     "value": "Premium 5G"
+    },
+    {
+     "value": "Premium Connect"
+    },
+    {
+     "value": "Premium Flex"
+    },
+    {
+     "value": "Premium Lite"
+    },
+    {
+     "value": "Premium Plus"
+    },
+    {
+     "value": "Premium Share"
+    },
+    {
+     "value": "Prepaid 5G"
+    },
+    {
+     "value": "Prepaid Connect"
+    },
+    {
+     "value": "Prepaid Essentials"
+    },
+    {
+     "value": "Prepaid Lite"
+    },
+    {
+     "value": "Prepaid Max"
+    },
+    {
+     "value": "Prepaid Plus"
+    },
+    {
+     "value": "Prepaid Share"
+    },
+    {
+     "value": "Student Flex"
+    },
+    {
+     "value": "Student Lite"
+    },
+    {
+     "value": "Student Plus"
+    },
+    {
+     "value": "Student Share"
+    },
+    {
+     "value": "Travel 5G"
+    },
+    {
+     "value": "Travel Connect"
+    },
+    {
+     "value": "Travel Essentials"
+    },
+    {
+     "value": "Travel Max"
+    },
+    {
+     "value": "Travel Plus"
+    },
+    {
+     "value": "Unlimited 5G"
+    },
+    {
+     "value": "Unlimited Connect"
+    },
+    {
+     "value": "Unlimited Flex"
+    },
+    {
+     "value": "Unlimited Share"
+    },
+    {
+     "value": "Value 5G"
+    },
+    {
+     "value": "Value Connect"
+    },
+    {
+     "value": "Value Essentials"
+    },
+    {
+     "value": "Value Lite"
+    },
+    {
+     "value": "Value Max"
+    },
+    {
+     "value": "Value Plus"
+    },
+    {
+     "value": "Value Share"
+    }
+   ]
+  },
+  {
+   "key": "subscriber_status",
+   "name": "Subscriber status",
+   "description": "Line lifecycle",
+   "data_type": "enum",
+   "category": "subscribers",
+   "values": [
+    {
+     "value": "ACTIVE",
+     "weight": 82
+    },
+    {
+     "value": "SUSPENDED",
+     "weight": 3
+    },
+    {
+     "value": "PORTING_IN",
+     "weight": 2
+    },
+    {
+     "value": "PORTING_OUT",
+     "weight": 1
+    },
+    {
+     "value": "CANCELLED",
+     "weight": 10
+    },
+    {
+     "value": "PENDING_ACTIVATION",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "service_type",
+   "name": "Service type",
+   "description": "What is sold",
+   "data_type": "enum",
+   "category": "products",
+   "values": [
+    {
+     "value": "MOBILE_VOICE"
+    },
+    {
+     "value": "MOBILE_DATA"
+    },
+    {
+     "value": "FIBER_BROADBAND"
+    },
+    {
+     "value": "CABLE_BROADBAND"
+    },
+    {
+     "value": "FIXED_WIRELESS"
+    },
+    {
+     "value": "IPTV"
+    },
+    {
+     "value": "VOIP"
+    }
+   ]
+  },
+  {
+   "key": "network_generation",
+   "name": "Network generation",
+   "description": "Radio technology",
+   "data_type": "enum",
+   "category": "network",
+   "values": [
+    {
+     "value": "GSM_2G",
+     "weight": 1
+    },
+    {
+     "value": "UMTS_3G",
+     "weight": 3
+    },
+    {
+     "value": "LTE_4G",
+     "weight": 50
+    },
+    {
+     "value": "NR_5G",
+     "weight": 40
+    },
+    {
+     "value": "WIFI_CALLING",
+     "weight": 6
+    }
+   ]
+  },
+  {
+   "key": "call_outcome",
+   "name": "Call outcome",
+   "description": "How calls end",
+   "data_type": "enum",
+   "category": "network",
+   "values": [
+    {
+     "value": "COMPLETED",
+     "weight": 75
+    },
+    {
+     "value": "BUSY",
+     "weight": 5
+    },
+    {
+     "value": "NO_ANSWER",
+     "weight": 8
+    },
+    {
+     "value": "DROPPED",
+     "weight": 2
+    },
+    {
+     "value": "FAILED",
+     "weight": 2
+    },
+    {
+     "value": "VOICEMAIL",
+     "weight": 8
+    }
+   ]
+  },
+  {
+   "key": "ticket_category",
+   "name": "Ticket category",
+   "description": "Support topics",
+   "data_type": "enum",
+   "category": "support",
+   "values": [
+    {
+     "value": "BILLING_DISPUTE"
+    },
+    {
+     "value": "SLOW_INTERNET"
+    },
+    {
+     "value": "NO_SIGNAL"
+    },
+    {
+     "value": "ROAMING_CHARGE"
+    },
+    {
+     "value": "SIM_REPLACEMENT"
+    },
+    {
+     "value": "PORT_REQUEST"
+    },
+    {
+     "value": "ROUTER_FAULT"
+    },
+    {
+     "value": "CONTRACT_QUERY"
+    }
+   ]
+  },
+  {
+   "key": "cell_status",
+   "name": "Cell site status",
+   "description": "Tower state",
+   "data_type": "enum",
+   "category": "network",
+   "values": [
+    {
+     "value": "ON_AIR",
+     "weight": 88
+    },
+    {
+     "value": "DEGRADED",
+     "weight": 5
+    },
+    {
+     "value": "MAINTENANCE",
+     "weight": 3
+    },
+    {
+     "value": "OFFLINE",
+     "weight": 1
+    },
+    {
+     "value": "PLANNED",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "device_model",
+   "name": "Device model",
+   "description": "Fictional handsets and routers",
+   "data_type": "string",
+   "category": "products",
+   "values": [
+    {
+     "value": "Argon A10"
+    },
+    {
+     "value": "Argon A20"
+    },
+    {
+     "value": "Argon Lite 4"
+    },
+    {
+     "value": "Argon Mesh M1"
+    },
+    {
+     "value": "Argon Note 8"
+    },
+    {
+     "value": "Argon Router R2"
+    },
+    {
+     "value": "Argon S3"
+    },
+    {
+     "value": "Argon X5"
+    },
+    {
+     "value": "Argon X7 Pro"
+    },
+    {
+     "value": "Helix Lite 4"
+    },
+    {
+     "value": "Helix Router R2"
+    },
+    {
+     "value": "Helix S3"
+    },
+    {
+     "value": "Helix X5"
+    },
+    {
+     "value": "Helix X7 Pro"
+    },
+    {
+     "value": "Nimbus A10"
+    },
+    {
+     "value": "Nimbus A20"
+    },
+    {
+     "value": "Nimbus Lite 4"
+    },
+    {
+     "value": "Nimbus Mesh M1"
+    },
+    {
+     "value": "Nimbus Note 8"
+    },
+    {
+     "value": "Nimbus Router R2"
+    },
+    {
+     "value": "Nimbus S3"
+    },
+    {
+     "value": "Nimbus X7 Pro"
+    },
+    {
+     "value": "Orbit A10"
+    },
+    {
+     "value": "Orbit A20"
+    },
+    {
+     "value": "Orbit Lite 4"
+    },
+    {
+     "value": "Orbit Mesh M1"
+    },
+    {
+     "value": "Orbit Note 8"
+    },
+    {
+     "value": "Orbit Router R2"
+    },
+    {
+     "value": "Orbit S3"
+    },
+    {
+     "value": "Orbit X5"
+    },
+    {
+     "value": "Orbit X7 Pro"
+    },
+    {
+     "value": "Pulse A10"
+    },
+    {
+     "value": "Pulse A20"
+    },
+    {
+     "value": "Pulse Lite 4"
+    },
+    {
+     "value": "Pulse Mesh M1"
+    },
+    {
+     "value": "Pulse Note 8"
+    },
+    {
+     "value": "Pulse Router R2"
+    },
+    {
+     "value": "Pulse S3"
+    },
+    {
+     "value": "Pulse X5"
+    },
+    {
+     "value": "Pulse X7 Pro"
+    },
+    {
+     "value": "Quark A20"
+    },
+    {
+     "value": "Quark Lite 4"
+    },
+    {
+     "value": "Quark Mesh M1"
+    },
+    {
+     "value": "Quark Note 8"
+    },
+    {
+     "value": "Quark S3"
+    },
+    {
+     "value": "Quark X5"
+    },
+    {
+     "value": "Quark X7 Pro"
+    },
+    {
+     "value": "Vela A20"
+    },
+    {
+     "value": "Vela Lite 4"
+    },
+    {
+     "value": "Vela Mesh M1"
+    },
+    {
+     "value": "Vela Note 8"
+    },
+    {
+     "value": "Vela Router R2"
+    },
+    {
+     "value": "Vela S3"
+    },
+    {
+     "value": "Vela X5"
+    },
+    {
+     "value": "Vela X7 Pro"
+    },
+    {
+     "value": "Zephyr A20"
+    },
+    {
+     "value": "Zephyr Lite 4"
+    },
+    {
+     "value": "Zephyr Note 8"
+    },
+    {
+     "value": "Zephyr S3"
+    },
+    {
+     "value": "Zephyr X5"
+    }
+   ]
+  },
+  {
+   "key": "cell_site_name",
+   "name": "Cell site",
+   "description": "Fictional site names",
+   "data_type": "string",
+   "category": "network",
+   "values": [
+    {
+     "value": "Airport East"
+    },
+    {
+     "value": "Airport Macro"
+    },
+    {
+     "value": "Airport North"
+    },
+    {
+     "value": "Airport Small Cell"
+    },
+    {
+     "value": "Airport South"
+    },
+    {
+     "value": "Grand Square East"
+    },
+    {
+     "value": "Grand Square Macro"
+    },
+    {
+     "value": "Grand Square North"
+    },
+    {
+     "value": "Grand Square Small Cell"
+    },
+    {
+     "value": "Harbor East"
+    },
+    {
+     "value": "Harbor Macro"
+    },
+    {
+     "value": "Harbor North"
+    },
+    {
+     "value": "Harbor South"
+    },
+    {
+     "value": "Harbor West"
+    },
+    {
+     "value": "Hilltop East"
+    },
+    {
+     "value": "Hilltop Macro"
+    },
+    {
+     "value": "Hilltop North"
+    },
+    {
+     "value": "Hilltop Small Cell"
+    },
+    {
+     "value": "Hilltop South"
+    },
+    {
+     "value": "Hilltop West"
+    },
+    {
+     "value": "Mill Road East"
+    },
+    {
+     "value": "Mill Road Macro"
+    },
+    {
+     "value": "Mill Road North"
+    },
+    {
+     "value": "Mill Road Small Cell"
+    },
+    {
+     "value": "Mill Road South"
+    },
+    {
+     "value": "Mill Road West"
+    },
+    {
+     "value": "Old Quarter Macro"
+    },
+    {
+     "value": "Old Quarter North"
+    },
+    {
+     "value": "Old Quarter Small Cell"
+    },
+    {
+     "value": "Old Quarter South"
+    },
+    {
+     "value": "Old Quarter West"
+    },
+    {
+     "value": "Riverside East"
+    },
+    {
+     "value": "Riverside Macro"
+    },
+    {
+     "value": "Riverside North"
+    },
+    {
+     "value": "Riverside Small Cell"
+    },
+    {
+     "value": "Riverside South"
+    },
+    {
+     "value": "Riverside West"
+    },
+    {
+     "value": "Stadium East"
+    },
+    {
+     "value": "Stadium Macro"
+    },
+    {
+     "value": "Stadium West"
+    },
+    {
+     "value": "Tech Park East"
+    },
+    {
+     "value": "Tech Park Macro"
+    },
+    {
+     "value": "Tech Park North"
+    },
+    {
+     "value": "Tech Park Small Cell"
+    },
+    {
+     "value": "Tech Park South"
+    },
+    {
+     "value": "Water Tower East"
+    },
+    {
+     "value": "Water Tower Macro"
+    },
+    {
+     "value": "Water Tower North"
+    },
+    {
+     "value": "Water Tower Small Cell"
+    },
+    {
+     "value": "Water Tower South"
+    }
+   ]
+  },
+  {
+   "key": "addon_name",
+   "name": "Add-on",
+   "description": "Optional extras",
+   "data_type": "string",
+   "category": "products",
+   "values": [
+    {
+     "value": "International Roaming Pass"
+    },
+    {
+     "value": "Extra 10 GB"
+    },
+    {
+     "value": "Device Insurance"
+    },
+    {
+     "value": "Static IP"
+    },
+    {
+     "value": "Video Streaming Pass"
+    },
+    {
+     "value": "Music Streaming Pass"
+    },
+    {
+     "value": "Parental Controls"
+    },
+    {
+     "value": "Unlimited Weekend Calls"
+    },
+    {
+     "value": "Second SIM"
+    },
+    {
+     "value": "Security Suite"
+    },
+    {
+     "value": "Priority Support"
+    },
+    {
+     "value": "Long Distance Pack"
+    }
+   ]
+  }
+ ]
+}

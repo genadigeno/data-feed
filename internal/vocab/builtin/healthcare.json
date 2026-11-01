@@ -1,0 +1,716 @@
+{
+ "domain": "healthcare",
+ "name": "Healthcare",
+ "description": "Fictional clinical administration: appointments, departments and billing.",
+ "groups": [
+  {
+   "key": "department",
+   "name": "Department",
+   "description": "Hospital departments",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Cardiology"
+    },
+    {
+     "value": "Dermatology"
+    },
+    {
+     "value": "Emergency Medicine"
+    },
+    {
+     "value": "Endocrinology"
+    },
+    {
+     "value": "Gastroenterology"
+    },
+    {
+     "value": "General Surgery"
+    },
+    {
+     "value": "Geriatrics"
+    },
+    {
+     "value": "Neurology"
+    },
+    {
+     "value": "Obstetrics"
+    },
+    {
+     "value": "Oncology"
+    },
+    {
+     "value": "Ophthalmology"
+    },
+    {
+     "value": "Orthopedics"
+    },
+    {
+     "value": "Pediatrics"
+    },
+    {
+     "value": "Psychiatry"
+    },
+    {
+     "value": "Radiology"
+    },
+    {
+     "value": "Rheumatology"
+    },
+    {
+     "value": "Urology"
+    },
+    {
+     "value": "Physical Therapy"
+    },
+    {
+     "value": "Family Medicine"
+    },
+    {
+     "value": "Anesthesiology"
+    }
+   ]
+  },
+  {
+   "key": "appointment_status",
+   "name": "Appointment status",
+   "description": "Appointment lifecycle",
+   "data_type": "enum",
+   "category": "workflow",
+   "values": [
+    {
+     "value": "SCHEDULED",
+     "weight": 15
+    },
+    {
+     "value": "CONFIRMED",
+     "weight": 15
+    },
+    {
+     "value": "CHECKED_IN",
+     "weight": 3
+    },
+    {
+     "value": "IN_PROGRESS",
+     "weight": 2
+    },
+    {
+     "value": "COMPLETED",
+     "weight": 50
+    },
+    {
+     "value": "CANCELLED",
+     "weight": 7
+    },
+    {
+     "value": "NO_SHOW",
+     "weight": 5
+    },
+    {
+     "value": "RESCHEDULED",
+     "weight": 3
+    }
+   ]
+  },
+  {
+   "key": "visit_type",
+   "name": "Visit type",
+   "description": "Kinds of visit",
+   "data_type": "enum",
+   "category": "clinical",
+   "values": [
+    {
+     "value": "NEW_PATIENT",
+     "weight": 12
+    },
+    {
+     "value": "FOLLOW_UP",
+     "weight": 35
+    },
+    {
+     "value": "ANNUAL_CHECKUP",
+     "weight": 15
+    },
+    {
+     "value": "TELEHEALTH",
+     "weight": 12
+    },
+    {
+     "value": "URGENT_CARE",
+     "weight": 8
+    },
+    {
+     "value": "PROCEDURE",
+     "weight": 6
+    },
+    {
+     "value": "LAB_ONLY",
+     "weight": 7
+    },
+    {
+     "value": "IMAGING",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "insurance_plan_type",
+   "name": "Plan type",
+   "description": "Insurance plan kinds",
+   "data_type": "enum",
+   "category": "billing",
+   "values": [
+    {
+     "value": "HMO"
+    },
+    {
+     "value": "PPO"
+    },
+    {
+     "value": "EPO"
+    },
+    {
+     "value": "POS"
+    },
+    {
+     "value": "HDHP"
+    },
+    {
+     "value": "MEDICAL_ASSISTANCE"
+    },
+    {
+     "value": "SELF_PAY"
+    }
+   ]
+  },
+  {
+   "key": "claim_status",
+   "name": "Claim status",
+   "description": "Claim lifecycle",
+   "data_type": "enum",
+   "category": "billing",
+   "values": [
+    {
+     "value": "SUBMITTED",
+     "weight": 10
+    },
+    {
+     "value": "IN_REVIEW",
+     "weight": 10
+    },
+    {
+     "value": "APPROVED",
+     "weight": 15
+    },
+    {
+     "value": "PARTIALLY_APPROVED",
+     "weight": 8
+    },
+    {
+     "value": "DENIED",
+     "weight": 7
+    },
+    {
+     "value": "APPEALED",
+     "weight": 2
+    },
+    {
+     "value": "PAID",
+     "weight": 48
+    }
+   ]
+  },
+  {
+   "key": "facility_name",
+   "name": "Facility",
+   "description": "Fictional facilities",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Ashford Community Hospital"
+    },
+    {
+     "value": "Ashford Family Clinic"
+    },
+    {
+     "value": "Ashford Health Center"
+    },
+    {
+     "value": "Ashford Medical Center"
+    },
+    {
+     "value": "Ashford Surgical Center"
+    },
+    {
+     "value": "Ashford Urgent Care"
+    },
+    {
+     "value": "Bluepeak Family Clinic"
+    },
+    {
+     "value": "Bluepeak Medical Center"
+    },
+    {
+     "value": "Bluepeak Surgical Center"
+    },
+    {
+     "value": "Bluepeak Urgent Care"
+    },
+    {
+     "value": "Brightfield Family Clinic"
+    },
+    {
+     "value": "Brightfield Health Center"
+    },
+    {
+     "value": "Brightfield Medical Center"
+    },
+    {
+     "value": "Brightfield Rehabilitation Center"
+    },
+    {
+     "value": "Brightfield Surgical Center"
+    },
+    {
+     "value": "Brightfield Urgent Care"
+    },
+    {
+     "value": "Clearwater Community Hospital"
+    },
+    {
+     "value": "Clearwater Family Clinic"
+    },
+    {
+     "value": "Clearwater Health Center"
+    },
+    {
+     "value": "Clearwater Rehabilitation Center"
+    },
+    {
+     "value": "Clearwater Urgent Care"
+    },
+    {
+     "value": "Elmhurst Community Hospital"
+    },
+    {
+     "value": "Elmhurst Family Clinic"
+    },
+    {
+     "value": "Elmhurst Health Center"
+    },
+    {
+     "value": "Elmhurst Urgent Care"
+    },
+    {
+     "value": "Fairmont Health Center"
+    },
+    {
+     "value": "Fairmont Medical Center"
+    },
+    {
+     "value": "Fairmont Surgical Center"
+    },
+    {
+     "value": "Greenvale Family Clinic"
+    },
+    {
+     "value": "Greenvale Health Center"
+    },
+    {
+     "value": "Greenvale Medical Center"
+    },
+    {
+     "value": "Greenvale Surgical Center"
+    },
+    {
+     "value": "Harborview Community Hospital"
+    },
+    {
+     "value": "Harborview Health Center"
+    },
+    {
+     "value": "Harborview Rehabilitation Center"
+    },
+    {
+     "value": "Harborview Surgical Center"
+    },
+    {
+     "value": "Harborview Urgent Care"
+    },
+    {
+     "value": "Ironwood Family Clinic"
+    },
+    {
+     "value": "Ironwood Health Center"
+    },
+    {
+     "value": "Ironwood Medical Center"
+    },
+    {
+     "value": "Ironwood Rehabilitation Center"
+    },
+    {
+     "value": "Ironwood Urgent Care"
+    },
+    {
+     "value": "Kingsley Community Hospital"
+    },
+    {
+     "value": "Kingsley Health Center"
+    },
+    {
+     "value": "Kingsley Medical Center"
+    },
+    {
+     "value": "Kingsley Rehabilitation Center"
+    },
+    {
+     "value": "Kingsley Urgent Care"
+    },
+    {
+     "value": "Lakeshore Community Hospital"
+    },
+    {
+     "value": "Lakeshore Family Clinic"
+    },
+    {
+     "value": "Lakeshore Health Center"
+    },
+    {
+     "value": "Lakeshore Medical Center"
+    },
+    {
+     "value": "Lakeshore Rehabilitation Center"
+    },
+    {
+     "value": "Lakeshore Surgical Center"
+    },
+    {
+     "value": "Lakeshore Urgent Care"
+    },
+    {
+     "value": "Maplecrest Community Hospital"
+    },
+    {
+     "value": "Maplecrest Family Clinic"
+    },
+    {
+     "value": "Maplecrest Health Center"
+    },
+    {
+     "value": "Maplecrest Medical Center"
+    },
+    {
+     "value": "Maplecrest Rehabilitation Center"
+    },
+    {
+     "value": "Maplecrest Urgent Care"
+    },
+    {
+     "value": "Northwind Family Clinic"
+    },
+    {
+     "value": "Northwind Health Center"
+    },
+    {
+     "value": "Northwind Medical Center"
+    },
+    {
+     "value": "Northwind Surgical Center"
+    },
+    {
+     "value": "Northwind Urgent Care"
+    },
+    {
+     "value": "Oakridge Community Hospital"
+    },
+    {
+     "value": "Oakridge Health Center"
+    },
+    {
+     "value": "Oakridge Rehabilitation Center"
+    },
+    {
+     "value": "Oakridge Surgical Center"
+    },
+    {
+     "value": "Oakridge Urgent Care"
+    },
+    {
+     "value": "Redwood Community Hospital"
+    },
+    {
+     "value": "Redwood Family Clinic"
+    },
+    {
+     "value": "Redwood Health Center"
+    },
+    {
+     "value": "Redwood Rehabilitation Center"
+    },
+    {
+     "value": "Redwood Urgent Care"
+    },
+    {
+     "value": "Riverton Community Hospital"
+    },
+    {
+     "value": "Riverton Health Center"
+    },
+    {
+     "value": "Riverton Rehabilitation Center"
+    },
+    {
+     "value": "Riverton Surgical Center"
+    },
+    {
+     "value": "Silverline Community Hospital"
+    },
+    {
+     "value": "Silverline Health Center"
+    },
+    {
+     "value": "Silverline Surgical Center"
+    },
+    {
+     "value": "Silverline Urgent Care"
+    },
+    {
+     "value": "Stonebridge Community Hospital"
+    },
+    {
+     "value": "Stonebridge Family Clinic"
+    },
+    {
+     "value": "Stonebridge Health Center"
+    },
+    {
+     "value": "Stonebridge Medical Center"
+    },
+    {
+     "value": "Stonebridge Rehabilitation Center"
+    },
+    {
+     "value": "Stonebridge Urgent Care"
+    },
+    {
+     "value": "Summerhill Community Hospital"
+    },
+    {
+     "value": "Summerhill Family Clinic"
+    },
+    {
+     "value": "Summerhill Health Center"
+    },
+    {
+     "value": "Summerhill Medical Center"
+    },
+    {
+     "value": "Summerhill Surgical Center"
+    },
+    {
+     "value": "Summerhill Urgent Care"
+    },
+    {
+     "value": "Westbrook Family Clinic"
+    },
+    {
+     "value": "Westbrook Medical Center"
+    },
+    {
+     "value": "Westbrook Rehabilitation Center"
+    },
+    {
+     "value": "Westbrook Surgical Center"
+    },
+    {
+     "value": "Westbrook Urgent Care"
+    }
+   ]
+  },
+  {
+   "key": "symptom",
+   "name": "Symptom",
+   "description": "Common reasons for a visit",
+   "data_type": "string",
+   "category": "clinical",
+   "values": [
+    {
+     "value": "Headache"
+    },
+    {
+     "value": "Sore throat"
+    },
+    {
+     "value": "Cough"
+    },
+    {
+     "value": "Back pain"
+    },
+    {
+     "value": "Fever"
+    },
+    {
+     "value": "Fatigue"
+    },
+    {
+     "value": "Joint pain"
+    },
+    {
+     "value": "Skin rash"
+    },
+    {
+     "value": "Shortness of breath"
+    },
+    {
+     "value": "Dizziness"
+    },
+    {
+     "value": "Nausea"
+    },
+    {
+     "value": "Chest discomfort"
+    },
+    {
+     "value": "Ear pain"
+    },
+    {
+     "value": "Abdominal pain"
+    },
+    {
+     "value": "Allergy symptoms"
+    },
+    {
+     "value": "Insomnia"
+    },
+    {
+     "value": "Sprained ankle"
+    },
+    {
+     "value": "Blurred vision"
+    },
+    {
+     "value": "Seasonal congestion"
+    },
+    {
+     "value": "Muscle stiffness"
+    }
+   ]
+  },
+  {
+   "key": "medication_class",
+   "name": "Medication class",
+   "description": "Broad drug classes",
+   "data_type": "string",
+   "category": "clinical",
+   "values": [
+    {
+     "value": "Analgesic"
+    },
+    {
+     "value": "Antibiotic"
+    },
+    {
+     "value": "Antihistamine"
+    },
+    {
+     "value": "Antihypertensive"
+    },
+    {
+     "value": "Antidepressant"
+    },
+    {
+     "value": "Anticoagulant"
+    },
+    {
+     "value": "Antidiabetic"
+    },
+    {
+     "value": "Bronchodilator"
+    },
+    {
+     "value": "Corticosteroid"
+    },
+    {
+     "value": "Diuretic"
+    },
+    {
+     "value": "Statin"
+    },
+    {
+     "value": "Antacid"
+    },
+    {
+     "value": "Antiviral"
+    },
+    {
+     "value": "Vaccine"
+    },
+    {
+     "value": "Muscle Relaxant"
+    },
+    {
+     "value": "Thyroid Hormone"
+    }
+   ]
+  },
+  {
+   "key": "lab_test_status",
+   "name": "Lab test status",
+   "description": "Lab order lifecycle",
+   "data_type": "enum",
+   "category": "clinical",
+   "values": [
+    {
+     "value": "ORDERED"
+    },
+    {
+     "value": "COLLECTED"
+    },
+    {
+     "value": "IN_ANALYSIS"
+    },
+    {
+     "value": "RESULTED"
+    },
+    {
+     "value": "REVIEWED"
+    },
+    {
+     "value": "CANCELLED"
+    }
+   ]
+  },
+  {
+   "key": "triage_level",
+   "name": "Triage level",
+   "description": "Urgency bands",
+   "data_type": "enum",
+   "category": "clinical",
+   "values": [
+    {
+     "value": "IMMEDIATE",
+     "weight": 2
+    },
+    {
+     "value": "EMERGENT",
+     "weight": 8
+    },
+    {
+     "value": "URGENT",
+     "weight": 30
+    },
+    {
+     "value": "LESS_URGENT",
+     "weight": 35
+    },
+    {
+     "value": "NON_URGENT",
+     "weight": 25
+    }
+   ]
+  }
+ ]
+}

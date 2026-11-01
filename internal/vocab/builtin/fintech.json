@@ -1,0 +1,574 @@
+{
+ "domain": "fintech",
+ "name": "Fintech",
+ "description": "Payments, digital wallets, cards and fraud checks.",
+ "groups": [
+  {
+   "key": "payment_status",
+   "name": "Payment status",
+   "description": "Payment lifecycle",
+   "data_type": "enum",
+   "category": "payments",
+   "values": [
+    {
+     "value": "CREATED",
+     "weight": 3
+    },
+    {
+     "value": "AUTHORIZED",
+     "weight": 5
+    },
+    {
+     "value": "CAPTURED",
+     "weight": 8
+    },
+    {
+     "value": "SETTLED",
+     "weight": 70
+    },
+    {
+     "value": "FAILED",
+     "weight": 7
+    },
+    {
+     "value": "REFUNDED",
+     "weight": 4
+    },
+    {
+     "value": "CHARGED_BACK",
+     "weight": 1
+    },
+    {
+     "value": "EXPIRED",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "payment_rail",
+   "name": "Payment rail",
+   "description": "How money moves",
+   "data_type": "enum",
+   "category": "payments",
+   "values": [
+    {
+     "value": "CARD_NETWORK"
+    },
+    {
+     "value": "ACH"
+    },
+    {
+     "value": "SEPA_CREDIT"
+    },
+    {
+     "value": "SEPA_INSTANT"
+    },
+    {
+     "value": "SWIFT"
+    },
+    {
+     "value": "FASTER_PAYMENTS"
+    },
+    {
+     "value": "WALLET_TRANSFER"
+    }
+   ]
+  },
+  {
+   "key": "card_network",
+   "name": "Card network",
+   "description": "Generic network tiers",
+   "data_type": "enum",
+   "category": "cards",
+   "values": [
+    {
+     "value": "NETWORK_A",
+     "weight": 50
+    },
+    {
+     "value": "NETWORK_B",
+     "weight": 35
+    },
+    {
+     "value": "NETWORK_C",
+     "weight": 10
+    },
+    {
+     "value": "PRIVATE_LABEL",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "card_type",
+   "name": "Card type",
+   "description": "Card products",
+   "data_type": "enum",
+   "category": "cards",
+   "values": [
+    {
+     "value": "DEBIT",
+     "weight": 45
+    },
+    {
+     "value": "CREDIT",
+     "weight": 30
+    },
+    {
+     "value": "PREPAID",
+     "weight": 8
+    },
+    {
+     "value": "VIRTUAL",
+     "weight": 12
+    },
+    {
+     "value": "CORPORATE",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "decline_reason",
+   "name": "Decline reason",
+   "description": "Why a payment fails",
+   "data_type": "enum",
+   "category": "payments",
+   "values": [
+    {
+     "value": "INSUFFICIENT_FUNDS",
+     "weight": 35
+    },
+    {
+     "value": "CARD_EXPIRED",
+     "weight": 10
+    },
+    {
+     "value": "SUSPECTED_FRAUD",
+     "weight": 8
+    },
+    {
+     "value": "INCORRECT_CVC",
+     "weight": 10
+    },
+    {
+     "value": "LIMIT_EXCEEDED",
+     "weight": 10
+    },
+    {
+     "value": "ISSUER_UNAVAILABLE",
+     "weight": 5
+    },
+    {
+     "value": "AUTHENTICATION_FAILED",
+     "weight": 7
+    },
+    {
+     "value": "DO_NOT_HONOR",
+     "weight": 15
+    }
+   ]
+  },
+  {
+   "key": "fraud_signal",
+   "name": "Fraud signal",
+   "description": "Risk indicators",
+   "data_type": "enum",
+   "category": "risk",
+   "values": [
+    {
+     "value": "VELOCITY_SPIKE"
+    },
+    {
+     "value": "NEW_DEVICE"
+    },
+    {
+     "value": "GEO_MISMATCH"
+    },
+    {
+     "value": "PROXY_DETECTED"
+    },
+    {
+     "value": "SHARED_DEVICE"
+    },
+    {
+     "value": "AMOUNT_ANOMALY"
+    },
+    {
+     "value": "EMAIL_RECENTLY_CREATED"
+    },
+    {
+     "value": "MULTIPLE_CARDS"
+    }
+   ]
+  },
+  {
+   "key": "risk_level",
+   "name": "Risk level",
+   "description": "Risk score bands",
+   "data_type": "enum",
+   "category": "risk",
+   "values": [
+    {
+     "value": "LOW",
+     "weight": 80
+    },
+    {
+     "value": "MEDIUM",
+     "weight": 14
+    },
+    {
+     "value": "HIGH",
+     "weight": 5
+    },
+    {
+     "value": "CRITICAL",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "key": "kyc_tier",
+   "name": "KYC tier",
+   "description": "Verification levels",
+   "data_type": "enum",
+   "category": "compliance",
+   "values": [
+    {
+     "value": "TIER_0",
+     "weight": 10
+    },
+    {
+     "value": "TIER_1",
+     "weight": 40
+    },
+    {
+     "value": "TIER_2",
+     "weight": 40
+    },
+    {
+     "value": "TIER_3",
+     "weight": 10
+    }
+   ]
+  },
+  {
+   "key": "wallet_label",
+   "name": "Wallet label",
+   "description": "Names users give wallets",
+   "data_type": "string",
+   "category": "wallets",
+   "values": [
+    {
+     "value": "Everyday"
+    },
+    {
+     "value": "Savings"
+    },
+    {
+     "value": "Travel"
+    },
+    {
+     "value": "Rent"
+    },
+    {
+     "value": "Bills"
+    },
+    {
+     "value": "Groceries"
+    },
+    {
+     "value": "Emergency Fund"
+    },
+    {
+     "value": "Holiday"
+    },
+    {
+     "value": "Business"
+    },
+    {
+     "value": "Allowance"
+    },
+    {
+     "value": "Investments"
+    },
+    {
+     "value": "Side Project"
+    },
+    {
+     "value": "Taxes"
+    },
+    {
+     "value": "Gifts"
+    },
+    {
+     "value": "Subscriptions"
+    }
+   ]
+  },
+  {
+   "key": "fintech_merchant",
+   "name": "Merchant",
+   "description": "Fictional online merchants",
+   "data_type": "string",
+   "category": "payments",
+   "values": [
+    {
+     "value": "Bookgrid"
+    },
+    {
+     "value": "Bookloop"
+    },
+    {
+     "value": "Bookly"
+    },
+    {
+     "value": "Bookmate"
+    },
+    {
+     "value": "Booknest"
+    },
+    {
+     "value": "Bookport"
+    },
+    {
+     "value": "Bookwise"
+    },
+    {
+     "value": "Cloudgrid"
+    },
+    {
+     "value": "Cloudloop"
+    },
+    {
+     "value": "Cloudmate"
+    },
+    {
+     "value": "Cloudnest"
+    },
+    {
+     "value": "Cloudport"
+    },
+    {
+     "value": "Cloudwise"
+    },
+    {
+     "value": "Fitgrid"
+    },
+    {
+     "value": "Fithub"
+    },
+    {
+     "value": "Fitloop"
+    },
+    {
+     "value": "Fitly"
+    },
+    {
+     "value": "Fitmate"
+    },
+    {
+     "value": "Fitnest"
+    },
+    {
+     "value": "Fitport"
+    },
+    {
+     "value": "Fitwise"
+    },
+    {
+     "value": "Foodgrid"
+    },
+    {
+     "value": "Foodhub"
+    },
+    {
+     "value": "Foodloop"
+    },
+    {
+     "value": "Foodly"
+    },
+    {
+     "value": "Foodnest"
+    },
+    {
+     "value": "Foodport"
+    },
+    {
+     "value": "Foodwise"
+    },
+    {
+     "value": "Gamegrid"
+    },
+    {
+     "value": "Gamehub"
+    },
+    {
+     "value": "Gameloop"
+    },
+    {
+     "value": "Gamely"
+    },
+    {
+     "value": "Gamemate"
+    },
+    {
+     "value": "Gamenest"
+    },
+    {
+     "value": "Gameport"
+    },
+    {
+     "value": "Gamewise"
+    },
+    {
+     "value": "Learngrid"
+    },
+    {
+     "value": "Learnloop"
+    },
+    {
+     "value": "Learnly"
+    },
+    {
+     "value": "Learnmate"
+    },
+    {
+     "value": "Learnnest"
+    },
+    {
+     "value": "Learnport"
+    },
+    {
+     "value": "Learnwise"
+    },
+    {
+     "value": "Payhub"
+    },
+    {
+     "value": "Payloop"
+    },
+    {
+     "value": "Payly"
+    },
+    {
+     "value": "Paymate"
+    },
+    {
+     "value": "Paynest"
+    },
+    {
+     "value": "Payport"
+    },
+    {
+     "value": "Paywise"
+    },
+    {
+     "value": "Ridegrid"
+    },
+    {
+     "value": "Ridehub"
+    },
+    {
+     "value": "Rideloop"
+    },
+    {
+     "value": "Ridely"
+    },
+    {
+     "value": "Ridemate"
+    },
+    {
+     "value": "Ridenest"
+    },
+    {
+     "value": "Rideport"
+    },
+    {
+     "value": "Ridewise"
+    },
+    {
+     "value": "Shopgrid"
+    },
+    {
+     "value": "Shophub"
+    },
+    {
+     "value": "Shoploop"
+    },
+    {
+     "value": "Shoply"
+    },
+    {
+     "value": "Shopmate"
+    },
+    {
+     "value": "Shopport"
+    },
+    {
+     "value": "Shopwise"
+    },
+    {
+     "value": "Streamloop"
+    },
+    {
+     "value": "Streamly"
+    },
+    {
+     "value": "Streamnest"
+    },
+    {
+     "value": "Streamport"
+    },
+    {
+     "value": "Streamwise"
+    }
+   ]
+  },
+  {
+   "key": "payout_description",
+   "name": "Payout description",
+   "description": "Statement descriptors",
+   "data_type": "string",
+   "category": "payments",
+   "values": [
+    {
+     "value": "Weekly settlement"
+    },
+    {
+     "value": "Monthly payout"
+    },
+    {
+     "value": "Marketplace earnings"
+    },
+    {
+     "value": "Refund adjustment"
+    },
+    {
+     "value": "Reserve release"
+    },
+    {
+     "value": "Instant payout"
+    },
+    {
+     "value": "Subscription revenue"
+    },
+    {
+     "value": "Affiliate commission"
+    },
+    {
+     "value": "Platform fee rebate"
+    },
+    {
+     "value": "Chargeback reversal"
+    },
+    {
+     "value": "Quarterly bonus"
+    },
+    {
+     "value": "Invoice settlement"
+    }
+   ]
+  }
+ ]
+}

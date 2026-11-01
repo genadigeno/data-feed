@@ -2,14 +2,18 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/genadigeno/data-feed/internal/ai"
+	"github.com/genadigeno/data-feed/internal/ai/claude"
 	"github.com/genadigeno/data-feed/internal/artifact"
 	"github.com/genadigeno/data-feed/internal/buildinfo"
+	"github.com/genadigeno/data-feed/internal/catalog"
 	"github.com/genadigeno/data-feed/internal/clock"
 	"github.com/genadigeno/data-feed/internal/config"
 	"github.com/genadigeno/data-feed/internal/coord"
@@ -27,6 +31,7 @@ import (
 type ControlPlane struct {
 	Core     *coord.Core
 	Sessions *session.Service
+	Catalogs *catalog.Service
 	Hub      *hub.Hub
 	Logs     *obs.SessionLogs
 	Store    *artifact.Store
@@ -43,10 +48,29 @@ func NewControlPlane(cfg *config.Config, db store.DB, dir *datadir.Dir, vocab sn
 		FreeBytes:        func() (uint64, error) { return datadir.FreeBytes(dir.Root()) },
 		OpenRegistration: cfg.Application.Environment == config.EnvDevelopment && config.IsLoopback(cfg.Coordinator.Listen),
 	})
+	catalogs := &catalog.Service{DB: db, Config: cfg, Clock: clk, Logger: logger.With("component", "catalog"), Hub: h, Provider: newProvider(cfg)}
 	return &ControlPlane{
-		Core: core, Hub: h, Logs: logs, Store: artifacts,
-		Sessions: &session.Service{DB: db, Config: cfg, Clock: clk, Notifier: core, Artifacts: artifacts, Vocab: vocab},
+		Core: core, Hub: h, Logs: logs, Store: artifacts, Catalogs: catalogs,
+		Sessions: &session.Service{
+			DB: db, Config: cfg, Clock: clk, Notifier: core, Artifacts: artifacts, Vocab: vocab,
+			CatalogContent: func(ctx context.Context, ref session.CatalogRef) (json.RawMessage, int, error) {
+				return catalogs.Resolve(ctx, ref.ID, ref.Version)
+			},
+		},
 	}
+}
+
+// newProvider picks the vocabulary provider, or nil if AI is off.
+func newProvider(cfg *config.Config) ai.Provider {
+	if !cfg.AI.Enabled {
+		return nil
+	}
+	if cfg.AI.Provider == ai.OfflineName {
+		return ai.Offline{}
+	}
+	return claude.New(claude.Options{
+		APIKey: cfg.AI.APIKey.Reveal(), BaseURL: cfg.AI.BaseURL, MaxRetries: cfg.AI.MaxRetries, RequestTimeout: cfg.AI.RequestTimeout,
+	})
 }
 
 // localCoordinator is the Coordinator as the embedded worker sees it. It is this process,

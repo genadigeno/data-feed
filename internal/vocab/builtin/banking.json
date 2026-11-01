@@ -1,0 +1,1380 @@
+{
+ "domain": "banking",
+ "name": "Banking",
+ "description": "Retail banking: accounts, transactions, branches and loans.",
+ "groups": [
+  {
+   "key": "account_type",
+   "name": "Account type",
+   "description": "Kinds of account",
+   "data_type": "enum",
+   "category": "accounts",
+   "values": [
+    {
+     "value": "CHECKING",
+     "weight": 40
+    },
+    {
+     "value": "SAVINGS",
+     "weight": 30
+    },
+    {
+     "value": "MONEY_MARKET",
+     "weight": 5
+    },
+    {
+     "value": "CERTIFICATE_OF_DEPOSIT",
+     "weight": 5
+    },
+    {
+     "value": "BUSINESS_CHECKING",
+     "weight": 8
+    },
+    {
+     "value": "JOINT",
+     "weight": 6
+    },
+    {
+     "value": "STUDENT",
+     "weight": 4
+    },
+    {
+     "value": "RETIREMENT",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "account_status",
+   "name": "Account status",
+   "description": "Account lifecycle",
+   "data_type": "enum",
+   "category": "accounts",
+   "values": [
+    {
+     "value": "ACTIVE",
+     "weight": 80
+    },
+    {
+     "value": "DORMANT",
+     "weight": 6
+    },
+    {
+     "value": "FROZEN",
+     "weight": 1
+    },
+    {
+     "value": "CLOSED",
+     "weight": 8
+    },
+    {
+     "value": "PENDING_VERIFICATION",
+     "weight": 3
+    },
+    {
+     "value": "OVERDRAWN",
+     "weight": 2
+    }
+   ]
+  },
+  {
+   "key": "transaction_type",
+   "name": "Transaction type",
+   "description": "Kinds of transaction",
+   "data_type": "enum",
+   "category": "transactions",
+   "values": [
+    {
+     "value": "CARD_PURCHASE",
+     "weight": 50
+    },
+    {
+     "value": "ATM_WITHDRAWAL",
+     "weight": 8
+    },
+    {
+     "value": "DIRECT_DEPOSIT",
+     "weight": 8
+    },
+    {
+     "value": "WIRE_TRANSFER",
+     "weight": 2
+    },
+    {
+     "value": "ACH_CREDIT",
+     "weight": 6
+    },
+    {
+     "value": "ACH_DEBIT",
+     "weight": 8
+    },
+    {
+     "value": "CHECK_DEPOSIT",
+     "weight": 2
+    },
+    {
+     "value": "STANDING_ORDER",
+     "weight": 6
+    },
+    {
+     "value": "FEE",
+     "weight": 3
+    },
+    {
+     "value": "INTEREST_PAYMENT",
+     "weight": 3
+    },
+    {
+     "value": "REFUND",
+     "weight": 4
+    }
+   ]
+  },
+  {
+   "key": "transaction_status",
+   "name": "Transaction status",
+   "description": "Transaction lifecycle",
+   "data_type": "enum",
+   "category": "transactions",
+   "values": [
+    {
+     "value": "POSTED",
+     "weight": 85
+    },
+    {
+     "value": "PENDING",
+     "weight": 8
+    },
+    {
+     "value": "DECLINED",
+     "weight": 4
+    },
+    {
+     "value": "REVERSED",
+     "weight": 2
+    },
+    {
+     "value": "DISPUTED",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "key": "currency_code",
+   "name": "Currency",
+   "description": "ISO 4217 codes",
+   "data_type": "enum",
+   "category": "transactions",
+   "values": [
+    {
+     "value": "USD",
+     "weight": 40
+    },
+    {
+     "value": "EUR",
+     "weight": 25
+    },
+    {
+     "value": "GBP",
+     "weight": 10
+    },
+    {
+     "value": "JPY",
+     "weight": 5
+    },
+    {
+     "value": "CHF",
+     "weight": 3
+    },
+    {
+     "value": "CAD",
+     "weight": 4
+    },
+    {
+     "value": "AUD",
+     "weight": 4
+    },
+    {
+     "value": "SEK",
+     "weight": 1
+    },
+    {
+     "value": "NOK",
+     "weight": 1
+    },
+    {
+     "value": "DKK",
+     "weight": 1
+    },
+    {
+     "value": "PLN",
+     "weight": 2
+    },
+    {
+     "value": "CZK",
+     "weight": 1
+    },
+    {
+     "value": "SGD",
+     "weight": 1
+    },
+    {
+     "value": "HKD",
+     "weight": 1
+    },
+    {
+     "value": "NZD",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "key": "loan_type",
+   "name": "Loan type",
+   "description": "Loan products",
+   "data_type": "enum",
+   "category": "lending",
+   "values": [
+    {
+     "value": "MORTGAGE",
+     "weight": 25
+    },
+    {
+     "value": "AUTO",
+     "weight": 25
+    },
+    {
+     "value": "PERSONAL",
+     "weight": 25
+    },
+    {
+     "value": "STUDENT",
+     "weight": 10
+    },
+    {
+     "value": "HOME_EQUITY",
+     "weight": 5
+    },
+    {
+     "value": "BUSINESS",
+     "weight": 5
+    },
+    {
+     "value": "CREDIT_LINE",
+     "weight": 5
+    }
+   ]
+  },
+  {
+   "key": "loan_status",
+   "name": "Loan status",
+   "description": "Loan lifecycle",
+   "data_type": "enum",
+   "category": "lending",
+   "values": [
+    {
+     "value": "APPLIED",
+     "weight": 5
+    },
+    {
+     "value": "APPROVED",
+     "weight": 3
+    },
+    {
+     "value": "DISBURSED",
+     "weight": 2
+    },
+    {
+     "value": "CURRENT",
+     "weight": 65
+    },
+    {
+     "value": "DELINQUENT",
+     "weight": 5
+    },
+    {
+     "value": "DEFAULTED",
+     "weight": 1
+    },
+    {
+     "value": "PAID_OFF",
+     "weight": 15
+    },
+    {
+     "value": "REJECTED",
+     "weight": 4
+    }
+   ]
+  },
+  {
+   "key": "branch_name",
+   "name": "Branch name",
+   "description": "Fictional branches",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Central Banking Center"
+    },
+    {
+     "value": "Central Branch"
+    },
+    {
+     "value": "Central Financial Center"
+    },
+    {
+     "value": "Downtown Banking Center"
+    },
+    {
+     "value": "Downtown Branch"
+    },
+    {
+     "value": "Downtown Financial Center"
+    },
+    {
+     "value": "Eastside Banking Center"
+    },
+    {
+     "value": "Eastside Branch"
+    },
+    {
+     "value": "Eastside Financial Center"
+    },
+    {
+     "value": "Harbor Banking Center"
+    },
+    {
+     "value": "Harbor Branch"
+    },
+    {
+     "value": "Harbor Financial Center"
+    },
+    {
+     "value": "Hillcrest Banking Center"
+    },
+    {
+     "value": "Hillcrest Branch"
+    },
+    {
+     "value": "Hillcrest Financial Center"
+    },
+    {
+     "value": "Lakeside Banking Center"
+    },
+    {
+     "value": "Lakeside Branch"
+    },
+    {
+     "value": "Lakeside Financial Center"
+    },
+    {
+     "value": "Market Street Banking Center"
+    },
+    {
+     "value": "Market Street Branch"
+    },
+    {
+     "value": "Market Street Financial Center"
+    },
+    {
+     "value": "Northgate Banking Center"
+    },
+    {
+     "value": "Northgate Branch"
+    },
+    {
+     "value": "Northgate Financial Center"
+    },
+    {
+     "value": "Old Town Banking Center"
+    },
+    {
+     "value": "Old Town Branch"
+    },
+    {
+     "value": "Old Town Financial Center"
+    },
+    {
+     "value": "Parkview Banking Center"
+    },
+    {
+     "value": "Parkview Branch"
+    },
+    {
+     "value": "Parkview Financial Center"
+    },
+    {
+     "value": "Riverside Banking Center"
+    },
+    {
+     "value": "Riverside Branch"
+    },
+    {
+     "value": "Riverside Financial Center"
+    },
+    {
+     "value": "Southgate Banking Center"
+    },
+    {
+     "value": "Southgate Branch"
+    },
+    {
+     "value": "Southgate Financial Center"
+    },
+    {
+     "value": "Station Road Banking Center"
+    },
+    {
+     "value": "Station Road Branch"
+    },
+    {
+     "value": "Station Road Financial Center"
+    },
+    {
+     "value": "University Banking Center"
+    },
+    {
+     "value": "University Branch"
+    },
+    {
+     "value": "University Financial Center"
+    },
+    {
+     "value": "Westfield Banking Center"
+    },
+    {
+     "value": "Westfield Branch"
+    },
+    {
+     "value": "Westfield Financial Center"
+    }
+   ]
+  },
+  {
+   "key": "bank_name",
+   "name": "Bank name",
+   "description": "Fictional banks",
+   "data_type": "string",
+   "category": "organisation",
+   "values": [
+    {
+     "value": "Ashford Bancorp"
+    },
+    {
+     "value": "Ashford Bank"
+    },
+    {
+     "value": "Ashford Credit Union"
+    },
+    {
+     "value": "Ashford Financial"
+    },
+    {
+     "value": "Ashford Savings Bank"
+    },
+    {
+     "value": "Ashford Trust"
+    },
+    {
+     "value": "Bluepeak Bancorp"
+    },
+    {
+     "value": "Bluepeak Bank"
+    },
+    {
+     "value": "Bluepeak Credit Union"
+    },
+    {
+     "value": "Bluepeak Financial"
+    },
+    {
+     "value": "Bluepeak Savings Bank"
+    },
+    {
+     "value": "Bluepeak Trust"
+    },
+    {
+     "value": "Brightfield Bancorp"
+    },
+    {
+     "value": "Brightfield Bank"
+    },
+    {
+     "value": "Brightfield Credit Union"
+    },
+    {
+     "value": "Brightfield Financial"
+    },
+    {
+     "value": "Brightfield Savings Bank"
+    },
+    {
+     "value": "Brightfield Trust"
+    },
+    {
+     "value": "Clearwater Bancorp"
+    },
+    {
+     "value": "Clearwater Bank"
+    },
+    {
+     "value": "Clearwater Credit Union"
+    },
+    {
+     "value": "Clearwater Financial"
+    },
+    {
+     "value": "Clearwater Savings Bank"
+    },
+    {
+     "value": "Clearwater Trust"
+    },
+    {
+     "value": "Elmhurst Bancorp"
+    },
+    {
+     "value": "Elmhurst Bank"
+    },
+    {
+     "value": "Elmhurst Credit Union"
+    },
+    {
+     "value": "Elmhurst Financial"
+    },
+    {
+     "value": "Elmhurst Savings Bank"
+    },
+    {
+     "value": "Elmhurst Trust"
+    },
+    {
+     "value": "Fairmont Bancorp"
+    },
+    {
+     "value": "Fairmont Bank"
+    },
+    {
+     "value": "Fairmont Credit Union"
+    },
+    {
+     "value": "Fairmont Financial"
+    },
+    {
+     "value": "Fairmont Savings Bank"
+    },
+    {
+     "value": "Fairmont Trust"
+    },
+    {
+     "value": "Greenvale Bancorp"
+    },
+    {
+     "value": "Greenvale Bank"
+    },
+    {
+     "value": "Greenvale Credit Union"
+    },
+    {
+     "value": "Greenvale Financial"
+    },
+    {
+     "value": "Greenvale Savings Bank"
+    },
+    {
+     "value": "Greenvale Trust"
+    },
+    {
+     "value": "Harborview Bancorp"
+    },
+    {
+     "value": "Harborview Bank"
+    },
+    {
+     "value": "Harborview Credit Union"
+    },
+    {
+     "value": "Harborview Financial"
+    },
+    {
+     "value": "Harborview Savings Bank"
+    },
+    {
+     "value": "Harborview Trust"
+    },
+    {
+     "value": "Ironwood Bancorp"
+    },
+    {
+     "value": "Ironwood Bank"
+    },
+    {
+     "value": "Ironwood Credit Union"
+    },
+    {
+     "value": "Ironwood Financial"
+    },
+    {
+     "value": "Ironwood Savings Bank"
+    },
+    {
+     "value": "Ironwood Trust"
+    },
+    {
+     "value": "Kingsley Bancorp"
+    },
+    {
+     "value": "Kingsley Bank"
+    },
+    {
+     "value": "Kingsley Credit Union"
+    },
+    {
+     "value": "Kingsley Financial"
+    },
+    {
+     "value": "Kingsley Savings Bank"
+    },
+    {
+     "value": "Kingsley Trust"
+    },
+    {
+     "value": "Lakeshore Bancorp"
+    },
+    {
+     "value": "Lakeshore Bank"
+    },
+    {
+     "value": "Lakeshore Credit Union"
+    },
+    {
+     "value": "Lakeshore Financial"
+    },
+    {
+     "value": "Lakeshore Savings Bank"
+    },
+    {
+     "value": "Lakeshore Trust"
+    },
+    {
+     "value": "Maplecrest Bancorp"
+    },
+    {
+     "value": "Maplecrest Bank"
+    },
+    {
+     "value": "Maplecrest Credit Union"
+    },
+    {
+     "value": "Maplecrest Financial"
+    },
+    {
+     "value": "Maplecrest Savings Bank"
+    },
+    {
+     "value": "Maplecrest Trust"
+    },
+    {
+     "value": "Northwind Bancorp"
+    },
+    {
+     "value": "Northwind Bank"
+    },
+    {
+     "value": "Northwind Credit Union"
+    },
+    {
+     "value": "Northwind Financial"
+    },
+    {
+     "value": "Northwind Savings Bank"
+    },
+    {
+     "value": "Northwind Trust"
+    },
+    {
+     "value": "Oakridge Bancorp"
+    },
+    {
+     "value": "Oakridge Bank"
+    },
+    {
+     "value": "Oakridge Credit Union"
+    },
+    {
+     "value": "Oakridge Financial"
+    },
+    {
+     "value": "Oakridge Savings Bank"
+    },
+    {
+     "value": "Oakridge Trust"
+    },
+    {
+     "value": "Redwood Bancorp"
+    },
+    {
+     "value": "Redwood Bank"
+    },
+    {
+     "value": "Redwood Credit Union"
+    },
+    {
+     "value": "Redwood Financial"
+    },
+    {
+     "value": "Redwood Savings Bank"
+    },
+    {
+     "value": "Redwood Trust"
+    },
+    {
+     "value": "Riverton Bancorp"
+    },
+    {
+     "value": "Riverton Bank"
+    },
+    {
+     "value": "Riverton Credit Union"
+    },
+    {
+     "value": "Riverton Financial"
+    },
+    {
+     "value": "Riverton Savings Bank"
+    },
+    {
+     "value": "Riverton Trust"
+    },
+    {
+     "value": "Silverline Bancorp"
+    },
+    {
+     "value": "Silverline Bank"
+    },
+    {
+     "value": "Silverline Credit Union"
+    },
+    {
+     "value": "Silverline Financial"
+    },
+    {
+     "value": "Silverline Savings Bank"
+    },
+    {
+     "value": "Silverline Trust"
+    },
+    {
+     "value": "Stonebridge Bancorp"
+    },
+    {
+     "value": "Stonebridge Bank"
+    },
+    {
+     "value": "Stonebridge Credit Union"
+    },
+    {
+     "value": "Stonebridge Financial"
+    },
+    {
+     "value": "Stonebridge Savings Bank"
+    },
+    {
+     "value": "Stonebridge Trust"
+    },
+    {
+     "value": "Summerhill Bancorp"
+    },
+    {
+     "value": "Summerhill Bank"
+    },
+    {
+     "value": "Summerhill Credit Union"
+    },
+    {
+     "value": "Summerhill Financial"
+    },
+    {
+     "value": "Summerhill Savings Bank"
+    },
+    {
+     "value": "Summerhill Trust"
+    },
+    {
+     "value": "Westbrook Bancorp"
+    },
+    {
+     "value": "Westbrook Bank"
+    },
+    {
+     "value": "Westbrook Credit Union"
+    },
+    {
+     "value": "Westbrook Financial"
+    },
+    {
+     "value": "Westbrook Savings Bank"
+    },
+    {
+     "value": "Westbrook Trust"
+    }
+   ]
+  },
+  {
+   "key": "merchant_category",
+   "name": "Merchant category",
+   "description": "Spending categories",
+   "data_type": "string",
+   "category": "transactions",
+   "values": [
+    {
+     "value": "Groceries"
+    },
+    {
+     "value": "Restaurants"
+    },
+    {
+     "value": "Fuel"
+    },
+    {
+     "value": "Public Transport"
+    },
+    {
+     "value": "Utilities"
+    },
+    {
+     "value": "Rent"
+    },
+    {
+     "value": "Insurance"
+    },
+    {
+     "value": "Healthcare"
+    },
+    {
+     "value": "Pharmacies"
+    },
+    {
+     "value": "Entertainment"
+    },
+    {
+     "value": "Streaming Services"
+    },
+    {
+     "value": "Travel"
+    },
+    {
+     "value": "Hotels"
+    },
+    {
+     "value": "Airlines"
+    },
+    {
+     "value": "Clothing"
+    },
+    {
+     "value": "Electronics"
+    },
+    {
+     "value": "Education"
+    },
+    {
+     "value": "Home Improvement"
+    },
+    {
+     "value": "Charity"
+    },
+    {
+     "value": "Subscriptions"
+    }
+   ]
+  },
+  {
+   "key": "merchant_name",
+   "name": "Merchant name",
+   "description": "Fictional merchants",
+   "data_type": "string",
+   "category": "transactions",
+   "values": [
+    {
+     "value": "Ashford Bookshop"
+    },
+    {
+     "value": "Ashford Cinema"
+    },
+    {
+     "value": "Ashford Fitness"
+    },
+    {
+     "value": "Ashford Fuel"
+    },
+    {
+     "value": "Ashford Hardware"
+    },
+    {
+     "value": "Ashford Market"
+    },
+    {
+     "value": "Ashford Pharmacy"
+    },
+    {
+     "value": "Bluepeak Bistro"
+    },
+    {
+     "value": "Bluepeak Fitness"
+    },
+    {
+     "value": "Bluepeak Grocers"
+    },
+    {
+     "value": "Bluepeak Pharmacy"
+    },
+    {
+     "value": "Brightfield Bistro"
+    },
+    {
+     "value": "Brightfield Bookshop"
+    },
+    {
+     "value": "Brightfield Cafe"
+    },
+    {
+     "value": "Brightfield Cinema"
+    },
+    {
+     "value": "Brightfield Fitness"
+    },
+    {
+     "value": "Brightfield Grocers"
+    },
+    {
+     "value": "Brightfield Hardware"
+    },
+    {
+     "value": "Brightfield Market"
+    },
+    {
+     "value": "Brightfield Pharmacy"
+    },
+    {
+     "value": "Clearwater Bistro"
+    },
+    {
+     "value": "Clearwater Cafe"
+    },
+    {
+     "value": "Clearwater Fitness"
+    },
+    {
+     "value": "Clearwater Fuel"
+    },
+    {
+     "value": "Clearwater Grocers"
+    },
+    {
+     "value": "Clearwater Hardware"
+    },
+    {
+     "value": "Clearwater Market"
+    },
+    {
+     "value": "Clearwater Pharmacy"
+    },
+    {
+     "value": "Elmhurst Bistro"
+    },
+    {
+     "value": "Elmhurst Bookshop"
+    },
+    {
+     "value": "Elmhurst Cafe"
+    },
+    {
+     "value": "Elmhurst Cinema"
+    },
+    {
+     "value": "Elmhurst Fitness"
+    },
+    {
+     "value": "Elmhurst Fuel"
+    },
+    {
+     "value": "Elmhurst Pharmacy"
+    },
+    {
+     "value": "Fairmont Bistro"
+    },
+    {
+     "value": "Fairmont Bookshop"
+    },
+    {
+     "value": "Fairmont Cafe"
+    },
+    {
+     "value": "Fairmont Cinema"
+    },
+    {
+     "value": "Fairmont Fuel"
+    },
+    {
+     "value": "Fairmont Grocers"
+    },
+    {
+     "value": "Fairmont Hardware"
+    },
+    {
+     "value": "Fairmont Market"
+    },
+    {
+     "value": "Fairmont Pharmacy"
+    },
+    {
+     "value": "Greenvale Bistro"
+    },
+    {
+     "value": "Greenvale Bookshop"
+    },
+    {
+     "value": "Greenvale Cafe"
+    },
+    {
+     "value": "Greenvale Fitness"
+    },
+    {
+     "value": "Greenvale Fuel"
+    },
+    {
+     "value": "Greenvale Grocers"
+    },
+    {
+     "value": "Greenvale Hardware"
+    },
+    {
+     "value": "Greenvale Pharmacy"
+    },
+    {
+     "value": "Harborview Bookshop"
+    },
+    {
+     "value": "Harborview Cafe"
+    },
+    {
+     "value": "Harborview Cinema"
+    },
+    {
+     "value": "Harborview Fitness"
+    },
+    {
+     "value": "Harborview Fuel"
+    },
+    {
+     "value": "Harborview Grocers"
+    },
+    {
+     "value": "Harborview Hardware"
+    },
+    {
+     "value": "Harborview Market"
+    },
+    {
+     "value": "Harborview Pharmacy"
+    },
+    {
+     "value": "Ironwood Bistro"
+    },
+    {
+     "value": "Ironwood Bookshop"
+    },
+    {
+     "value": "Ironwood Cafe"
+    },
+    {
+     "value": "Ironwood Cinema"
+    },
+    {
+     "value": "Ironwood Fitness"
+    },
+    {
+     "value": "Ironwood Fuel"
+    },
+    {
+     "value": "Ironwood Grocers"
+    },
+    {
+     "value": "Ironwood Hardware"
+    },
+    {
+     "value": "Ironwood Market"
+    },
+    {
+     "value": "Kingsley Bistro"
+    },
+    {
+     "value": "Kingsley Bookshop"
+    },
+    {
+     "value": "Kingsley Cinema"
+    },
+    {
+     "value": "Kingsley Fitness"
+    },
+    {
+     "value": "Kingsley Fuel"
+    },
+    {
+     "value": "Kingsley Grocers"
+    },
+    {
+     "value": "Kingsley Hardware"
+    },
+    {
+     "value": "Kingsley Pharmacy"
+    },
+    {
+     "value": "Lakeshore Bistro"
+    },
+    {
+     "value": "Lakeshore Bookshop"
+    },
+    {
+     "value": "Lakeshore Cinema"
+    },
+    {
+     "value": "Lakeshore Fitness"
+    },
+    {
+     "value": "Lakeshore Fuel"
+    },
+    {
+     "value": "Lakeshore Grocers"
+    },
+    {
+     "value": "Lakeshore Hardware"
+    },
+    {
+     "value": "Lakeshore Market"
+    },
+    {
+     "value": "Lakeshore Pharmacy"
+    },
+    {
+     "value": "Maplecrest Bistro"
+    },
+    {
+     "value": "Maplecrest Bookshop"
+    },
+    {
+     "value": "Maplecrest Fitness"
+    },
+    {
+     "value": "Maplecrest Fuel"
+    },
+    {
+     "value": "Maplecrest Grocers"
+    },
+    {
+     "value": "Maplecrest Hardware"
+    },
+    {
+     "value": "Maplecrest Pharmacy"
+    },
+    {
+     "value": "Northwind Bistro"
+    },
+    {
+     "value": "Northwind Bookshop"
+    },
+    {
+     "value": "Northwind Cafe"
+    },
+    {
+     "value": "Northwind Cinema"
+    },
+    {
+     "value": "Northwind Fuel"
+    },
+    {
+     "value": "Northwind Grocers"
+    },
+    {
+     "value": "Northwind Hardware"
+    },
+    {
+     "value": "Northwind Market"
+    },
+    {
+     "value": "Northwind Pharmacy"
+    },
+    {
+     "value": "Oakridge Cafe"
+    },
+    {
+     "value": "Oakridge Cinema"
+    },
+    {
+     "value": "Oakridge Fitness"
+    },
+    {
+     "value": "Oakridge Fuel"
+    },
+    {
+     "value": "Oakridge Grocers"
+    },
+    {
+     "value": "Oakridge Hardware"
+    },
+    {
+     "value": "Oakridge Pharmacy"
+    },
+    {
+     "value": "Redwood Fitness"
+    },
+    {
+     "value": "Redwood Fuel"
+    },
+    {
+     "value": "Redwood Hardware"
+    },
+    {
+     "value": "Redwood Market"
+    },
+    {
+     "value": "Redwood Pharmacy"
+    },
+    {
+     "value": "Riverton Bistro"
+    },
+    {
+     "value": "Riverton Bookshop"
+    },
+    {
+     "value": "Riverton Cafe"
+    },
+    {
+     "value": "Riverton Cinema"
+    },
+    {
+     "value": "Riverton Fitness"
+    },
+    {
+     "value": "Riverton Fuel"
+    },
+    {
+     "value": "Riverton Grocers"
+    },
+    {
+     "value": "Riverton Hardware"
+    },
+    {
+     "value": "Riverton Market"
+    },
+    {
+     "value": "Silverline Cafe"
+    },
+    {
+     "value": "Silverline Cinema"
+    },
+    {
+     "value": "Silverline Fitness"
+    },
+    {
+     "value": "Silverline Grocers"
+    },
+    {
+     "value": "Silverline Hardware"
+    },
+    {
+     "value": "Silverline Market"
+    },
+    {
+     "value": "Stonebridge Bistro"
+    },
+    {
+     "value": "Stonebridge Bookshop"
+    },
+    {
+     "value": "Stonebridge Cinema"
+    },
+    {
+     "value": "Stonebridge Fitness"
+    },
+    {
+     "value": "Stonebridge Fuel"
+    },
+    {
+     "value": "Stonebridge Grocers"
+    },
+    {
+     "value": "Stonebridge Hardware"
+    },
+    {
+     "value": "Stonebridge Market"
+    },
+    {
+     "value": "Stonebridge Pharmacy"
+    },
+    {
+     "value": "Summerhill Bookshop"
+    },
+    {
+     "value": "Summerhill Cafe"
+    },
+    {
+     "value": "Summerhill Cinema"
+    },
+    {
+     "value": "Summerhill Fitness"
+    },
+    {
+     "value": "Summerhill Fuel"
+    },
+    {
+     "value": "Summerhill Grocers"
+    },
+    {
+     "value": "Summerhill Hardware"
+    },
+    {
+     "value": "Summerhill Market"
+    },
+    {
+     "value": "Summerhill Pharmacy"
+    },
+    {
+     "value": "Westbrook Grocers"
+    },
+    {
+     "value": "Westbrook Hardware"
+    }
+   ]
+  },
+  {
+   "key": "kyc_status",
+   "name": "KYC status",
+   "description": "Identity check outcome",
+   "data_type": "enum",
+   "category": "compliance",
+   "values": [
+    {
+     "value": "NOT_STARTED",
+     "weight": 3
+    },
+    {
+     "value": "IN_REVIEW",
+     "weight": 5
+    },
+    {
+     "value": "VERIFIED",
+     "weight": 85
+    },
+    {
+     "value": "FAILED",
+     "weight": 3
+    },
+    {
+     "value": "EXPIRED",
+     "weight": 4
+    }
+   ]
+  }
+ ]
+}
