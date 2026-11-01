@@ -1846,6 +1846,84 @@ func (c *Core) PurgeArtifacts(ctx context.Context, id string) error {
 	})
 }
 
+// DrainWorker stops giving a Worker new units. Those it has run to the end.
+func (c *Core) DrainWorker(ctx context.Context, id string) error {
+	err := c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		w, err := tx.GetWorker(ctx, id)
+		if err != nil {
+			return err
+		}
+		if w.State == store.WorkerRevoked {
+			return apperr.New(apperr.Conflict, wire.CodeWorkerRevoked, "this Worker has been revoked")
+		}
+		w.State = store.WorkerDraining
+		return tx.PutWorker(ctx, w)
+	})
+	if errors.Is(err, store.ErrNotFound) {
+		return apperr.New(apperr.NotFound, session.CodeNotFound, "no worker "+id)
+	}
+	return err
+}
+
+// RevokeWorker cuts a Worker off for good. Its units go to others, and its token no longer
+// fences only because of expiry: the lease change takes effect at once.
+func (c *Core) RevokeWorker(ctx context.Context, id string) error {
+	if id == LocalWorkerID {
+		return apperr.New(apperr.InvalidArgument, "ERR_BAD_REQUEST", "the embedded worker cannot be revoked: set worker.local_slots to 0")
+	}
+	var released int
+	err := c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		released = 0
+		w, err := tx.GetWorker(ctx, id)
+		if err != nil {
+			return err
+		}
+		w.State = store.WorkerRevoked
+		if err := tx.PutWorker(ctx, w); err != nil {
+			return err
+		}
+		held, err := tx.LeasedByWorker(ctx, id)
+		if err != nil {
+			return err
+		}
+		for i := range held {
+			u := lease.Revoke(held[i])
+			if err := tx.UpdateUnit(ctx, &u); err != nil {
+				return err
+			}
+			released++
+		}
+		return nil
+	})
+	if errors.Is(err, store.ErrNotFound) {
+		return apperr.New(apperr.NotFound, session.CodeNotFound, "no worker "+id)
+	}
+	if err != nil {
+		return err
+	}
+	c.mu.Lock()
+	delete(c.seen, id)
+	delete(c.caps, id)
+	c.orphans.Forget(id)
+	c.mu.Unlock()
+	c.notifyWaiters(released)
+	c.log.Warn("worker revoked", "worker_id", id, "units_released", released)
+	return nil
+}
+
+// CreateJoinToken makes a token that lets new Workers register. Only its hash is kept.
+func (c *Core) CreateJoinToken(ctx context.Context, maxUses int, ttl time.Duration) (id, secret string, expires *time.Time, err error) {
+	id, secret = ids.New("jtk"), ids.Secret()
+	now := c.clk.Now()
+	row := &store.JoinToken{ID: id, Hash: HashSecret(secret), CreatedAt: now, MaxUses: maxUses}
+	if ttl > 0 {
+		at := now.Add(ttl)
+		row.ExpiresAt, expires = &at, &at
+	}
+	err = c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error { return tx.InsertJoinToken(ctx, row) })
+	return id, secret, expires, err
+}
+
 // BeginDrain stops handing out work and tells Workers to drain, ahead of shutdown.
 func (c *Core) BeginDrain() {
 	c.mu.Lock()

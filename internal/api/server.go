@@ -1,5 +1,5 @@
-// Package api is the public HTTP API. Phase 2 serves health and readiness; the
-// remaining resources are added in Phase 8.
+// Package api is the public HTTP API. Handlers parse, call a service and map the result;
+// decisions stay in the services. See docs/03-interfaces/api-reference.md.
 package api
 
 import (
@@ -11,10 +11,19 @@ import (
 	"net/http"
 	"regexp"
 	"runtime/debug"
-	"time"
+	"strings"
+	"sync/atomic"
 
 	"github.com/genadigeno/data-feed/internal/apperr"
+	"github.com/genadigeno/data-feed/internal/artifact"
+	"github.com/genadigeno/data-feed/internal/catalog"
 	"github.com/genadigeno/data-feed/internal/clock"
+	"github.com/genadigeno/data-feed/internal/config"
+	"github.com/genadigeno/data-feed/internal/coord"
+	"github.com/genadigeno/data-feed/internal/hub"
+	"github.com/genadigeno/data-feed/internal/obs"
+	"github.com/genadigeno/data-feed/internal/session"
+	"github.com/genadigeno/data-feed/internal/store"
 )
 
 const requestIDHeader = "X-Request-Id"
@@ -33,6 +42,19 @@ type Options struct {
 	Version       string
 	Ready         func(ctx context.Context) []Check
 	MaxConcurrent int
+
+	Config    *config.Config
+	DB        store.DB
+	Core      *coord.Core
+	Sessions  *session.Service
+	Catalogs  *catalog.Service
+	Artifacts *artifact.Store
+	Logs      *obs.SessionLogs
+	Hub       *hub.Hub
+	// Done closes when the server starts shutting down, which ends live update streams.
+	Done <-chan struct{}
+	// Extra, if set, handles what no API route matches: the web interface.
+	Extra http.Handler
 }
 
 // HealthResponse is the body of GET /api/v1/health.
@@ -58,53 +80,139 @@ func summarize(checks []Check) ReadyResponse {
 	return r
 }
 
-// NewHandler builds the public API handler.
-func NewHandler(o Options) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, _ *http.Request) {
-		writeJSON(w, o.Logger, http.StatusOK, HealthResponse{Status: "ok", Version: o.Version})
-	})
-	mux.HandleFunc("GET /api/v1/ready", func(w http.ResponseWriter, r *http.Request) {
-		resp := summarize(o.Ready(r.Context()))
-		status := http.StatusOK
-		if !resp.Ready {
-			status = http.StatusServiceUnavailable
-		}
-		writeJSON(w, o.Logger, status, resp)
-	})
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		writeError(w, r, o.Logger, apperr.New(apperr.NotFound, "ERR_NOT_FOUND", "no such endpoint"))
-	})
-	return middleware(o, mux)
+// server holds what handlers share.
+type server struct {
+	o          Options
+	limiters   *limiters
+	keys       keyLocks
+	sseClients atomic.Int64
+	requests   statusCounts
+	slots      chan struct{}
 }
 
-func middleware(o Options, next http.Handler) http.Handler {
-	slots := make(chan struct{}, o.MaxConcurrent)
+func (s *server) writeJSON(w http.ResponseWriter, status int, body any) {
+	writeJSON(w, s.o.Logger, status, body)
+}
+
+// NewHandler builds the public API handler.
+func NewHandler(o Options) http.Handler {
+	s := &server{
+		o: o, slots: make(chan struct{}, o.MaxConcurrent),
+		limiters: newLimiters(o.Config.API.RateLimit.RequestsPerSecond, o.Config.API.RateLimit.Burst),
+	}
+	mux := http.NewServeMux()
+	for _, rt := range s.routes() {
+		mux.Handle(rt.Method+" "+prefix+rt.Path, s.wrap(rt))
+	}
+	routes := s.routes()
+	mux.HandleFunc(prefix+"/", func(w http.ResponseWriter, r *http.Request) {
+		if allowed := AllowedMethods(routes, strings.TrimPrefix(r.URL.Path, prefix)); len(allowed) > 0 {
+			w.Header().Set("Allow", strings.Join(allowed, ", "))
+			writeError(w, r, o.Logger, apperr.New(apperr.MethodNotAllowed, "ERR_METHOD_NOT_ALLOWED", "this endpoint does not take "+r.Method))
+			return
+		}
+		writeError(w, r, o.Logger, apperr.New(apperr.NotFound, "ERR_NOT_FOUND", "no such endpoint"))
+	})
+	if o.Extra != nil {
+		mux.Handle("/", o.Extra)
+	} else {
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			writeError(w, r, o.Logger, apperr.New(apperr.NotFound, "ERR_NOT_FOUND", "no such endpoint"))
+		})
+	}
+	return s.middleware(mux)
+}
+
+// wrap applies one route's rules, in order: who is calling, how often, what they may do,
+// and how much they may send.
+func (s *server) wrap(rt route) http.Handler {
+	handler := rt.Handler
+	if rt.Idempotent {
+		handler = s.idempotent(handler)
+	}
+	limit := int64(s.o.Config.API.MaxBodyBytes)
+	if rt.Import {
+		limit = int64(s.o.Config.API.MaxImportBytes)
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fail := func(err error) {
+			e := asAppError(err)
+			if e.Kind == apperr.ResourceExhausted && e.Code == "ERR_RATE_LIMITED" {
+				w.Header().Set("Retry-After", "1")
+			}
+			writeError(w, r, s.o.Logger, e)
+		}
+		if rt.Role != "" {
+			p, err := s.authenticate(r)
+			if err != nil {
+				if e, ok := apperr.As(err); ok && e.Kind == apperr.Unauthenticated {
+					w.Header().Set("WWW-Authenticate", "Bearer")
+				}
+				fail(err)
+				return
+			}
+			if ok, _ := s.limiters.allow(p.ID, s.o.Clock.Now()); !ok {
+				fail(apperr.New(apperr.ResourceExhausted, "ERR_RATE_LIMITED", "too many requests"))
+				return
+			}
+			if !RoleAllows(p.Role, rt.Role) {
+				fail(apperr.New(apperr.PermissionDenied, "ERR_FORBIDDEN", "this needs the "+rt.Role+" role"))
+				return
+			}
+			r = r.WithContext(context.WithValue(r.Context(), principalKey{}, p))
+		}
+		// A declared size can be refused before reading any of it, which spares the upload.
+		if r.ContentLength > limit {
+			fail(&http.MaxBytesError{Limit: limit})
+			return
+		}
+		r.Body = http.MaxBytesReader(w, r.Body, limit)
+		if err := handler(w, r); err != nil {
+			fail(err)
+		}
+	})
+}
+
+// isLongLived spots responses that may stay open for a long time. They must not use up
+// the slots that keep ordinary requests answered quickly.
+func isLongLived(path string) bool {
+	return strings.HasSuffix(path, prefix+"/events") || strings.Contains(path, "/artifacts/")
+}
+
+func (s *server) middleware(next http.Handler) http.Handler {
+	o := s.o
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := requestID(r.Header.Get(requestIDHeader))
 		w.Header().Set(requestIDHeader, id)
 		r = r.WithContext(context.WithValue(r.Context(), requestIDKey{}, id))
 
-		select {
-		case slots <- struct{}{}:
-			defer func() { <-slots }()
-		default:
-			w.Header().Set("Retry-After", "1")
-			writeError(w, r, o.Logger, apperr.New(apperr.Unavailable, "ERR_OVERLOADED", "too many concurrent requests"))
-			return
+		if !isLongLived(r.URL.Path) {
+			select {
+			case s.slots <- struct{}{}:
+				defer func() { <-s.slots }()
+			default:
+				w.Header().Set("Retry-After", "1")
+				writeError(w, r, o.Logger, apperr.New(apperr.Unavailable, "ERR_OVERLOADED", "too many concurrent requests"))
+				return
+			}
 		}
 
 		start := o.Clock.Now()
 		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		defer func() {
-			if p := recover(); p != nil {
+			p := recover()
+			if p == http.ErrAbortHandler {
+				panic(p) // deliberately cutting the connection
+			}
+			if p != nil {
 				o.Logger.Error("panic in request handler", "request_id", id, "panic", p, "stack", string(debug.Stack()))
 				if !rec.wrote {
 					writeError(rec, r, o.Logger, apperr.New(apperr.Internal, apperr.CodeInternal, "internal error"))
 				}
 			}
+			s.requests.add(rec.status)
 			o.Logger.Info("http request", "request_id", id, "method", r.Method, "route", r.Pattern,
-				"status", rec.status, "duration_ms", o.Clock.Now().Sub(start)/time.Millisecond)
+				"status", rec.status, "duration_ms", o.Clock.Now().Sub(start).Milliseconds())
 		}()
 		next.ServeHTTP(rec, r)
 	})
@@ -130,6 +238,9 @@ type statusRecorder struct {
 	status int
 	wrote  bool
 }
+
+// Unwrap lets http.ResponseController reach the real writer, for flushing and deadlines.
+func (s *statusRecorder) Unwrap() http.ResponseWriter { return s.ResponseWriter }
 
 func (s *statusRecorder) WriteHeader(code int) {
 	s.status, s.wrote = code, true

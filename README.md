@@ -5,8 +5,7 @@ embedded SQLite, artifact storage), as a Worker on any host, or as a CLI. No ext
 object store is required.
 
 **Status: under construction.** `datafeed generate` produces data directly. The Coordinator and Workers run sessions
-across hosts, surviving Worker and Coordinator restarts, but sessions cannot be created by users until the public API
-arrives.
+across hosts, surviving Worker and Coordinator restarts, driven through a versioned HTTP API. A full CLI and a web interface are next.
 
 ## Quick start
 

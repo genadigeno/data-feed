@@ -24,6 +24,8 @@ const (
 	ResourceExhausted
 	Unavailable
 	Canceled
+	MethodNotAllowed
+	PayloadTooLarge
 )
 
 // CodeInternal is the only code clients see for Internal errors.
@@ -114,6 +116,10 @@ func HTTPStatus(k Kind) int {
 		return http.StatusServiceUnavailable
 	case Canceled:
 		return 499
+	case MethodNotAllowed:
+		return http.StatusMethodNotAllowed
+	case PayloadTooLarge:
+		return http.StatusRequestEntityTooLarge
 	default:
 		return http.StatusInternalServerError
 	}

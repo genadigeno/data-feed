@@ -89,7 +89,16 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 		return err
 	}
 
+	plane := NewControlPlane(cfg, db.Store(), dir, Vocabulary, clk, logger)
+	if err := plane.Core.Recover(ctx); err != nil {
+		return fmt.Errorf("recover: %w", err)
+	}
+	if err := api.EnsureBootstrapToken(ctx, db.Store(), cfg.Auth.BootstrapAdminToken.Reveal(), clk.Now()); err != nil {
+		return fmt.Errorf("create the first API token: %w", err)
+	}
+
 	var ready atomic.Bool
+	shuttingDown := make(chan struct{})
 	publicHandler := api.NewHandler(api.Options{
 		Logger:        logger.With("component", "api"),
 		Clock:         clk,
@@ -98,12 +107,9 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 		Ready: func(ctx context.Context) []api.Check {
 			return readinessChecks(ctx, ready.Load(), db, dir, cfg.Storage.MinFreeBytes)
 		},
+		Config: cfg, DB: db.Store(), Core: plane.Core, Sessions: plane.Sessions, Catalogs: plane.Catalogs,
+		Artifacts: plane.Store, Logs: plane.Logs, Hub: plane.Hub, Done: shuttingDown,
 	})
-
-	plane := NewControlPlane(cfg, db.Store(), dir, Vocabulary, clk, logger)
-	if err := plane.Core.Recover(ctx); err != nil {
-		return fmt.Errorf("recover: %w", err)
-	}
 	internalHandler := protocol.NewHandler(logger.With("component", "protocol"), buildinfo.Version, plane.Core)
 
 	// The internal listener opens first, as Workers must be able to connect by the
@@ -166,6 +172,7 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 
 	ready.Store(false)
 	logger.Info("coordinator shutting down")
+	close(shuttingDown)
 
 	// The embedded worker finishes against a working control plane, then everything stops.
 	plane.Core.BeginDrain()

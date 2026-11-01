@@ -1,0 +1,903 @@
+# The public API's contract. A test checks these paths against the server's route table.
+openapi: 3.1.0
+info:
+  title: datafeed
+  version: "1"
+  description: |
+    Synthetic data generation. Requests and responses are JSON unless stated otherwise.
+    Counts that can exceed 2^53 are strings. Lists page with ?limit= and ?cursor=.
+    POSTs marked with the Idempotency-Key parameter replay their first answer for 24 hours.
+servers:
+  - url: /api/v1
+security:
+  - bearer: []
+paths:
+  /health:
+    get:
+      summary: "Liveness"
+      tags: [system]
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Health"}}
+  /ready:
+    get:
+      summary: "Readiness: every check must pass"
+      tags: [system]
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Ready"}}
+  /openapi.yaml:
+    get:
+      summary: "This document"
+      tags: [system]
+      security: []
+      responses:
+        "200": {description: OK}
+  /metrics:
+    get:
+      summary: "Prometheus text format"
+      tags: [system]
+      description: Needs a token only with api.metrics_require_auth set.
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /whoami:
+    get:
+      summary: "Who the token belongs to"
+      tags: [system]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Principal"}}
+        default: {$ref: "#/components/responses/Error"}
+  /dashboard:
+    get:
+      summary: "Overview counters and recent sessions"
+      tags: [system]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Dashboard"}}
+        default: {$ref: "#/components/responses/Error"}
+  /events:
+    get:
+      summary: "Server-Sent Events: state, progress, artifact, log, job, resync. Filter with ?session="
+      tags: [system]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions:
+    post:
+      summary: "Create a session from a specification (YAML or JSON). ?start=true also starts it"
+      tags: [sessions]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+    get:
+      summary: "List sessions. Filters: state (comma separated), mode, q, sort"
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/SessionPage"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/validate:
+    post:
+      summary: "Check a specification without storing anything"
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Validation"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Details; ?include=spec adds the submitted specification. ETag is the version"
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Delete a session that is not running. Output stays on disk unless ?purge_artifacts=true (admin)"
+      tags: [sessions]
+      x-required-role: operator
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/config:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    put:
+      summary: "Replace the specification of a session not yet started. Needs If-Match"
+      tags: [sessions]
+      x-required-role: operator
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/start:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Queue the session"
+      tags: [sessions]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "202":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/pause:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Pause: running units give back at their next part"
+      tags: [sessions]
+      x-required-role: operator
+      responses:
+        "202":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/resume:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Resume a paused session"
+      tags: [sessions]
+      x-required-role: operator
+      responses:
+        "202":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/stop:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Stop. Body {mode: graceful|immediate}, graceful by default"
+      tags: [sessions]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "202":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/clone:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "New session with the same specification and a new seed"
+      tags: [sessions]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/retry:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "New session with the same snapshot, so the same bytes"
+      tags: [sessions]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Session"}}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/progress:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Counters, rates, units and where time goes"
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/metrics:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Throughput history in 10 s buckets; ?history=1h"
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/logs:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Session log; ?since=, ?level=, ?limit="
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/events:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Lifecycle history"
+      tags: [sessions]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/artifacts:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Output by stream, with download links"
+      tags: [artifacts]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Delete a finished session's output, keeping its history"
+      tags: [artifacts]
+      x-required-role: admin
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/artifacts/manifest:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "The output manifest"
+      tags: [artifacts]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/artifacts/{stream}/parts/{n}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+      - {name: stream, in: path, required: true, schema: {type: string}}
+      - {name: n, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Download one part. Supports Range"
+      tags: [artifacts]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /sessions/{id}/artifacts/{stream}/merged:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+      - {name: stream, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Download a stream as one document. Supports Range; not for compressed output"
+      tags: [artifacts]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /generate:
+    post:
+      summary: "Small synchronous generation; the response body is the data. ?table= selects a stream"
+      tags: [generate]
+      x-required-role: operator
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /schemas:
+    post:
+      summary: "Save a schema"
+      tags: [schemas]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Schema"}}
+        default: {$ref: "#/components/responses/Error"}
+    get:
+      summary: "List schemas"
+      tags: [schemas]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /schemas/validate:
+    post:
+      summary: "Check a schema"
+      tags: [schemas]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Validation"}}
+        default: {$ref: "#/components/responses/Error"}
+  /schemas/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Read a schema; ?version="
+      tags: [schemas]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Schema"}}
+        default: {$ref: "#/components/responses/Error"}
+    put:
+      summary: "Save a new version"
+      tags: [schemas]
+      x-required-role: operator
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Schema"}}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Delete a schema and its versions"
+      tags: [schemas]
+      x-required-role: operator
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /schemas/{id}/preview:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Sample records; the response body is the data"
+      tags: [schemas]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /domains:
+    post:
+      summary: "Create a domain"
+      tags: [vocabulary]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Domain"}}
+        default: {$ref: "#/components/responses/Error"}
+    get:
+      summary: "List domains"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /domains/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Read a domain"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Domain"}}
+        default: {$ref: "#/components/responses/Error"}
+    patch:
+      summary: "Change a domain"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Domain"}}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Delete a domain with no catalogs"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /domains/{id}/vocabulary/generate:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Start a job that fills a catalog draft"
+      tags: [vocabulary]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "202":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Job"}}
+        default: {$ref: "#/components/responses/Error"}
+  /builtin-catalogs:
+    get:
+      summary: "List catalogs built into the binary"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /builtin-catalogs/{domain}:
+    parameters:
+      - {name: domain, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Read a built-in catalog"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs:
+    post:
+      summary: "Create an empty draft"
+      tags: [vocabulary]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Catalog"}}
+        default: {$ref: "#/components/responses/Error"}
+    get:
+      summary: "List catalogs; ?domain="
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/import:
+    post:
+      summary: "Create a draft from an exported document"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "201": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Read a version and its values; ?version="
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}/clone:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Copy into a new catalog. The id may be builtin:<domain>"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Catalog"}}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}/versions:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "List versions"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+    post:
+      summary: "Start a new draft from a version"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Catalog"}}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}/versions/{v}/publish:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+      - {name: v, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Freeze a draft"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Catalog"}}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}/versions/{v}/export:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+      - {name: v, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Export in the portable format"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}/versions/{v}/groups/{key}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+      - {name: v, in: path, required: true, schema: {type: string}}
+      - {name: key, in: path, required: true, schema: {type: string}}
+    put:
+      summary: "Add or change a group of a draft"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Remove a group from a draft"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /catalogs/{id}/versions/{v}/groups/{key}/values:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+      - {name: v, in: path, required: true, schema: {type: string}}
+      - {name: key, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Add values to a draft group; each is validated"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Remove the value given in ?value="
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /vocabulary-jobs/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Read a job"
+      tags: [vocabulary]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Job"}}
+        default: {$ref: "#/components/responses/Error"}
+  /vocabulary-jobs/{id}/cancel:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Cancel a job; what it made stays in the draft"
+      tags: [vocabulary]
+      x-required-role: operator
+      responses:
+        "202":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Job"}}
+        default: {$ref: "#/components/responses/Error"}
+  /workers:
+    get:
+      summary: "List Workers"
+      tags: [workers]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /workers/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Read a Worker"
+      tags: [workers]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /workers/{id}/drain:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Give a Worker no new units"
+      tags: [workers]
+      x-required-role: admin
+      responses:
+        "202": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /workers/{id}/revoke:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    post:
+      summary: "Cut a Worker off for good; its units go to others"
+      tags: [workers]
+      x-required-role: admin
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+  /worker-tokens:
+    post:
+      summary: "Create a join token. Its value appears only in this response"
+      tags: [workers]
+      x-required-role: admin
+      responses:
+        "201": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /tokens:
+    post:
+      summary: "Create an API token. Its value appears only in this response"
+      tags: [auth]
+      x-required-role: admin
+      responses:
+        "201": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+    get:
+      summary: "List API tokens"
+      tags: [auth]
+      x-required-role: admin
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /tokens/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    delete:
+      summary: "Revoke an API token"
+      tags: [auth]
+      x-required-role: admin
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
+components:
+  securitySchemes:
+    bearer: {type: http, scheme: bearer}
+  parameters:
+    IdempotencyKey: {name: Idempotency-Key, in: header, required: false, schema: {type: string, maxLength: 255}}
+  responses:
+    Error:
+      description: An error, with a stable code.
+      content:
+        application/json: {schema: {$ref: "#/components/schemas/Error"}}
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: {type: string, examples: [ERR_INVALID_TRANSITION]}
+            message: {type: string}
+            problems:
+              type: array
+              items:
+                type: object
+                properties:
+                  path: {type: string}
+                  code: {type: string}
+                  message: {type: string}
+            details: {type: object}
+            request_id: {type: string}
+    Health:
+      type: object
+      properties:
+        status: {type: string}
+        version: {type: string}
+    Ready:
+      type: object
+      properties:
+        ready: {type: boolean}
+        checks:
+          type: array
+          items:
+            type: object
+            properties:
+              name: {type: string}
+              ok: {type: boolean}
+              message: {type: string}
+    Principal:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        role: {type: string, enum: [viewer, operator, admin]}
+    Validation:
+      type: object
+      properties:
+        valid: {type: boolean}
+    Dashboard:
+      type: object
+      properties:
+        sessions: {type: object, additionalProperties: {type: integer}}
+        workers: {type: object, additionalProperties: {type: integer}}
+        records_committed: {type: string}
+        bytes_committed: {type: string}
+        current_rate: {type: number}
+        recent:
+          type: array
+          items: {$ref: "#/components/schemas/Session"}
+    Session:
+      type: object
+      required: [id, name, state, available_actions, version]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        description: {type: string}
+        strategy: {type: string, enum: [random, hybrid, relational]}
+        mode: {type: string, enum: [batch, stream]}
+        format: {type: string, enum: [json, ndjson, xml, csv]}
+        state:
+          type: string
+          enum: [CREATED, QUEUED, STARTING, RUNNING, PAUSING, PAUSED, STOPPING, COMPLETED, STOPPED, FAILED]
+        state_reason: {type: string}
+        available_actions: {type: array, items: {type: string}}
+        seed: {type: string}
+        reference_time: {type: string, format: date-time}
+        engine_version: {type: integer}
+        snapshot_hash: {type: string}
+        catalog:
+          type: object
+          properties:
+            id: {type: string}
+            version: {type: integer}
+        limits:
+          type: object
+          properties:
+            count: {type: string}
+            duration_ms: {type: integer}
+            rate: {type: number}
+            max_workers: {type: integer}
+            max_bytes: {type: string}
+        created_at: {type: string, format: date-time}
+        started_at: {type: string, format: date-time}
+        ended_at: {type: string, format: date-time}
+        paused_total_ms: {type: integer}
+        progress:
+          type: object
+          properties:
+            records: {type: string}
+            bytes: {type: string}
+            in_flight_records: {type: string}
+            expected_records: {type: string}
+            fraction: {type: number}
+        rates:
+          type: object
+          properties:
+            current: {type: number}
+            average: {type: number}
+            peak: {type: number}
+        units:
+          type: object
+          properties:
+            pending: {type: integer}
+            leased: {type: integer}
+            committed: {type: integer}
+            failed: {type: integer}
+        pressure:
+          type: object
+          description: Seconds spent blocked, which names the bottleneck.
+          properties:
+            output_blocked_seconds: {type: number}
+            generation_starved_seconds: {type: number}
+            sink_blocked_seconds: {type: number}
+            rate_limited_seconds: {type: number}
+        errors:
+          type: object
+          properties:
+            count: {type: integer}
+            last: {type: string}
+        version: {type: integer}
+        spec: {type: object}
+    SessionPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {$ref: "#/components/schemas/Session"}
+        next_cursor: {type: string}
+    Schema:
+      type: object
+      properties:
+        id: {type: string}
+        version: {type: integer}
+        name: {type: string}
+        kind: {type: string}
+        definition: {type: object}
+        created_at: {type: string, format: date-time}
+    Domain:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        description: {type: string}
+        locale: {type: string}
+        created_at: {type: string, format: date-time}
+    Catalog:
+      type: object
+      properties:
+        id: {type: string}
+        version: {type: integer}
+        domain_id: {type: string}
+        status: {type: string, enum: [DRAFT, PUBLISHED]}
+        parent_version: {type: integer}
+        content_hash: {type: string}
+        created_at: {type: string, format: date-time}
+        published_at: {type: string, format: date-time}
+    Job:
+      type: object
+      properties:
+        id: {type: string}
+        catalog_id: {type: string}
+        version: {type: integer}
+        state: {type: string, enum: [QUEUED, RUNNING, COMPLETED, PARTIAL, FAILED, CANCELLED]}
+        progress: {type: object}
+        usage: {type: object}
+        error: {type: string}
+        created_at: {type: string, format: date-time}
+        ended_at: {type: string, format: date-time}
