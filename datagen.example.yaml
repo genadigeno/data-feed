@@ -1,0 +1,28 @@
+# Example configuration. Copy to datagen.yaml (git-ignored) and adjust.
+# `datagen config show` lists every setting with its value and source.
+
+application:
+  environment: development       # development | test | production
+
+server:
+  listen: 127.0.0.1:8080         # public API
+
+coordination:
+  listen: 127.0.0.1:8081         # worker protocol; TLS is required off loopback
+
+storage:
+  data_dir: ./data               # keep on local storage, never NFS or SMB
+
+logging:
+  level: info                    # debug | info | warn | error
+  format: text                   # text | json
+
+# Worker role (`datagen worker run`):
+worker:
+  coordinator_url: http://127.0.0.1:8081
+  # coordinator_fingerprint: sha256:…   # pin a self-signed Coordinator certificate
+
+# Secrets must be references outside development:
+# ai:
+#   enabled: true
+#   api_key: ${ANTHROPIC_API_KEY}
