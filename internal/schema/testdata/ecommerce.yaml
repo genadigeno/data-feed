@@ -1,0 +1,45 @@
+kind: relational
+tables:
+  customers:
+    count: 100000
+    primary_key: id
+    fields:
+      id:         { type: uuid }
+      first_name: { type: first_name }
+      last_name:  { type: last_name }
+      email:      { type: email, unique: true }
+      created_at: { type: timestamp, min: "2022-01-01T00:00:00Z", max: "2026-01-01T00:00:00Z" }
+  orders:
+    primary_key: id
+    owner: { ref: customers, per_parent: { min: 0, max: 8, distribution: zipf } }
+    fields:
+      id:           { type: uuid }
+      customer_id:  { type: reference, ref: customers.id, owner: true }
+      order_number: { type: string, pattern: "ORD-[0-9]{10}", unique: true }
+      total_amount: { type: decimal, precision: 12, scale: 2, min: 1, max: 5000 }
+      status:       { type: order_status }
+      created_at:   { type: timestamp, derive: { from: owner, field: created_at, offset: { min: 0s, max: 72h } } }
+  products:
+    count: 5000
+    primary_key: id
+    fields:
+      id:   { type: long, generator: { name: sequence, params: { start: 1 } } }
+      name: { type: string, generator: { name: vocab, params: { group: product_name } }, unique: false }
+  order_items:
+    primary_key: id
+    owner: { ref: orders, per_parent: { min: 1, max: 5 } }
+    unique_keys:
+      - fields: [order_id, line_no]
+    fields:
+      id:         { type: uuid }
+      order_id:   { type: reference, ref: orders.id, owner: true }
+      line_no:    { type: integer, generator: ordinal }
+      product_id: { type: reference, ref: products.id, select: { distribution: zipf, s: 1.1 } }
+      quantity:   { type: integer, min: 1, max: 10 }
+      unit_price: { type: decimal, precision: 10, scale: 2, min: 0.5, max: 999 }
+  employees:
+    count: 100
+    primary_key: id
+    fields:
+      id:         { type: integer, distribution: { type: sequence, start: 1 } }
+      manager_id: { type: reference, ref: employees.id, nullable: true, select: { mode: earlier } }
