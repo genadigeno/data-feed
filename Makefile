@@ -25,7 +25,7 @@ test:
 test-short:
 	go test -short ./...
 
-# Runs each fuzz target for FUZZTIME; there are no fuzz targets until Phase 3.
+# Runs each fuzz target for FUZZTIME.
 fuzz:
 	@for pkg in $$(go list ./...); do \
 		for target in $$(go test -list '^Fuzz' $$pkg | grep '^Fuzz'); do \

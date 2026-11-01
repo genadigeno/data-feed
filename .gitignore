@@ -37,6 +37,7 @@ docs/
 
 # datafeed runtime files
 /bin/
+/dist/
 /data/
 /worker-spool/
 /worker-credential

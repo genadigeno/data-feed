@@ -1,0 +1,40 @@
+name: Bug report
+description: Something doesn't work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include the exact error message, if there was one.
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations: {required: true}
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      description: The commands you ran, and your schema or specification. Remove anything private, including tokens.
+      render: shell
+    validations: {required: true}
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `datafeed version`.
+    validations: {required: true}
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux, Docker]
+    validations: {required: true}
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Anything relevant from the server or Worker. Remove anything private.
+      render: text

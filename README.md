@@ -1,5 +1,9 @@
 # datafeed
 
+[![CI](https://github.com/genadigeno/data-feed/actions/workflows/go.yml/badge.svg)](https://github.com/genadigeno/data-feed/actions/workflows/go.yml)
+[![Release](https://img.shields.io/github/v/release/genadigeno/data-feed)](https://github.com/genadigeno/data-feed/releases/latest)
+[![License](https://img.shields.io/github/license/genadigeno/data-feed)](LICENSE)
+
 **Generate realistic synthetic data at scale, and get exactly the same bytes every time you ask.**
 
 datafeed is a self-contained synthetic data platform. One program generates data on your laptop, serves it to your applications
@@ -7,6 +11,15 @@ over HTTP, or runs across many hosts. It needs no external database, message bro
 
 Use it to fill test databases, load-test pipelines, seed demo environments, or feed events into a system under test, without touching
 production data.
+
+```bash
+datafeed generate --schema examples/customer.yaml --count 2 --seed 42
+```
+
+```json
+{"id":"50949458-c459-806e-bf3d-13661f706417","name":"Maya Demir","email":"zoe.eriksen3@example.net","age":76,"balance":36706.64,"active":true,"created_at":"2018-03-10T13:06:56Z"}
+{"id":"9e03b00a-bd57-806e-9c74-f4b49eef01a3","name":"Cyrus Gomez","email":"emil.abara380@example.net","age":56,"balance":25667.15,"active":true,"created_at":"2019-05-12T04:15:29Z"}
+```
 
 ## Features
 
@@ -22,45 +35,45 @@ production data.
 
 ## Get started
 
-This takes about five minutes. There are no prebuilt downloads yet, so you build datafeed from source.
+This takes about five minutes.
 
-### 1. Install Go and Git
+### 1. Download datafeed
 
-You need [Go 1.26 or newer](https://go.dev/dl/) and [Git](https://git-scm.com/downloads). No C compiler is required.
+Get the file for your system from the [latest release](https://github.com/genadigeno/data-feed/releases/latest). There's nothing else to install.
 
-| System | Install Go with |
+| System | File |
 |---|---|
-| Windows | `winget install GoLang.Go`, then open a new terminal |
-| macOS | `brew install go` |
-| Linux | The archive from [go.dev/dl](https://go.dev/dl/), as distribution packages are often too old |
+| Windows | `datafeed_windows_amd64.zip` |
+| macOS, Apple Silicon | `datafeed_darwin_arm64.tar.gz` |
+| macOS, Intel | `datafeed_darwin_amd64.tar.gz` |
+| Linux | `datafeed_linux_amd64.tar.gz`, or `arm64` |
 
-Check it worked:
+**Windows:** extract the zip, then open a terminal in the `datafeed_windows_amd64` folder. Binaries aren't code-signed yet, so if SmartScreen appears, choose
+"More info", then "Run anyway". In PowerShell, write `.\datafeed` wherever this guide says `datafeed`.
 
-```bash
-go version
-```
-
-### 2. Install datafeed
+**macOS and Linux**, using the right file name for your system:
 
 ```bash
-git clone https://github.com/genadigeno/data-feed.git
-```
-
-```bash
-cd data-feed
+curl -L https://github.com/genadigeno/data-feed/releases/latest/download/datafeed_linux_amd64.tar.gz | tar xz
 ```
 
 ```bash
-go install ./cmd/datafeed
+cd datafeed_linux_amd64
 ```
 
-**Open a new terminal**, go back to the `data-feed` folder, and check:
+```bash
+sudo install datafeed /usr/local/bin/
+```
+
+Stay in this folder for now, as it holds the `examples` used below.
+
+### 2. Check it works
 
 ```bash
 datafeed version
 ```
 
-If you see "not recognized" or "command not found", Go's install folder isn't on your `PATH`. See [Troubleshooting](#troubleshooting).
+If you see "not recognized" or "command not found", you're in a different folder, or it isn't on your `PATH`. See [Troubleshooting](#troubleshooting).
 
 ### 3. Generate your first data
 
@@ -72,7 +85,7 @@ datafeed generate --schema examples/customer.yaml --count 10
 
 ### 4. Start the server
 
-Most other features need the server running. **Open a separate terminal for it**, go to the `data-feed` folder, and leave it running:
+Most other features need the server running. **Open a separate terminal for it**, go to the same folder, and leave it running:
 
 ```bash
 datafeed serve
@@ -121,7 +134,7 @@ Feeds are managed from the CLI or API: the web interface has no feeds page yet, 
 
 ## Common scenarios
 
-Run these from the `data-feed` folder, so that `examples/` can be found.
+Run these from the folder holding `examples/`.
 
 ### Write data to a file
 
@@ -199,6 +212,8 @@ Streaming needs a feed in `ndjson` or `csv`. In a relational feed, choose a tabl
 rows, can be read by page but not streamed. Feeds run on the Coordinator rather than Workers, and at most 8 streams can be open at once by default
 (`api.feed_max_streams`). `datafeed feed --help` lists the other commands.
 
+Ready-to-run clients in Python, JavaScript and Go are in [examples/clients](examples#reading-a-feed-from-your-application).
+
 ### Track a run as a session
 
 *Needs the server running.* Sessions keep their history, and can be paused, resumed, retried and downloaded later:
@@ -261,7 +276,7 @@ curl -X POST "http://127.0.0.1:8080/api/v1/sessions?start=true" -H "Content-Type
 curl http://127.0.0.1:8080/api/v1/sessions
 ```
 
-The full contract is served at `/api/v1/openapi.yaml`.
+The full contract is at [internal/api/openapi.yaml](internal/api/openapi.yaml), and a running server serves it at `/api/v1/openapi.yaml`.
 
 ### Run with Docker
 
@@ -279,7 +294,7 @@ docker compose --profile workers up --build --scale worker=3
 
 | What you see | What it means | What to do |
 |---|---|---|
-| `'datafeed' is not recognized` or `command not found` | It isn't installed, or Go's install folder isn't on your `PATH` | Run `go install ./cmd/datafeed` in the `data-feed` folder and open a new terminal. If it still fails, see below |
+| `'datafeed' is not recognized` or `command not found` | You're not in its folder, or it isn't on your `PATH` | Go to the folder you extracted it to. In PowerShell, write `.\\datafeed`. If you built from source, see below |
 | `cannot reach the server at http://127.0.0.1:8080` | The server isn't running | Start `datafeed serve` in another terminal, and leave it running |
 | `no file customer.yaml in this folder` | `--schema` found no such file, and it isn't a saved schema's ID | Check the path, such as `examples/customer.yaml`, and which folder you're in |
 | `no saved schema sch_…` | The ID doesn't match a schema on this server | Copy it from the web interface or `datafeed schema list` |
@@ -289,7 +304,7 @@ docker compose --profile workers up --build --scale worker=3
 | Your sessions or feeds have disappeared | The server was started from a different folder, so it has a different `data` folder | Start it from the original folder, or set `DATAFEED_DATA_DIR` |
 | `a valid API token is required` | The server has authentication on | Set `DATAFEED_TOKEN`, or pass `--token` |
 
-**To add Go's install folder to your `PATH`:** find it with `go env GOPATH`, and add its `bin` folder. For this terminal only:
+**If you installed with Go, add its install folder to your `PATH`:** find it with `go env GOPATH`, and add its `bin` folder. For this terminal only:
 
 | Shell | Command |
 |---|---|
@@ -305,6 +320,30 @@ To keep it, on Windows search for "Edit environment variables for your account" 
 - `datafeed <command> --help` describes every command and flag.
 - `datafeed health --ready` checks that the server is up.
 - `datafeed config validate` reports every configuration problem at once.
+
+## Build from source
+
+You need [Go 1.26 or newer](https://go.dev/dl/). No C compiler is required.
+
+```bash
+go install github.com/genadigeno/data-feed/cmd/datafeed@latest
+```
+
+Or from a clone, which also gives you the examples:
+
+```bash
+git clone https://github.com/genadigeno/data-feed.git
+```
+
+```bash
+cd data-feed
+```
+
+```bash
+go build -o datafeed ./cmd/datafeed
+```
+
+On Windows, use `-o datafeed.exe`.
 
 ## Going to production
 
@@ -352,21 +391,23 @@ Your numbers will depend mostly on your disk. Reproduce the in-process benchmark
 
 ## Getting help
 
-[Open an issue](https://github.com/genadigeno/data-feed/issues) for bugs and questions.
+- Ask a question or share an idea in [Discussions](https://github.com/genadigeno/data-feed/discussions).
+- [Open an issue](https://github.com/genadigeno/data-feed/issues/new/choose) for bugs and feature requests.
+- Report security problems privately, as [SECURITY.md](SECURITY.md) explains.
+- See what changed in the [changelog](CHANGELOG.md).
 
 ## Contributing
 
-```bash
-make fmt lint test
-```
-
-Tests must stay fast and need no external services. Changes must keep output byte-identical, or say clearly why they can't.
+Contributions are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to set up, what we look for and how to open a pull request. Everyone taking part
+follows the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Project status
 
-datafeed is pre-1.0. It has been measured and failure-tested on Windows, and the usage commands in this file have been run on Windows and on
-Ubuntu, all on one machine. It builds for macOS, but has not been run there. Running it across real hosts is not yet proven, so try it on
-your own hosts before relying on it. There are no prebuilt releases yet.
+datafeed follows [Semantic Versioning](https://semver.org/). CLI commands, the `/api/v1` API and the session and schema documents stay compatible across 1.x, and a
+change to generated bytes raises the engine version that `datafeed version` reports.
+
+Automated tests run on Linux, Windows and macOS. Performance and failure testing ran on one Windows machine, and the usage commands here were also run by hand on
+Ubuntu. Running across real hosts is not yet proven, so try it on your own hosts before relying on it. The [changelog](CHANGELOG.md) lists the known limits.
 
 ## License
 
