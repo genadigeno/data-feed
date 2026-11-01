@@ -179,8 +179,10 @@ func loadGenerateSchema(cfg *config.Config, o *GenerateOptions) (*schema.Schema,
 		return nil, schemaProblems(problems)
 	}
 
-	if err := applyCount(s, o); err != nil {
-		return nil, err
+	if o.Count > 0 {
+		if err := schema.SetRootCount(s, o.Count); err != nil {
+			return nil, usage("--count is " + err.Error())
+		}
 	}
 	if err := checkModeOptions(s, o); err != nil {
 		return nil, err
@@ -205,30 +207,6 @@ func loadGenerateSchema(cfg *config.Config, o *GenerateOptions) (*schema.Schema,
 		return nil, schemaProblems(problems)
 	}
 	return s, nil
-}
-
-// applyCount treats --count on a relational schema as the row count of its only root
-// table. With several roots the schema's own counts are unambiguous, and --count is not.
-func applyCount(s *schema.Schema, o *GenerateOptions) error {
-	if o.Count == 0 || s.Relational == nil {
-		return nil
-	}
-	var root *schema.Table
-	for i := range s.Relational.Tables {
-		if s.Relational.Tables[i].Owner != nil {
-			continue
-		}
-		if root != nil {
-			return usage("--count is ambiguous: this schema has several tables without an owner, so set each one's count in the schema")
-		}
-		root = &s.Relational.Tables[i]
-	}
-	if root == nil {
-		return nil // validation reports the ownership problem
-	}
-	n := int64(o.Count)
-	root.Count = &n
-	return nil
 }
 
 func checkModeOptions(s *schema.Schema, o *GenerateOptions) error {

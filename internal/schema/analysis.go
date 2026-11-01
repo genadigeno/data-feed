@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"errors"
 	"math"
 	"math/big"
 	"strconv"
@@ -475,4 +476,32 @@ func nestedMaxBytes(root *Table, r *RelationalSpec, defs map[string]*Definition)
 		return total
 	}
 	return size(root, 0)
+}
+
+// SetRootCount sets the rows of a relational schema's only root table. With several roots
+// a single count would be ambiguous, so each must set its own.
+func SetRootCount(s *Schema, count uint64) error {
+	if s.Relational == nil {
+		return nil
+	}
+	var root *Table
+	for i := range s.Relational.Tables {
+		t := &s.Relational.Tables[i]
+		if t.Owner != nil {
+			continue
+		}
+		if root != nil {
+			return errors.New("ambiguous: this schema has several tables without an owner, so set each one's count in the schema")
+		}
+		root = t
+	}
+	if root == nil {
+		return nil // validation reports the ownership problem
+	}
+	if count > math.MaxInt64 {
+		return errors.New("too large")
+	}
+	n := int64(count)
+	root.Count = &n
+	return nil
 }

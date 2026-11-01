@@ -4,8 +4,9 @@
 embedded SQLite, artifact storage), as a Worker on any host, or as a CLI. No external database, broker, cache or
 object store is required.
 
-**Status: under construction.** The foundation works: configuration, logging, SQLite with migrations, the
-Coordinator and Worker processes, health checks and graceful shutdown. Data generation is not implemented yet.
+**Status: under construction.** `datafeed generate` produces data directly. The Coordinator and Workers run sessions
+across hosts, surviving Worker and Coordinator restarts, but sessions cannot be created by users until the public API
+arrives.
 
 ## Quick start
 

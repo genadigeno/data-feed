@@ -238,7 +238,7 @@ func (g *globals) validateAndReport(role config.Role) error {
 func newWorkerCommand(g *globals) *cobra.Command {
 	cmd := &cobra.Command{Use: "worker", Short: "Run and inspect Worker processes"}
 
-	var coordinator, name, fingerprint, caFile string
+	var coordinator, name, fingerprint, caFile, joinToken string
 	run := &cobra.Command{
 		Use:   "run",
 		Short: "Run a Worker in the foreground; it connects to a Coordinator and stops on a signal",
@@ -247,7 +247,11 @@ func newWorkerCommand(g *globals) *cobra.Command {
 			"This build verifies connectivity and protocol compatibility; task execution is not available yet.",
 		Args: usageArgs(cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			loaded, err := g.loadConfig(config.RoleWorker, workerFlags(coordinator, name, fingerprint, caFile))
+			flags := workerFlags(coordinator, name, fingerprint, caFile)
+			if joinToken != "" {
+				flags["worker.join_token"] = joinToken
+			}
+			loaded, err := g.loadConfig(config.RoleWorker, flags)
 			if err != nil {
 				return err
 			}
@@ -263,6 +267,7 @@ func newWorkerCommand(g *globals) *cobra.Command {
 	f.StringVar(&name, "name", "", "Worker name (worker.name, default: hostname)")
 	f.StringVar(&fingerprint, "coordinator-fingerprint", "", "pin the Coordinator's certificate: sha256:… (worker.coordinator_fingerprint)")
 	f.StringVar(&caFile, "coordinator-ca", "", "CA bundle that signed the Coordinator's certificate (worker.coordinator_ca_file)")
+	f.StringVar(&joinToken, "join-token", "", "join token for first registration; prefer env:NAME or file:PATH (worker.join_token)")
 
 	var validateCoordinator string
 	validate := &cobra.Command{

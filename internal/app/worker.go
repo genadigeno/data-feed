@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"log/slog"
-	"os"
 
 	"github.com/genadigeno/data-feed/internal/clock"
 	"github.com/genadigeno/data-feed/internal/config"
@@ -32,24 +31,9 @@ func RunWorker(ctx context.Context, cfg *config.Config, logger *slog.Logger, clk
 	client := protocol.NewClient(cfg.Worker.CoordinatorURL, tlsConfig)
 	defer client.Close()
 
-	name := cfg.Worker.Name
-	if name == "" {
-		if host, err := os.Hostname(); err == nil {
-			name = host
-		}
+	opts, err := remoteWorkerOptions(cfg, client, Vocabulary, clk, logger)
+	if err != nil {
+		return err
 	}
-	return worker.New(worker.Options{
-		Name:       name,
-		Transport:  pingAdapter{client},
-		Compatible: protocol.CheckCompatible,
-		Clock:      clk,
-		Logger:     logger,
-	}).Run(ctx)
-}
-
-type pingAdapter struct{ c *protocol.Client }
-
-func (p pingAdapter) Ping(ctx context.Context) (int, error) {
-	resp, err := p.c.Ping(ctx)
-	return resp.ProtocolVersion, err
+	return worker.New(opts).Run(ctx)
 }

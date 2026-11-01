@@ -33,6 +33,8 @@ var rules = []rule{
 			"web", "ai", "pipeline", "output", "apperr", "net/http", "database/sql",
 		},
 	},
+	{Packages: []string{"hub", "wire"}, Forbidden: []string{"store", "session", "coord", "worker", "protocol", "api", "apiclient", "cli", "app", "database/sql"}},
+	{Packages: []string{"snapshot"}, Forbidden: []string{"store", "session", "coord", "worker", "protocol", "api", "apiclient", "cli", "app", "net/http", "database/sql"}},
 	{Packages: []string{"ai"}, Forbidden: []string{"store", "api", "cli", "app", "session", "coord", "worker"}},
 	{Packages: []string{"pipeline", "output"}, Forbidden: []string{"store", "coord", "protocol", "api", "cli", "app", "session", "worker"}},
 	{Packages: []string{"session", "coord"}, Forbidden: []string{"store/sqlite", "api", "apiclient", "protocol", "cli", "app"}},

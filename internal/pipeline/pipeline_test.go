@@ -716,15 +716,67 @@ func TestLowRateKeepsOutputFlowing(t *testing.T) {
 	}()
 	clk.BlockUntil(1) // waiting for the rate limit
 
-	// Finish must not sit out the wait.
+	// Finish must not sit out the wait, and what has not been paced yet is not output.
 	close(finish)
 	select {
 	case r := <-done:
-		if !r.Truncated || r.Records != 1 {
+		if !r.Truncated || r.Records != 0 || r.EndIndex != 0 || r.Parts != 0 {
 			t.Fatalf("result: %+v", r)
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("finish was stuck behind the rate limit")
+	}
+}
+
+// Batches generated ahead of the rate must not all pass at once when a run finishes.
+func TestFinishDoesNotOvershootTheRate(t *testing.T) {
+	defer checkNoLeak(t)()
+	for _, gens := range []int{1, 4} {
+		clk := clocktest.NewFake(refTime)
+		sink := newMemorySink()
+		finish := make(chan struct{})
+		u := unit(t, engineFor(t, hybridDoc), gen.StreamMain, gens, sink, 1<<40)
+		u.Clock = clk
+		u.RecordsPerSecond = 100
+		u.Finish = finish
+
+		done := make(chan Result, 1)
+		go func() {
+			r, err := Run(context.Background(), u)
+			if err != nil {
+				t.Error(err)
+			}
+			done <- r
+		}()
+		clk.BlockUntil(1)
+		close(finish)
+		select {
+		case r := <-done:
+			if !r.Truncated || r.Records != 0 {
+				t.Fatalf("%d generators: %+v", gens, r)
+			}
+			if got := sink.joined(); len(got) != 0 {
+				t.Fatalf("%d generators: wrote %d bytes, result %+v", gens, len(got), r)
+			}
+		case <-time.After(5 * time.Second):
+			t.Fatalf("%d generators: stuck", gens)
+		}
+	}
+}
+
+func TestControlChangesTheRate(t *testing.T) {
+	var c Control
+	c.SetRate(5) // nothing is running yet: no effect, and no failure
+	clk := clocktest.NewFake(refTime)
+	p := newPacer(100, 10, clk, &Stats{})
+	c.pacer.Store(p)
+	c.SetRate(40)
+	if got := float64(p.lim.Limit()); got != 40 {
+		t.Fatalf("rate %v", got)
+	}
+	c.SetRate(0) // not a rate: a run is never silently unlimited or stopped
+	if got := float64(p.lim.Limit()); got != 40 {
+		t.Fatalf("rate %v", got)
 	}
 }
 

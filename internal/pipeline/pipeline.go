@@ -71,6 +71,20 @@ type Unit struct {
 	// Finish, when closed, ends the run cleanly at the next batch: the open part is closed
 	// and handed over. Used for graceful stops, pauses and deadlines.
 	Finish <-chan struct{}
+	// Control, if set, adjusts the run while it goes.
+	Control *Control
+}
+
+// Control adjusts a running unit. A run that started without a rate has nothing to adjust.
+type Control struct{ pacer atomic.Pointer[pacer] }
+
+// SetRate changes the record rate of the run. It takes effect from the next batch.
+func (c *Control) SetRate(perSecond float64) {
+	p := c.pacer.Load()
+	if p == nil || perSecond <= 0 {
+		return
+	}
+	p.lim.SetLimitAt(p.clk.Now(), rate.Limit(perSecond))
 }
 
 // Result says how a run ended.
@@ -104,6 +118,9 @@ func Run(ctx context.Context, u Unit) (result Result, err error) {
 	if u.RecordsPerSecond > 0 {
 		limit = max(1, min(limit, int(u.RecordsPerSecond/rateWindowsPerSecond)))
 		limiter = newPacer(u.RecordsPerSecond, limit, u.Clock, u.Stats)
+		if u.Control != nil {
+			u.Control.pacer.Store(limiter)
+		}
 	}
 
 	genCtx, cancel := context.WithCancel(ctx)
@@ -228,6 +245,7 @@ func (u *Unit) startGenerators(ctx context.Context, limit int, p *pacer, fail fu
 				}
 				if !p.wait(ctx, u.Finish, b.Len()) {
 					u.Pool.Put(b)
+					finished()
 					return
 				}
 				if !send(b) {
@@ -261,11 +279,15 @@ func (u *Unit) startGenerators(ctx context.Context, limit int, p *pacer, fail fu
 			result := make(chan jobResult, 1)
 			select {
 			case ordered <- result:
+			case <-u.Finish:
+				return
 			case <-ctx.Done():
 				return
 			}
 			select {
 			case jobs <- job{next, to, result}:
+			case <-u.Finish:
+				return
 			case <-ctx.Done():
 				return
 			}
@@ -307,6 +329,13 @@ func (u *Unit) startGenerators(ctx context.Context, limit int, p *pacer, fail fu
 				if r.batch == nil {
 					return
 				}
+				// Batches generated ahead are not part of the output until they are sent, so a
+				// finished run drops them: end has not moved past them, and they would otherwise
+				// all pass at once, whatever the rate.
+				if finished() {
+					u.Pool.Put(r.batch)
+					return
+				}
 				if r.batch.Len() == 0 {
 					u.Pool.Put(r.batch)
 					end.Store(r.end)
@@ -314,12 +343,16 @@ func (u *Unit) startGenerators(ctx context.Context, limit int, p *pacer, fail fu
 				}
 				if !p.wait(ctx, u.Finish, r.batch.Len()) {
 					u.Pool.Put(r.batch)
+					finished()
 					return
 				}
 				if !send(r.batch) {
 					return
 				}
 				end.Store(r.end)
+			case <-u.Finish:
+				finished()
+				return
 			case <-ctx.Done():
 				return
 			}
@@ -352,8 +385,8 @@ func newPacer(perSecond float64, burst int, clk clock.Clock, stats *Stats) *pace
 	return &pacer{lim: lim, clk: clk, stats: stats}
 }
 
-// wait returns false if ctx ended. Finish ends the wait early but still lets the batch
-// through, because it has been generated and belongs in the output.
+// wait returns false if ctx ended or Finish closed: the batch has not earned its place in
+// the output yet, and nothing has been promised about it, so it is simply not sent.
 func (p *pacer) wait(ctx context.Context, finish <-chan struct{}, n int) bool {
 	if p == nil {
 		return true
@@ -368,7 +401,7 @@ func (p *pacer) wait(ctx context.Context, finish <-chan struct{}, n int) bool {
 	case <-p.clk.After(delay):
 		return true
 	case <-finish:
-		return true
+		return false
 	case <-ctx.Done():
 		return false
 	}

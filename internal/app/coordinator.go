@@ -25,6 +25,7 @@ import (
 	"github.com/genadigeno/data-feed/internal/datadir"
 	"github.com/genadigeno/data-feed/internal/protocol"
 	"github.com/genadigeno/data-feed/internal/security"
+	"github.com/genadigeno/data-feed/internal/snapshot"
 	"github.com/genadigeno/data-feed/internal/store/sqlite"
 )
 
@@ -97,7 +98,12 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 			return readinessChecks(ctx, ready.Load(), db, dir, cfg.Storage.MinFreeBytes)
 		},
 	})
-	internalHandler := protocol.NewHandler(logger.With("component", "protocol"), buildinfo.Version)
+
+	plane := NewControlPlane(cfg, db.Store(), dir, Vocabulary, clk, logger)
+	if err := plane.Core.Recover(ctx); err != nil {
+		return fmt.Errorf("recover: %w", err)
+	}
+	internalHandler := protocol.NewHandler(logger.With("component", "protocol"), buildinfo.Version, plane.Core)
 
 	// The internal listener opens first, as Workers must be able to connect by the
 	// time the Coordinator reports ready.
@@ -133,6 +139,19 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 		"data_dir", dir.Root())
 	ready.Store(true)
 
+	// Background work stops before the database closes.
+	workCtx, stopWork := context.WithCancel(context.Background())
+	var work errgroup.Group
+	work.Go(func() error {
+		plane.Core.Run(workCtx)
+		return nil
+	})
+	localCtx, stopLocal := context.WithCancel(workCtx)
+	defer stopLocal()
+	if local := plane.LocalWorker(cfg, dir, Vocabulary, clk, logger); local != nil {
+		work.Go(func() error { return local.Run(localCtx) })
+	}
+
 	var serveErr error
 	select {
 	case <-ctx.Done():
@@ -142,6 +161,16 @@ func RunCoordinator(ctx context.Context, cfg *config.Config, logger *slog.Logger
 
 	ready.Store(false)
 	logger.Info("coordinator shutting down")
+
+	// The embedded worker finishes against a working control plane, then everything stops.
+	plane.Core.BeginDrain()
+	stopLocal()
+	defer func() {
+		stopWork()
+		if err := work.Wait(); err != nil {
+			logger.Error("background work", "err", err)
+		}
+	}()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownGrace)
 	defer cancel()
@@ -270,3 +299,6 @@ func startServer(addr string, tlsConfig *tls.Config, srv *http.Server) (*running
 	}()
 	return r, nil
 }
+
+// Vocabulary decodes the catalog a snapshot carries. Catalogs arrive with Phase 7.
+var Vocabulary snapshot.VocabularyDecoder

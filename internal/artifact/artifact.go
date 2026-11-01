@@ -22,6 +22,7 @@ import (
 const (
 	dirOutputs   = "outputs"
 	dirStaging   = "staging"
+	dirRetained  = "retained"
 	manifestFile = "manifest.json"
 )
 
@@ -228,6 +229,32 @@ func (s *Store) Scan() ([]FileInfo, error) {
 		return nil
 	})
 	return out, err
+}
+
+// RetainSession moves a deleted session's output out of managed storage, so it stays on
+// disk but reconciliation, which removes files no row refers to, leaves it alone.
+func (s *Store) RetainSession(session string) error {
+	if !safeID.MatchString(session) {
+		return fmt.Errorf("unsafe session id %q", session)
+	}
+	from := filepath.Join(s.outputs(), session)
+	if _, err := os.Stat(from); errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	dir := filepath.Join(s.root, dirRetained)
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return err
+	}
+	return os.Rename(from, filepath.Join(dir, session))
+}
+
+// PurgeSession deletes a session's output. Files still open, such as by a running download
+// on Windows, make this fail; it is retried at the next opportunity.
+func (s *Store) PurgeSession(session string) error {
+	if !safeID.MatchString(session) {
+		return fmt.Errorf("unsafe session id %q", session)
+	}
+	return os.RemoveAll(filepath.Join(s.outputs(), session))
 }
 
 // ActionKind says what a reconciliation step does.
