@@ -78,7 +78,7 @@ func (r resolver) SchemaDocument(ref SchemaRef) ([]byte, error) {
 		return nil
 	})
 	if errors.Is(err, store.ErrNotFound) {
-		return nil, fmt.Errorf("no schema %s", ref.ID)
+		return nil, fmt.Errorf("no saved schema %s", ref.ID)
 	}
 	return doc, err
 }

@@ -1,0 +1,20 @@
+# Two related tables: every order points at a real customer. Each table gets its own
+# files, so the output must be a directory. Try it with:
+#   datafeed generate --schema examples/shop.yaml --format csv -O shop/
+kind: relational
+tables:
+  customers:
+    count: 10000
+    primary_key: id
+    fields:
+      id: {type: uuid}
+      name: {type: full_name}
+      email: {type: email}
+  orders:
+    primary_key: id
+    owner: {ref: customers, per_parent: {min: 1, max: 3}}
+    fields:
+      id: {type: uuid}
+      customer: {type: reference, ref: customers.id, owner: true}
+      total: {type: decimal, scale: 2, min: 1, max: 900}
+      placed_at: {type: timestamp}

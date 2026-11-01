@@ -73,6 +73,9 @@ func (s *specFlags) build(cmd *cobra.Command) ([]byte, error) {
 			return nil, err
 		}
 	} else {
+		if err := checkSchemaRef(s.schema); err != nil {
+			return nil, err
+		}
 		ref = s.schema
 	}
 	name := s.name
@@ -84,6 +87,15 @@ func (s *specFlags) build(cmd *cobra.Command) ([]byte, error) {
 		seed = &s.seed
 	}
 	return BuildSpec(name, s.mode, s.format, doc, ref, s.catalog, s.count, s.rate, s.duration, seed, s.unitRecords)
+}
+
+// checkSchemaRef explains a --schema that is neither a file here nor a saved schema's ID,
+// which would otherwise reach the server and come back as an unknown schema.
+func checkSchemaRef(ref string) error {
+	if ref == "" || strings.HasPrefix(ref, "sch_") {
+		return nil
+	}
+	return usageError(fmt.Errorf("no file %s in this folder, and it isn't a saved schema's ID, which starts with sch_", ref))
 }
 
 func baseName(path string) string {

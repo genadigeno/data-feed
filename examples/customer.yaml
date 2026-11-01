@@ -1,0 +1,11 @@
+# One flat record per customer. Try it with:
+#   datafeed generate --schema examples/customer.yaml --count 10
+kind: hybrid
+fields:
+  id: {type: uuid, unique: true}
+  name: {type: full_name}
+  email: {type: email}
+  age: {type: integer, min: 18, max: 90}
+  balance: {type: decimal, scale: 2, min: 0, max: 100000}
+  active: {type: boolean}
+  created_at: {type: timestamp}

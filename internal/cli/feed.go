@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"cmp"
 	"context"
 	"fmt"
 	"io"
@@ -25,7 +24,10 @@ func showFeed(g *globals, f *api.FeedDTO) error {
 	return g.show(f, func(w io.Writer) {
 		streams := make([]string, len(f.Streams))
 		for i, st := range f.Streams {
-			streams[i] = st.ID + " (ends at " + cmp.Or(st.End, "no end") + ")"
+			streams[i] = st.ID + " (no end)"
+			if st.End != "" {
+				streams[i] = st.ID + " (ends at " + st.End + ")"
+			}
 		}
 		fields(w, "ID", f.ID, "Name", f.Name, "Strategy", f.Strategy, "Format", f.Format, "Seed", f.Seed,
 			"Reference time", f.ReferenceTime.Format("2006-01-02T15:04:05Z07:00"), "Streams", strings.Join(streams, ", "))

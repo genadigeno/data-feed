@@ -252,3 +252,15 @@ func TestIsTerminal(t *testing.T) {
 		}
 	}
 }
+
+func TestCheckSchemaRef(t *testing.T) {
+	for _, ok := range []string{"", "sch_01a1975678ac701793e64f2abd97d439"} {
+		if err := checkSchemaRef(ok); err != nil {
+			t.Errorf("%q: %v", ok, err)
+		}
+	}
+	err := checkSchemaRef("customer.yaml")
+	if err == nil || !strings.Contains(err.Error(), "no file customer.yaml") {
+		t.Fatalf("got %v", err)
+	}
+}
