@@ -157,7 +157,8 @@ func Generate(ctx context.Context, cfg *config.Config, o GenerateOptions, stdout
 			close(finish)
 			watcherDone <- false
 		case <-stop:
-			watcherDone <- false
+			// A run can finish just as it is cancelled, and then both of these are ready.
+			watcherDone <- ctx.Err() != nil
 		}
 	}()
 	defer func() {
