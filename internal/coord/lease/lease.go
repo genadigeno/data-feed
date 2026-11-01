@@ -36,7 +36,6 @@ func Grant(u store.Unit, worker, leaseID string, now time.Time, d time.Duration)
 	u.WorkerID = worker
 	u.LeaseExpiresAt = now.Add(d)
 	u.GrantedAt = now
-	u.Attempts++
 	return u, nil
 }
 
@@ -51,10 +50,12 @@ func Check(u store.Unit, r Ref, now time.Time) error {
 	return nil
 }
 
-// Renew extends a current lease.
+// Renew extends a current lease. Being the current holder is enough: if the reaper hasn't
+// taken a lease back it is still good, whatever the wall clock now says, so a jump of the
+// clock can't cost every Worker its leases.
 func Renew(u store.Unit, r Ref, now time.Time, d time.Duration) (store.Unit, error) {
-	if err := Check(u, r, now); err != nil {
-		return u, err
+	if u.State != store.UnitLeased || u.LeaseID != r.LeaseID || u.WorkerID != r.WorkerID || u.FencingToken != r.FencingToken {
+		return u, ErrFenced
 	}
 	u.LeaseExpiresAt = now.Add(d)
 	return u, nil
@@ -77,11 +78,25 @@ func Expired(u store.Unit, lastRenewal time.Time, hasRenewal bool, now time.Time
 	return !hasRenewal || now.Sub(lastRenewal) >= d
 }
 
-// Expire returns an expired unit to the queue.
+// Expire returns an expired unit to the queue. It counts as a failed attempt: a unit that
+// keeps crashing or wedging its Workers never gets to report a failure of its own.
 func Expire(u store.Unit) store.Unit {
 	u = clearLease(u)
 	u.State = store.UnitPending
+	u.Attempts++
 	return u
+}
+
+// ExpireFinal is Expire, and says whether the unit has now used up its attempts. A unit
+// that has is failed, which fails its session.
+func ExpireFinal(u store.Unit, maxAttempts int) (store.Unit, bool) {
+	u = Expire(u)
+	if u.Attempts >= maxAttempts {
+		u.State = store.UnitFailed
+		u.LastError = "its lease expired too many times: Workers may be crashing on it"
+		return u, true
+	}
+	return u, false
 }
 
 // Revoke takes a lease away at once. The token increases, so a submission already on its
@@ -197,6 +212,7 @@ func FailAttempt(u store.Unit, r Ref, message string, retryable bool, maxAttempt
 	}
 	u = clearLease(u)
 	u.LastError = message
+	u.Attempts++
 	if !retryable || u.Attempts >= maxAttempts {
 		u.State = store.UnitFailed
 		return u, true, nil
@@ -236,6 +252,9 @@ func NewOrphanTracker(limit int) *OrphanTracker {
 // leases it reported. It returns the units whose lease is orphaned.
 func (o *OrphanTracker) Observe(worker string, held []store.Unit, reported map[string]bool, now time.Time) []store.Unit {
 	previous, seen := o.last[worker]
+	if seen && !now.After(previous) {
+		return nil // the same heartbeat again, as when its transaction is retried
+	}
 	o.last[worker] = now
 
 	var orphans []store.Unit
@@ -255,6 +274,15 @@ func (o *OrphanTracker) Observe(worker string, held []store.Unit, reported map[s
 		}
 	}
 	return orphans
+}
+
+// Retain drops counts for leases that no longer exist.
+func (o *OrphanTracker) Retain(current func(leaseID string) bool) {
+	for id := range o.misses {
+		if !current(id) {
+			delete(o.misses, id)
+		}
+	}
 }
 
 // Forget drops a worker's state.

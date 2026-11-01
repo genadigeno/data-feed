@@ -52,6 +52,8 @@ type Server struct {
 	MaxHeaderBytes        Size          `yaml:"max_header_bytes"`
 	MaxConcurrentRequests int           `yaml:"max_concurrent_requests"`
 	ShutdownGrace         time.Duration `yaml:"shutdown_grace"`
+	// BehindTLSProxy says a proxy terminates TLS in front of this server.
+	BehindTLSProxy bool `yaml:"behind_tls_proxy"`
 }
 
 type Auth struct {
@@ -131,8 +133,6 @@ type Generation struct {
 	PartMaxBytes          Size          `yaml:"part_max_bytes"`
 	PartMaxRecords        int64         `yaml:"part_max_records"`
 	PartMaxAge            time.Duration `yaml:"part_max_age"`
-	StreamWindow          int           `yaml:"stream_window"`
-	PauseGrace            time.Duration `yaml:"pause_grace"`
 	MaxSnapshotBytes      Size          `yaml:"max_snapshot_bytes"`
 	MaxTotalRecords       int64         `yaml:"max_total_records"`
 	RandomCaps            RandomCaps    `yaml:"random_caps"`
@@ -280,7 +280,6 @@ func Defaults(environment string) Config {
 			UnitMaxBytes:          512 * MiB,
 			PartMaxBytes:          64 * MiB,
 			PartMaxAge:            60 * time.Second,
-			PauseGrace:            10 * time.Second,
 			MaxSnapshotBytes:      64 * MiB,
 			RandomCaps:            RandomCaps{MaxDepth: 16, MaxFields: 256, MaxArrayLength: 1024, MaxStringLength: 65536},
 		},

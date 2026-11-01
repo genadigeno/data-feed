@@ -19,6 +19,7 @@ func newHash() hash.Hash { return sha256.New() }
 // Recover brings persisted state back in line after a restart, before anything is served.
 // See docs/01-architecture/recovery-design.md.
 func (c *Core) Recover(ctx context.Context) error {
+	c.startedAt = c.clk.Now()
 	if err := c.reconcileArtifacts(ctx); err != nil {
 		return fmt.Errorf("reconcile artifacts: %w", err)
 	}
@@ -100,7 +101,9 @@ func (c *Core) reconcileArtifacts(ctx context.Context) error {
 		return err
 	}
 	if err := c.o.Artifacts.ApplyFiles(actions); err != nil {
-		return err
+		// Antivirus or an open window can hold a file for a while. Rows are already right,
+		// and the file is unreferenced, so the next start tries again.
+		c.log.Error("could not clean up some files", "err", err)
 	}
 	for id := range degraded {
 		c.logSession(id, slog.LevelWarn, "output files were found missing or damaged; regenerate with a retry")
@@ -123,7 +126,7 @@ func (c *Core) recoverLeases(ctx context.Context) error {
 			return err
 		}
 		for i := range workers {
-			if workers[i].State == store.WorkerRevoked {
+			if workers[i].State == store.WorkerRevoked || workers[i].State == store.WorkerDraining {
 				continue
 			}
 			workers[i].State = store.WorkerDisconnected
@@ -183,7 +186,7 @@ func (c *Core) recoverSessions(ctx context.Context) error {
 		s := &terminal[i]
 		if s.Purging {
 			if err := c.PurgeArtifacts(ctx, s.ID); err != nil && !errors.Is(err, store.ErrNotFound) {
-				return err
+				c.log.Error("could not finish removing output", "session_id", s.ID, "err", err)
 			}
 			continue
 		}

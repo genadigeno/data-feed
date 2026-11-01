@@ -810,8 +810,11 @@ func (s *Service) execute(ctx, serverCtx context.Context, job *store.VocabJob) {
 		return
 	}
 	domain, content, err := s.jobInputs(ctx, job, req.DomainID)
+	if serverCtx.Err() != nil {
+		return // shutting down: the next start picks it up
+	}
 	if err != nil {
-		s.finish(job, &Progress{}, false, err)
+		s.finish(job, &Progress{}, ctx.Err() != nil, err)
 		return
 	}
 	existing := make(map[string][]vocab.Entry, len(content.Groups))
@@ -820,7 +823,9 @@ func (s *Service) execute(ctx, serverCtx context.Context, job *store.VocabJob) {
 		existing[content.Groups[i].Key] = content.Groups[i].Values
 	}
 	if err := s.setState(ctx, job, JobRunning); err != nil {
-		s.finish(job, &Progress{}, false, err)
+		if serverCtx.Err() == nil {
+			s.finish(job, &Progress{}, ctx.Err() != nil, err)
+		}
 		return
 	}
 
@@ -832,7 +837,7 @@ func (s *Service) execute(ctx, serverCtx context.Context, job *store.VocabJob) {
 		MaxConcurrent: cfg.MaxConcurrentRequests, MaxTotalTokens: cfg.MaxTotalTokens, UseCache: cfg.CacheEnabled && !req.NoCache, Existing: existing,
 	}
 	builder := &Builder{
-		Provider: s.Provider, Cache: dbCache{s}, Limiter: s.limiter, Slots: s.slots,
+		Provider: s.Provider, Cache: dbCache{s}, Limiter: s.callLimiter(), Slots: s.slots,
 		OnPlan: func(plans []ai.GroupPlan) error { return s.storePlan(ctx, job, plans) },
 		OnGroup: func(g *ai.GroupPlan, values []vocab.Entry) error {
 			return s.storeValues(ctx, job, g.Key, values)
@@ -848,6 +853,14 @@ func (s *Service) execute(ctx, serverCtx context.Context, job *store.VocabJob) {
 	default:
 		s.finish(job, &progress, false, err)
 	}
+}
+
+// callLimiter limits calls to a remote service. The offline provider is a local function.
+func (s *Service) callLimiter() *rate.Limiter {
+	if s.Provider.Name() == ai.OfflineName {
+		return nil
+	}
+	return s.limiter
 }
 
 func or(a, b string) string {
@@ -878,8 +891,23 @@ func (s *Service) setState(ctx context.Context, job *store.VocabJob, state strin
 	})
 }
 
+// stillDraft keeps a job from changing a catalog published while it was running.
+func stillDraft(ctx context.Context, tx store.Tx, job *store.VocabJob) error {
+	c, err := tx.GetCatalog(ctx, job.CatalogID, job.TargetVersion)
+	if err != nil {
+		return err
+	}
+	if c.Status != store.CatalogDraft {
+		return fmt.Errorf("%w: version %d was published while the job was running", ai.ErrPermanent, c.Version)
+	}
+	return nil
+}
+
 func (s *Service) storePlan(ctx context.Context, job *store.VocabJob, plans []ai.GroupPlan) error {
 	return s.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		if err := stillDraft(ctx, tx, job); err != nil {
+			return err
+		}
 		for i := range plans {
 			p := &plans[i]
 			row, err := groupRow(job.CatalogID, job.TargetVersion, &vocab.Group{Key: p.Key, Name: p.Name, Description: p.Description, DataType: p.DataType, Category: p.Category})
@@ -896,6 +924,9 @@ func (s *Service) storePlan(ctx context.Context, job *store.VocabJob, plans []ai
 
 func (s *Service) storeValues(ctx context.Context, job *store.VocabJob, group string, values []vocab.Entry) error {
 	return s.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		if err := stillDraft(ctx, tx, job); err != nil {
+			return err
+		}
 		for i := range values {
 			row, err := valueRow(job.CatalogID, job.TargetVersion, group, &values[i])
 			if err != nil {

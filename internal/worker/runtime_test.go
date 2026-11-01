@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"testing/synctest"
@@ -46,6 +47,7 @@ type fakeCoordinator struct {
 	bodies      map[int][]byte
 	failNext    int // upload attempts to fail after storing, as a lost response does
 	fencePart   int // part number to refuse as fenced, or -1
+	rejectPart  int // part number to refuse for good, or 0
 	completed   chan completion
 	released    chan wire.LeaseRef
 	failed      chan string
@@ -135,6 +137,9 @@ func (f *fakeCoordinator) UploadPart(_ context.Context, _ string, m wire.PartMet
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.rejectPart != 0 && m.Seq == f.rejectPart {
+		return wire.UploadResult{}, apperr.New(apperr.ResourceExhausted, wire.CodePartTooLarge, "part too large")
+	}
 	if m.Seq == f.fencePart {
 		return wire.UploadResult{}, apperr.New(apperr.Conflict, wire.CodeLeaseFenced, "fenced")
 	}
@@ -321,6 +326,31 @@ func TestFencedUploadDiscardsTheUnit(t *testing.T) {
 	case m := <-f.failed:
 		t.Fatalf("reported failure despite fencing: %s", m)
 	default:
+	}
+	cancel()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	wantClean(t, r, r.o.SpoolDir)
+}
+
+// A rejection that retrying can't fix must be reported, so that the unit's attempts count
+// and the session fails, or the unit would go round for ever.
+func TestRejectedUploadIsReportedAsAFailure(t *testing.T) {
+	f := newFake(t)
+	f.rejectPart = 1
+	f.assignments = []wire.Assignment{f.assign(1000)}
+	ctx, cancel := context.WithCancel(context.Background())
+	r, done := startRuntime(t, ctx, f, true)
+	select {
+	case m := <-f.failed:
+		if !strings.Contains(m, "too large") {
+			t.Fatalf("reported %q", m)
+		}
+	case c := <-f.completed:
+		t.Fatalf("completed: %+v", c)
+	case <-time.After(30 * time.Second):
+		t.Fatal("the failure was never reported")
 	}
 	cancel()
 	if err := <-done; err != nil {

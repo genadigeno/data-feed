@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/http/pprof"
 	"regexp"
 	"runtime/debug"
 	"strings"
@@ -53,6 +54,8 @@ type Options struct {
 	Hub       *hub.Hub
 	// Done closes when the server starts shutting down, which ends live update streams.
 	Done <-chan struct{}
+	// Backup writes a consistent copy of the database to a new file.
+	Backup func(ctx context.Context, dest string) error
 	// Extra, if set, handles what no API route matches: the web interface.
 	Extra http.Handler
 }
@@ -80,6 +83,10 @@ func summarize(checks []Check) ReadyResponse {
 	return r
 }
 
+// maxHeavyRequests bounds requests that can load a whole catalog or compile a schema, which
+// even a viewer can ask for, while the rest of the API stays quick.
+const maxHeavyRequests = 4
+
 // server holds what handlers share.
 type server struct {
 	o          Options
@@ -88,6 +95,8 @@ type server struct {
 	sseClients atomic.Int64
 	requests   statusCounts
 	slots      chan struct{}
+	verifying  chan struct{}
+	heavy      chan struct{}
 }
 
 func (s *server) writeJSON(w http.ResponseWriter, status int, body any) {
@@ -97,7 +106,7 @@ func (s *server) writeJSON(w http.ResponseWriter, status int, body any) {
 // NewHandler builds the public API handler.
 func NewHandler(o Options) http.Handler {
 	s := &server{
-		o: o, slots: make(chan struct{}, o.MaxConcurrent),
+		o: o, slots: make(chan struct{}, o.MaxConcurrent), verifying: make(chan struct{}, 1), heavy: make(chan struct{}, maxHeavyRequests),
 		limiters: newLimiters(o.Config.API.RateLimit.RequestsPerSecond, o.Config.API.RateLimit.Burst),
 	}
 	mux := http.NewServeMux()
@@ -113,6 +122,19 @@ func NewHandler(o Options) http.Handler {
 		}
 		writeError(w, r, o.Logger, apperr.New(apperr.NotFound, "ERR_NOT_FOUND", "no such endpoint"))
 	})
+	if o.Config.Diagnostics.Pprof {
+		// Profiles reveal memory contents, so they are for admins only.
+		for pattern, h := range map[string]http.HandlerFunc{
+			"/debug/pprof/": pprof.Index, "/debug/pprof/cmdline": pprof.Cmdline, "/debug/pprof/profile": pprof.Profile,
+			"/debug/pprof/symbol": pprof.Symbol, "/debug/pprof/trace": pprof.Trace,
+		} {
+			mux.Handle("GET "+pattern, s.wrap(route{Role: RoleAdmin, Handler: func(w http.ResponseWriter, r *http.Request) error {
+				noWriteDeadline(w)
+				h(w, r)
+				return nil
+			}}))
+		}
+	}
 	if o.Extra != nil {
 		mux.Handle("/", o.Extra)
 	} else {
@@ -127,6 +149,18 @@ func NewHandler(o Options) http.Handler {
 // and how much they may send.
 func (s *server) wrap(rt route) http.Handler {
 	handler := rt.Handler
+	if rt.Heavy {
+		next := handler
+		handler = func(w http.ResponseWriter, r *http.Request) error {
+			select {
+			case s.heavy <- struct{}{}:
+				defer func() { <-s.heavy }()
+			case <-r.Context().Done():
+				return r.Context().Err()
+			}
+			return next(w, r)
+		}
+	}
 	if rt.Idempotent {
 		handler = s.idempotent(handler)
 	}
@@ -176,7 +210,10 @@ func (s *server) wrap(rt route) http.Handler {
 // isLongLived spots responses that may stay open for a long time. They must not use up
 // the slots that keep ordinary requests answered quickly.
 func isLongLived(path string) bool {
-	return strings.HasSuffix(path, prefix+"/events") || strings.Contains(path, "/artifacts/")
+	if strings.Contains(path, "/artifacts/") {
+		return strings.HasSuffix(path, "/merged") || strings.Contains(path, "/parts/")
+	}
+	return strings.HasSuffix(path, prefix+"/events") || strings.HasPrefix(path, prefix+"/admin/") || strings.HasPrefix(path, "/debug/pprof/")
 }
 
 func (s *server) middleware(next http.Handler) http.Handler {
@@ -186,6 +223,10 @@ func (s *server) middleware(next http.Handler) http.Handler {
 		w.Header().Set(requestIDHeader, id)
 		r = r.WithContext(context.WithValue(r.Context(), requestIDKey{}, id))
 
+		if !HostAllowed(o.Config.Server.Listen, r.Host) || CrossOrigin(r.Method, r.Header.Get("Origin"), r.Host) {
+			writeError(w, r, o.Logger, apperr.New(apperr.PermissionDenied, "ERR_CROSS_SITE", "requests from other sites are refused"))
+			return
+		}
 		if !isLongLived(r.URL.Path) {
 			select {
 			case s.slots <- struct{}{}:

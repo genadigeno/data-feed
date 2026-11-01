@@ -40,6 +40,7 @@ type Options struct {
 
 // DB is an open database. Only the Coordinator ever creates one.
 type DB struct {
+	dsnWrite      string // for a backup, which needs its own connection
 	writer        *sql.DB
 	reader        *sql.DB
 	clock         clock.Clock
@@ -87,7 +88,7 @@ func Open(ctx context.Context, o Options) (*DB, error) {
 	writer.SetConnMaxLifetime(0)
 	writer.SetConnMaxIdleTime(0)
 
-	db := &DB{writer: writer, clock: o.Clock, logger: o.Logger}
+	db := &DB{writer: writer, clock: o.Clock, logger: o.Logger, dsnWrite: dsn(abs, o, false)}
 	if err := db.migrate(ctx); err != nil {
 		_ = writer.Close()
 		return nil, err
@@ -108,6 +109,20 @@ func Open(ctx context.Context, o Options) (*DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+// Backup writes a consistent copy of the database to a new file. It reads a snapshot on a
+// connection of its own, so generation keeps committing meanwhile.
+func (db *DB) Backup(ctx context.Context, dest string) error {
+	conn, err := sql.Open("sqlite", db.dsnWrite)
+	if err != nil {
+		return fmt.Errorf("open backup connection: %w", err)
+	}
+	defer conn.Close()
+	if _, err := conn.ExecContext(ctx, `VACUUM INTO ?`, dest); err != nil {
+		return fmt.Errorf("back up database: %w", err)
+	}
+	return nil
 }
 
 // SchemaVersion returns the migration version the database is at.

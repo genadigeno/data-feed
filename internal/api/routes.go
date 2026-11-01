@@ -32,6 +32,8 @@ type route struct {
 	Stream bool
 	// Idempotent routes honour the Idempotency-Key header.
 	Idempotent bool
+	// Heavy routes wait their turn for one of a few slots.
+	Heavy bool
 	// Import allows the larger request body limit.
 	Import  bool
 	Handler handlerFunc
@@ -50,9 +52,9 @@ func (s *server) routes() []route {
 		{Method: "GET", Path: "/dashboard", Role: RoleViewer, Handler: s.dashboard},
 		{Method: "GET", Path: "/events", Role: RoleViewer, Stream: true, Handler: s.events},
 
-		{Method: "POST", Path: "/sessions", Role: RoleOperator, Idempotent: true, Handler: s.createSession},
+		{Method: "POST", Path: "/sessions", Role: RoleOperator, Heavy: true, Idempotent: true, Handler: s.createSession},
 		{Method: "GET", Path: "/sessions", Role: RoleViewer, Handler: s.listSessions},
-		{Method: "POST", Path: "/sessions/validate", Role: RoleViewer, Handler: s.validateSession},
+		{Method: "POST", Path: "/sessions/validate", Role: RoleViewer, Heavy: true, Handler: s.validateSession},
 		{Method: "GET", Path: "/sessions/{id}", Role: RoleViewer, Handler: s.getSession},
 		{Method: "DELETE", Path: "/sessions/{id}", Role: RoleOperator, Handler: s.deleteSession},
 		{Method: "PUT", Path: "/sessions/{id}/config", Role: RoleOperator, Handler: s.configureSession},
@@ -70,17 +72,17 @@ func (s *server) routes() []route {
 		{Method: "GET", Path: "/sessions/{id}/artifacts/manifest", Role: RoleViewer, Handler: s.artifactManifest},
 		{Method: "DELETE", Path: "/sessions/{id}/artifacts", Role: RoleAdmin, Handler: s.purgeArtifacts},
 		{Method: "GET", Path: "/sessions/{id}/artifacts/{stream}/parts/{n}", Role: RoleViewer, Stream: true, Handler: s.downloadPart},
-		{Method: "GET", Path: "/sessions/{id}/artifacts/{stream}/merged", Role: RoleViewer, Stream: true, Handler: s.downloadMerged},
+		{Method: "GET", Path: "/sessions/{id}/artifacts/{stream}/merged", Role: RoleViewer, Heavy: false, Stream: true, Handler: s.downloadMerged},
 
-		{Method: "POST", Path: "/generate", Role: RoleOperator, Handler: s.generate},
+		{Method: "POST", Path: "/generate", Role: RoleOperator, Heavy: true, Handler: s.generate},
 
 		{Method: "POST", Path: "/schemas", Role: RoleOperator, Idempotent: true, Handler: s.createSchema},
 		{Method: "GET", Path: "/schemas", Role: RoleViewer, Handler: s.listSchemas},
-		{Method: "POST", Path: "/schemas/validate", Role: RoleViewer, Handler: s.validateSchema},
+		{Method: "POST", Path: "/schemas/validate", Role: RoleViewer, Heavy: true, Handler: s.validateSchema},
 		{Method: "GET", Path: "/schemas/{id}", Role: RoleViewer, Handler: s.getSchema},
 		{Method: "PUT", Path: "/schemas/{id}", Role: RoleOperator, Handler: s.updateSchema},
 		{Method: "DELETE", Path: "/schemas/{id}", Role: RoleOperator, Handler: s.deleteSchema},
-		{Method: "POST", Path: "/schemas/{id}/preview", Role: RoleViewer, Handler: s.previewSchema},
+		{Method: "POST", Path: "/schemas/{id}/preview", Role: RoleViewer, Heavy: true, Handler: s.previewSchema},
 
 		{Method: "POST", Path: "/domains", Role: RoleOperator, Idempotent: true, Handler: s.createDomain},
 		{Method: "GET", Path: "/domains", Role: RoleViewer, Handler: s.listDomains},
@@ -95,12 +97,12 @@ func (s *server) routes() []route {
 		{Method: "POST", Path: "/catalogs", Role: RoleOperator, Idempotent: true, Handler: s.createCatalog},
 		{Method: "GET", Path: "/catalogs", Role: RoleViewer, Handler: s.listCatalogs},
 		{Method: "POST", Path: "/catalogs/import", Role: RoleOperator, Import: true, Handler: s.importCatalog},
-		{Method: "GET", Path: "/catalogs/{id}", Role: RoleViewer, Handler: s.getCatalog},
+		{Method: "GET", Path: "/catalogs/{id}", Role: RoleViewer, Heavy: true, Handler: s.getCatalog},
 		{Method: "POST", Path: "/catalogs/{id}/clone", Role: RoleOperator, Handler: s.cloneCatalog},
 		{Method: "GET", Path: "/catalogs/{id}/versions", Role: RoleViewer, Handler: s.catalogVersions},
 		{Method: "POST", Path: "/catalogs/{id}/versions", Role: RoleOperator, Handler: s.newCatalogVersion},
 		{Method: "POST", Path: "/catalogs/{id}/versions/{v}/publish", Role: RoleOperator, Handler: s.publishCatalog},
-		{Method: "GET", Path: "/catalogs/{id}/versions/{v}/export", Role: RoleViewer, Handler: s.exportCatalog},
+		{Method: "GET", Path: "/catalogs/{id}/versions/{v}/export", Role: RoleViewer, Heavy: true, Handler: s.exportCatalog},
 		{Method: "PUT", Path: "/catalogs/{id}/versions/{v}/groups/{key}", Role: RoleOperator, Handler: s.putGroup},
 		{Method: "DELETE", Path: "/catalogs/{id}/versions/{v}/groups/{key}", Role: RoleOperator, Handler: s.deleteGroup},
 		{Method: "POST", Path: "/catalogs/{id}/versions/{v}/groups/{key}/values", Role: RoleOperator, Import: true, Handler: s.addValues},
@@ -111,9 +113,13 @@ func (s *server) routes() []route {
 
 		{Method: "GET", Path: "/workers", Role: RoleViewer, Handler: s.listWorkers},
 		{Method: "GET", Path: "/workers/{id}", Role: RoleViewer, Handler: s.getWorker},
+		{Method: "DELETE", Path: "/workers/{id}", Role: RoleAdmin, Handler: s.deleteWorker},
 		{Method: "POST", Path: "/workers/{id}/drain", Role: RoleAdmin, Handler: s.drainWorker},
 		{Method: "POST", Path: "/workers/{id}/revoke", Role: RoleAdmin, Handler: s.revokeWorker},
 		{Method: "POST", Path: "/worker-tokens", Role: RoleAdmin, Handler: s.createJoinToken},
+
+		{Method: "GET", Path: "/admin/backup", Role: RoleAdmin, Stream: true, Handler: s.backup},
+		{Method: "POST", Path: "/admin/verify", Role: RoleAdmin, Stream: true, Handler: s.verify},
 
 		{Method: "POST", Path: "/tokens", Role: RoleAdmin, Handler: s.createToken},
 		{Method: "GET", Path: "/tokens", Role: RoleAdmin, Handler: s.listTokens},

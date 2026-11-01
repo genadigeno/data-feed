@@ -116,9 +116,10 @@ type uploadSink struct {
 	compression string
 	extension   string // of the part being written; the pipeline writes one at a time
 
-	queue chan spooled
-	done  chan struct{}
-	err   error // the failure that stopped uploads; read after done closes
+	queue     chan spooled
+	closeOnce sync.Once
+	done      chan struct{}
+	err       error // the failure that stopped uploads; read after done closes
 }
 
 func newUploadSink(r *Runtime, u *unitRun, log *slog.Logger) *uploadSink {
@@ -168,7 +169,7 @@ func (s *uploadSink) Accept(ctx context.Context, p output.FinishedPart) error {
 
 // close waits for queued parts to be delivered and returns what stopped them, if anything.
 func (s *uploadSink) close() error {
-	close(s.queue)
+	s.closeOnce.Do(func() { close(s.queue) })
 	<-s.done
 	return s.err
 }
@@ -195,9 +196,10 @@ func (s *uploadSink) loop() {
 		if err == nil {
 			s.u.acked.Add(item.part.Records)
 		} else {
-			// The rest of the unit cannot be accepted without this part.
+			// The rest of the unit cannot be accepted without this part. Only generation
+			// stops: the lease is still good for reporting what happened.
 			s.err = err
-			s.u.cancel()
+			s.u.stopRun()
 		}
 		if item.acked != nil {
 			item.acked <- err

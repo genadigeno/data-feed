@@ -6,7 +6,7 @@ object store is required.
 
 **Status: under construction.** `datafeed generate` produces data directly. The Coordinator and Workers run sessions
 across hosts, surviving Worker and Coordinator restarts, driven through a versioned HTTP API, the CLI and a web interface.
-Security and reliability hardening and operations guides are still to come.
+Benchmarks and a production-readiness report are still to come.
 
 ```bash
 datafeed --local session run --schema shop.yaml --format csv

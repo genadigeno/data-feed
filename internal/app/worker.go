@@ -2,7 +2,11 @@ package app
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+	"net/http"
+	"net/http/pprof"
+	"time"
 
 	"github.com/genadigeno/data-feed/internal/clock"
 	"github.com/genadigeno/data-feed/internal/config"
@@ -30,6 +34,22 @@ func RunWorker(ctx context.Context, cfg *config.Config, logger *slog.Logger, clk
 
 	client := protocol.NewClient(cfg.Worker.CoordinatorURL, tlsConfig)
 	defer client.Close()
+
+	if addr := cfg.Diagnostics.WorkerPprofListen; addr != "" {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		srv := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+		defer srv.Close()
+		go func() {
+			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				logger.Warn("profiling listener", "err", err)
+			}
+		}()
+	}
 
 	opts, err := remoteWorkerOptions(cfg, client, Vocabulary, clk, logger)
 	if err != nil {

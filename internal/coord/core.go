@@ -1,6 +1,7 @@
 package coord
 
 import (
+	"cmp"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -88,6 +89,8 @@ type Core struct {
 	uploadSlots chan struct{}
 	wake        chan struct{}
 
+	startedAt time.Time // when recovery ran: Workers need a moment to return after that
+
 	compiledMu sync.Mutex
 	compiled   map[string]*snapshot.Compiled
 	compiledAt []string
@@ -145,6 +148,9 @@ func (c *Core) SessionChanged(s *store.Session, from string) {
 		Data: map[string]any{"session_id": s.ID, "from": from, "to": s.State, "available_actions": session.AvailableActions(s.State), "reason": s.StateReason},
 	})
 	c.logSession(s.ID, slog.LevelInfo, "state changed", "from", from, "to", s.State, "reason", s.StateReason)
+	if s.State == session.Running {
+		c.notifyAllWaiters() // there may be work now, and Workers are parked in long polls
+	}
 }
 
 func (c *Core) logSession(id string, level slog.Level, msg string, attrs ...any) {
@@ -202,6 +208,10 @@ func (c *Core) Register(ctx context.Context, r wire.RegisterRequest) (wire.Regis
 	}
 	capsJSON, err := json.Marshal(r.Capabilities)
 	if err != nil {
+		return wire.RegisterResponse{}, err
+	}
+	// Anyone can reach this: a bad caller shouldn't get to contend for the single writer.
+	if err := c.precheckRegistration(ctx, &r); err != nil {
 		return wire.RegisterResponse{}, err
 	}
 	now := c.clk.Now()
@@ -262,6 +272,23 @@ func (c *Core) Register(ctx context.Context, r wire.RegisterRequest) (wire.Regis
 		HeartbeatInterval: c.cfg.Coordinator.HeartbeatInterval.Milliseconds(),
 		LeaseDuration:     c.cfg.Coordinator.LeaseDuration.Milliseconds(),
 	}, nil
+}
+
+func (c *Core) precheckRegistration(ctx context.Context, r *wire.RegisterRequest) error {
+	if _, _, ok := ParseCredential(r.Credential); ok || c.o.OpenRegistration {
+		if !ok {
+			return nil
+		}
+		_, err := c.Authenticate(ctx, r.Credential)
+		return err
+	}
+	return c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
+		token, err := tx.FindJoinToken(ctx, HashSecret(r.JoinToken))
+		if errors.Is(err, store.ErrNotFound) || (err == nil && !JoinTokenUsable(token, c.clk.Now())) {
+			return apperr.New(apperr.Unauthenticated, "ERR_UNAUTHENTICATED", "a valid join token is required to register")
+		}
+		return err
+	})
 }
 
 // RegisterLocal registers the embedded worker, which is part of this process.
@@ -723,13 +750,32 @@ func (c *Core) snapshotFor(ctx context.Context, tx store.Tx, hash string) (*snap
 	return snap, nil
 }
 
-// Snapshot implements wire.Coordinator.
-func (c *Core) Snapshot(ctx context.Context, _, hash string) ([]byte, error) {
+// Snapshot implements wire.Coordinator. A Worker gets only what it holds a lease for, as a
+// snapshot holds a session's schema and catalog.
+func (c *Core) Snapshot(ctx context.Context, worker, hash string) ([]byte, error) {
 	var body []byte
 	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
-		var err error
-		body, err = tx.GetSnapshot(ctx, hash)
-		return err
+		held, err := tx.LeasedByWorker(ctx, worker)
+		if err != nil {
+			return err
+		}
+		checked := map[string]bool{}
+		for i := range held {
+			id := held[i].SessionID
+			if checked[id] {
+				continue
+			}
+			checked[id] = true
+			s, err := tx.GetSession(ctx, id)
+			if err != nil {
+				return err
+			}
+			if s.SnapshotHash == hash {
+				body, err = tx.GetSnapshot(ctx, hash)
+				return err
+			}
+		}
+		return store.ErrNotFound
 	})
 	if errors.Is(err, store.ErrNotFound) {
 		return nil, apperr.New(apperr.NotFound, session.CodeNotFound, "no snapshot "+hash)
@@ -737,8 +783,9 @@ func (c *Core) Snapshot(ctx context.Context, _, hash string) ([]byte, error) {
 	return body, err
 }
 
-// PartCommitted implements wire.Coordinator.
-func (c *Core) PartCommitted(ctx context.Context, _, unit string, seq int) (bool, string, error) {
+// PartCommitted implements wire.Coordinator. It answers about a Worker's own parts: only
+// the one that sent a part can be unsure whether it arrived.
+func (c *Core) PartCommitted(ctx context.Context, worker, unit string, seq int) (bool, string, error) {
 	var part *store.Part
 	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
 		var err error
@@ -750,6 +797,9 @@ func (c *Core) PartCommitted(ctx context.Context, _, unit string, seq int) (bool
 	}
 	if err != nil {
 		return false, "", err
+	}
+	if part.WorkerID != worker {
+		return false, "", nil
 	}
 	return true, part.SHA256, nil
 }
@@ -764,6 +814,9 @@ func (c *Core) UploadPart(ctx context.Context, worker string, m wire.PartMeta, b
 
 	ref := lease.Ref{UnitID: m.UnitID, LeaseID: m.LeaseID, WorkerID: worker, FencingToken: m.FencingToken}
 	meta := lease.PartMeta{Seq: m.Seq, FirstIndex: m.FirstIndex, EndIndex: m.EndIndex, Records: m.Records, Bytes: m.Bytes, SHA256: m.SHA256}
+	if msg := CheckPartMeta(&m); msg != "" {
+		return wire.UploadResult{}, apperr.New(apperr.InvalidArgument, "ERR_BAD_PART", msg)
+	}
 
 	// A fast check before receiving a large body.
 	var unit store.Unit
@@ -786,7 +839,7 @@ func (c *Core) UploadPart(ctx context.Context, worker string, m wire.PartMeta, b
 		if err != nil {
 			return err
 		}
-		limit = snap.PartMaxBytes + uploadSlack
+		limit = snap.PartMaxBytes + int64(c.cfg.Generation.MaxRecordSizeBytes) + uploadSlack
 		part, err := tx.GetPart(ctx, m.UnitID, m.Seq)
 		if err != nil && !errors.Is(err, store.ErrNotFound) {
 			return err
@@ -1263,7 +1316,7 @@ func (c *Core) Run(ctx context.Context) {
 	defer ticker.Stop()
 	progress := c.clk.NewTicker(progressInterval)
 	defer progress.Stop()
-	gc := c.clk.NewTicker(gcInterval)
+	gc := c.clk.NewTicker(cmp.Or(c.cfg.Storage.Retention.Interval, gcInterval))
 	defer gc.Stop()
 	for {
 		select {
@@ -1300,6 +1353,7 @@ func (c *Core) tick(ctx context.Context) {
 		{"stop conditions", c.checkStopConditions},
 		{"settle", c.settleAll},
 		{"disk", c.checkDisk},
+		{"stranded", c.failStranded},
 		{"admit", c.admit},
 	}
 	for _, step := range steps {
@@ -1322,6 +1376,7 @@ func (c *Core) expireLeases(ctx context.Context) error {
 		return err
 	}
 	c.mu.Lock()
+	c.pruneLeaseState(units)
 	var due []store.Unit
 	for i := range units {
 		last, ok := c.renewals[units[i].LeaseID]
@@ -1334,8 +1389,10 @@ func (c *Core) expireLeases(ctx context.Context) error {
 		return nil
 	}
 	var expired []store.Unit
+	failed := map[string]*store.Session{}
 	err = c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
 		expired = nil
+		clear(failed)
 		for i := range due {
 			// Re-read: a renewal may have won the race since the check above.
 			row, err := tx.GetUnit(ctx, due[i].ID)
@@ -1345,11 +1402,30 @@ func (c *Core) expireLeases(ctx context.Context) error {
 			if row.State != store.UnitLeased || row.LeaseID != due[i].LeaseID || now.Before(row.LeaseExpiresAt) {
 				continue
 			}
-			u := lease.Expire(*row)
+			u, final := lease.ExpireFinal(*row, c.cfg.Coordinator.MaxUnitAttempts)
 			if err := tx.UpdateUnit(ctx, &u); err != nil {
 				return err
 			}
 			expired = append(expired, due[i])
+			if !final || failed[row.SessionID] != nil {
+				continue
+			}
+			s, err := tx.GetSession(ctx, row.SessionID)
+			if err != nil {
+				return err
+			}
+			if session.IsTerminal(s.State) {
+				continue
+			}
+			if err := session.WithdrawUnits(ctx, tx, s.ID, true); err != nil {
+				return err
+			}
+			s.ErrorCount++
+			s.LastError = u.LastError
+			if _, err := session.Apply(ctx, tx, s, session.EvFail, "coordinator", "unit "+u.ID+": "+u.LastError, now); err != nil {
+				return err
+			}
+			failed[s.ID] = s
 		}
 		return nil
 	})
@@ -1360,8 +1436,35 @@ func (c *Core) expireLeases(ctx context.Context) error {
 		c.forgetUnit(expired[i].SessionID, wire.LeaseRef{UnitID: expired[i].ID, LeaseID: expired[i].LeaseID})
 		c.logSession(expired[i].SessionID, slog.LevelWarn, "lease expired", "unit_id", expired[i].ID, "worker_id", expired[i].WorkerID)
 	}
+	for _, f := range failed {
+		c.afterChange(ctx, f, session.Running)
+	}
 	c.notifyWaiters(len(expired))
 	return nil
+}
+
+// pruneLeaseState forgets leases that ended by revocation or withdrawal, so memory follows
+// the leases that exist. Called with the lock held.
+func (c *Core) pruneLeaseState(units []store.Unit) {
+	leases := make(map[string]bool, len(units))
+	byUnit := make(map[string]bool, len(units))
+	for i := range units {
+		leases[units[i].LeaseID] = true
+		byUnit[units[i].ID] = true
+	}
+	for id := range c.renewals {
+		if !leases[id] {
+			delete(c.renewals, id)
+		}
+	}
+	for _, flying := range c.inFlight {
+		for unit := range flying {
+			if !byUnit[unit] {
+				delete(flying, unit)
+			}
+		}
+	}
+	c.orphans.Retain(func(id string) bool { return leases[id] })
 }
 
 func (c *Core) trackWorkers(ctx context.Context) error {
@@ -1385,7 +1488,8 @@ func (c *Core) trackWorkers(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			if w.State == store.WorkerActive || w.State == store.WorkerDraining {
+			// A drain outlasts a silence: only a new registration ends it.
+			if w.State == store.WorkerActive {
 				w.State = store.WorkerDisconnected
 				if err := tx.PutWorker(ctx, w); err != nil {
 					return err
@@ -1480,11 +1584,18 @@ func (c *Core) checkDisk(ctx context.Context) error {
 	if since.IsZero() || c.clk.Now().Sub(since) < c.cfg.Storage.DiskFullTimeout {
 		return nil
 	}
+	// Space may have returned with no upload since to notice it.
+	if c.o.FreeBytes != nil {
+		if free, err := c.o.FreeBytes(); err == nil && free >= uint64(c.cfg.Storage.MinFreeBytes) {
+			c.clearLowDisk()
+			return nil
+		}
+	}
 	now := c.clk.Now()
 	var rows []store.Session
 	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
 		var err error
-		rows, err = tx.SessionsInStates(ctx, session.Running)
+		rows, err = tx.SessionsInStates(ctx, session.Running, session.Pausing, session.Stopping)
 		return err
 	})
 	if err != nil {
@@ -1493,15 +1604,17 @@ func (c *Core) checkDisk(ctx context.Context) error {
 	for i := range rows {
 		id := rows[i].ID
 		var changed *store.Session
+		var from string
 		err := c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
 			changed = nil
 			s, err := tx.GetSession(ctx, id)
 			if err != nil {
 				return err
 			}
-			if s.State != session.Running {
+			if session.IsTerminal(s.State) || s.State == session.Paused {
 				return nil
 			}
+			from = s.State
 			if err := session.WithdrawUnits(ctx, tx, id, true); err != nil {
 				return err
 			}
@@ -1515,7 +1628,7 @@ func (c *Core) checkDisk(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		c.afterChange(ctx, changed, session.Running)
+		c.afterChange(ctx, changed, from)
 	}
 	c.clearLowDisk()
 	return nil
@@ -1523,6 +1636,9 @@ func (c *Core) checkDisk(ctx context.Context) error {
 
 // admit starts queued sessions while there is room, oldest first.
 func (c *Core) admit(ctx context.Context) error {
+	if err := c.requeueStarting(ctx); err != nil {
+		return err
+	}
 	var queued []store.Session
 	var active int
 	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
@@ -1553,6 +1669,24 @@ func (c *Core) admit(ctx context.Context) error {
 		c.notifyAllWaiters()
 	}
 	return nil
+}
+
+// requeueStarting puts back sessions left in STARTING. Planning happens within a tick, which
+// is the only place that sets it, so any seen at the start of one were abandoned.
+func (c *Core) requeueStarting(ctx context.Context) error {
+	now := c.clk.Now()
+	return c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		rows, err := tx.SessionsInStates(ctx, session.Starting)
+		if err != nil {
+			return err
+		}
+		for i := range rows {
+			if _, err := session.Apply(ctx, tx, &rows[i], session.EvRequeue, "coordinator", "planning was interrupted", now); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // startSession plans a session. Building its engine is too slow for a transaction, so
@@ -1619,9 +1753,15 @@ func (c *Core) startSession(ctx context.Context, q *store.Session) error {
 	return nil
 }
 
-func (c *Core) planStreams(ctx context.Context, s *store.Session) ([]store.StreamState, error) {
+func (c *Core) planStreams(ctx context.Context, s *store.Session) (streams []store.StreamState, err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			c.log.Error("panic while planning a session", "session_id", s.ID, "panic", p, "stack", string(debug.Stack()))
+			err = fmt.Errorf("planning failed unexpectedly: %v", p)
+		}
+	}()
 	var body []byte
-	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
+	err = c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
 		var err error
 		body, err = tx.GetSnapshot(ctx, s.SnapshotHash)
 		return err
@@ -1838,6 +1978,7 @@ func (c *Core) PurgeArtifacts(ctx context.Context, id string) error {
 		}
 		s.Purging = false
 		s.ArtifactsDegraded = true
+		s.Records, s.Bytes = 0, 0
 		return tx.UpdateSession(ctx, s, s.Version)
 	})
 }
@@ -1907,6 +2048,32 @@ func (c *Core) RevokeWorker(ctx context.Context, id string) error {
 	return nil
 }
 
+// DeleteWorker forgets a Worker that is no longer connected, which frees its place among
+// coordination.max_registered_workers. If it returns, it needs a new join token.
+func (c *Core) DeleteWorker(ctx context.Context, id string) error {
+	err := c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		w, err := tx.GetWorker(ctx, id)
+		if err != nil {
+			return err
+		}
+		if w.State != store.WorkerDisconnected && w.State != store.WorkerRevoked {
+			return apperr.New(apperr.Conflict, "ERR_WORKER_CONNECTED", "this Worker is "+w.State+": stop or revoke it first")
+		}
+		held, err := tx.LeasedByWorker(ctx, id)
+		if err != nil {
+			return err
+		}
+		if len(held) > 0 {
+			return apperr.New(apperr.Conflict, "ERR_WORKER_CONNECTED", "this Worker still holds leases: wait for them to expire")
+		}
+		return tx.DeleteWorker(ctx, id)
+	})
+	if errors.Is(err, store.ErrNotFound) {
+		return apperr.New(apperr.NotFound, session.CodeNotFound, "no worker "+id)
+	}
+	return err
+}
+
 // CreateJoinToken makes a token that lets new Workers register. Only its hash is kept.
 func (c *Core) CreateJoinToken(ctx context.Context, maxUses int, ttl time.Duration) (id, secret string, expires *time.Time, err error) {
 	id, secret = ids.New("jtk"), ids.Secret()
@@ -1918,6 +2085,122 @@ func (c *Core) CreateJoinToken(ctx context.Context, maxUses int, ttl time.Durati
 	}
 	err = c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error { return tx.InsertJoinToken(ctx, row) })
 	return id, secret, expires, err
+}
+
+// VerifyReport says what checking a session's output found.
+type VerifyReport struct {
+	SessionID string                   `json:"session_id"`
+	Parts     int                      `json:"parts"`
+	Problems  []artifact.VerifyProblem `json:"problems"`
+}
+
+// VerifySession reads a session's files and compares them with its records. A finished
+// session with damage is marked, which is what users see; a running one is only reported,
+// as its files can be legitimately changing.
+func (c *Core) VerifySession(ctx context.Context, id string) (VerifyReport, error) {
+	report := VerifyReport{SessionID: id, Problems: []artifact.VerifyProblem{}}
+	var parts []store.Part
+	var row *store.Session
+	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
+		var err error
+		if row, err = tx.GetSession(ctx, id); err != nil {
+			return err
+		}
+		parts, err = tx.SessionParts(ctx, id)
+		return err
+	})
+	if errors.Is(err, store.ErrNotFound) {
+		return report, apperr.New(apperr.NotFound, session.CodeNotFound, "no session "+id)
+	}
+	if err != nil {
+		return report, err
+	}
+	converted := make([]artifact.Part, len(parts))
+	for i := range parts {
+		converted[i] = ToArtifactPart(&parts[i])
+	}
+	report.Parts = len(parts)
+	problems, err := c.o.Artifacts.Verify(ctx, converted)
+	if err != nil {
+		return report, err
+	}
+	if len(problems) == 0 || !session.IsTerminal(row.State) {
+		if problems != nil {
+			report.Problems = problems
+		}
+		return report, nil
+	}
+	report.Problems = problems
+	err = c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		s, err := tx.GetSession(ctx, id)
+		if err != nil {
+			return err
+		}
+		s.ArtifactsDegraded = true
+		return tx.UpdateSession(ctx, s, s.Version)
+	})
+	return report, err
+}
+
+// anyEligible says whether a connected Worker could run a session's units.
+func (c *Core) anyEligible(s *store.Session, now time.Time) bool {
+	limits := ParseLimits(s)
+	cand := Candidate{Engine: s.EngineVersion, Format: s.Format, Strategy: s.Strategy, Arch: s.WorkerArch, Selector: limits.Selector, UnitMemory: limits.UnitMemoryBytes}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for id, seen := range c.seen {
+		if caps := c.caps[id]; caps != nil && now.Sub(seen) < disconnectAfter*c.cfg.Coordinator.HeartbeatInterval && Eligible(&cand, caps) {
+			return true
+		}
+	}
+	return false
+}
+
+// failStranded fails sessions that have waited too long with no Worker to run them.
+func (c *Core) failStranded(ctx context.Context) error {
+	timeout := c.cfg.Coordinator.NoWorkerTimeout
+	if timeout <= 0 {
+		return nil
+	}
+	now := c.clk.Now()
+	var rows []store.Session
+	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
+		var err error
+		rows, err = tx.SessionsInStates(ctx, session.Running)
+		return err
+	})
+	if err != nil {
+		return err
+	}
+	for i := range rows {
+		id := rows[i].ID
+		var changed *store.Session
+		err := c.o.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+			changed = nil
+			s, err := tx.GetSession(ctx, id)
+			if err != nil {
+				return err
+			}
+			counts, err := tx.CountUnits(ctx, id)
+			if err != nil {
+				return err
+			}
+			if !Stranded(s, counts[store.UnitLeased], c.anyEligible(s, now), c.startedAt, now, timeout) {
+				return nil
+			}
+			s.LastError = "no eligible Worker took any work"
+			applied, err := session.Apply(ctx, tx, s, session.EvFail, "coordinator", "ERR_NO_WORKER", now)
+			if applied {
+				changed = s
+			}
+			return err
+		})
+		if err != nil {
+			return err
+		}
+		c.afterChange(ctx, changed, session.Running)
+	}
+	return nil
 }
 
 // BeginDrain stops handing out work and tells Workers to drain, ahead of shutdown.

@@ -159,6 +159,39 @@ func (t *Throughput) Observe(total uint64, now time.Time, stale time.Duration) f
 	return t.Rate
 }
 
+// Stranded reports a running session that nothing has been able to run for the timeout.
+// waitingSince is the latest of what could have changed that, and eligible says a connected
+// Worker could take its units: then it is only waiting for a free slot.
+func Stranded(s *store.Session, leased int64, eligible bool, waitingSince, now time.Time, timeout time.Duration) bool {
+	if s.State != session.Running || s.Finishing || leased > 0 || eligible || s.StartedAt == nil {
+		return false
+	}
+	since := waitingSince
+	if s.StartedAt.After(since) {
+		since = *s.StartedAt
+	}
+	if s.LastActivityAt != nil && s.LastActivityAt.After(since) {
+		since = *s.LastActivityAt
+	}
+	return now.Sub(since) >= timeout
+}
+
+// CheckPartMeta finds what a Worker can't truthfully say about a part, or "". These numbers
+// go into progress and into how downloads are stitched together.
+func CheckPartMeta(m *wire.PartMeta) string {
+	switch {
+	case m.EndIndex < m.FirstIndex:
+		return "the part ends before it starts"
+	case m.Records > m.EndIndex-m.FirstIndex:
+		return "the part has more records than indices"
+	case m.Bytes < 0 || m.HeaderLen < 0 || m.FooterLen < 0:
+		return "negative sizes"
+	case int64(m.HeaderLen)+int64(m.FooterLen) > m.Bytes && !strings.HasSuffix(m.Extension, ".gz"):
+		return "the header and footer are larger than the part"
+	}
+	return ""
+}
+
 // HashSecret is how credentials and tokens are stored.
 func HashSecret(secret string) []byte {
 	sum := sha256.Sum256([]byte(secret))

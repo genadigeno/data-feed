@@ -231,6 +231,9 @@ func (c *Config) validateCoordinator(v *validator) {
 			v.add("auth.mode", codeConfigInsecure, "production requires auth.mode=token")
 		}
 	}
+	if c.Application.Environment == EnvProduction && !IsLoopback(s.Listen) && s.TLS.CertFile == "" && !s.BehindTLSProxy {
+		v.add("server.tls", codeConfigInsecure, "API tokens would cross the network in the clear: set server.tls, or server.behind_tls_proxy if a proxy terminates TLS")
+	}
 	if c.Auth.BootstrapAdminToken.IsLiteral() && c.Application.Environment != EnvDevelopment {
 		v.add("auth.bootstrap_admin_token", codeConfigSecret, "literal secrets are only allowed in development; use ${ENV} or file:/path")
 	}
@@ -255,6 +258,9 @@ func (c *Config) validateCoordinator(v *validator) {
 	v.positive("coordination.max_unit_attempts", int64(co.MaxUnitAttempts))
 	v.positive("coordination.orphan_lease_heartbeats", int64(co.OrphanLeaseHeartbeats))
 	v.nonNegative("coordination.no_worker_timeout", int64(co.NoWorkerTimeout))
+	if l := c.Diagnostics.WorkerPprofListen; l != "" && !IsLoopback(l) {
+		v.add("diagnostics.worker_pprof_listen", codeConfigInsecure, "%q is not loopback: profiles reveal memory contents and have no authentication", l)
+	}
 	if co.HeartbeatInterval < time.Second {
 		v.add("coordination.heartbeat_interval", codeConfigTiming, "must be at least 1s")
 	}

@@ -677,6 +677,13 @@ paths:
       responses:
         "200": {description: OK}
         default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Forget a Worker that is no longer connected"
+      tags: [workers]
+      x-required-role: admin
+      responses:
+        "204": {description: Done}
+        default: {$ref: "#/components/responses/Error"}
   /workers/{id}/drain:
     parameters:
       - {name: id, in: path, required: true, schema: {type: string}}
@@ -704,6 +711,22 @@ paths:
       x-required-role: admin
       responses:
         "201": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /admin/backup:
+    get:
+      summary: "A consistent copy of the database, not including output files"
+      tags: [admin]
+      x-required-role: admin
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /admin/verify:
+    post:
+      summary: "Compare stored output with its records; ?session= for just one"
+      tags: [admin]
+      x-required-role: admin
+      responses:
+        "200": {description: OK}
         default: {$ref: "#/components/responses/Error"}
   /tokens:
     post:

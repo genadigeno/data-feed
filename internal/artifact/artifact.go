@@ -6,6 +6,8 @@ package artifact
 
 import (
 	"cmp"
+	"context"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -255,6 +257,62 @@ func (s *Store) PurgeSession(session string) error {
 		return fmt.Errorf("unsafe session id %q", session)
 	}
 	return os.RemoveAll(filepath.Join(s.outputs(), session))
+}
+
+// RemoveSessionLogs deletes a session's log directory.
+func (s *Store) RemoveSessionLogs(session string) error {
+	if !safeID.MatchString(session) {
+		return fmt.Errorf("unsafe session id %q", session)
+	}
+	return os.RemoveAll(filepath.Join(s.root, "sessions", session))
+}
+
+// Why a part failed verification.
+const (
+	VerifyMissing  = "missing"
+	VerifySize     = "wrong_size"
+	VerifyChecksum = "wrong_checksum"
+)
+
+// VerifyProblem is a part that isn't what its record says.
+type VerifyProblem struct {
+	Stream  string `json:"stream"`
+	RelPath string `json:"path"`
+	Reason  string `json:"reason"`
+}
+
+// Verify reads parts and compares them with their records, stopping early only if ctx ends.
+func (s *Store) Verify(ctx context.Context, parts []Part) ([]VerifyProblem, error) {
+	var out []VerifyProblem
+	buf := make([]byte, 256<<10)
+	for i := range parts {
+		if err := ctx.Err(); err != nil {
+			return out, err
+		}
+		p := &parts[i]
+		report := func(reason string) { out = append(out, VerifyProblem{p.Stream, p.RelPath, reason}) }
+		f, err := s.Open(p.RelPath)
+		if errors.Is(err, fs.ErrNotExist) {
+			report(VerifyMissing)
+			continue
+		}
+		if err != nil {
+			return out, err
+		}
+		h := sha256.New()
+		n, err := io.CopyBuffer(h, f, buf)
+		_ = f.Close()
+		if err != nil {
+			return out, fmt.Errorf("read %s: %w", p.RelPath, err)
+		}
+		switch {
+		case n != p.Bytes:
+			report(VerifySize)
+		case hex.EncodeToString(h.Sum(nil)) != p.SHA256:
+			report(VerifyChecksum)
+		}
+	}
+	return out, nil
 }
 
 // ActionKind says what a reconciliation step does.

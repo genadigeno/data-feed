@@ -142,6 +142,47 @@ func TestAllowedMethods(t *testing.T) {
 	}
 }
 
+func TestHostAllowed(t *testing.T) {
+	loop, open := "127.0.0.1:8080", "0.0.0.0:8080"
+	for host, want := range map[string]bool{
+		"127.0.0.1:8080": true, "localhost:8080": true, "LOCALHOST": true, "[::1]:8080": true, "ui.localhost:8080": true,
+		"evil.example:8080": false, "evil.example": false, "10.0.0.5:8080": false, "localhost.evil.example": false, "": false,
+	} {
+		if got := HostAllowed(loop, host); got != want {
+			t.Errorf("%q: %v", host, got)
+		}
+	}
+	if !HostAllowed(open, "anything.example") {
+		t.Fatal("a server on the network can have any name")
+	}
+}
+
+func TestCrossOrigin(t *testing.T) {
+	host := "127.0.0.1:8080"
+	cases := []struct {
+		method, origin string
+		want           bool
+	}{
+		{"POST", "", false}, // not a browser
+		{"POST", "http://127.0.0.1:8080", false},
+		{"POST", "https://evil.example", true},
+		{"POST", "null", true}, // a sandboxed frame
+		{"DELETE", "http://127.0.0.1:9999", true},
+		{"GET", "https://evil.example", false}, // it can't read the answer
+	}
+	for _, tc := range cases {
+		if got := CrossOrigin(tc.method, tc.origin, host); got != tc.want {
+			t.Errorf("%+v: %v", tc, got)
+		}
+	}
+}
+
+func TestClientIP(t *testing.T) {
+	if ClientIP("10.0.0.1:5000") != "10.0.0.1" || ClientIP("[::1]:80") != "::1" || ClientIP("weird") != "weird" {
+		t.Fatal("ClientIP")
+	}
+}
+
 func TestRoles(t *testing.T) {
 	cases := []struct {
 		have, need string
@@ -577,7 +618,8 @@ func TestContentTypes(t *testing.T) {
 func TestLongLivedPaths(t *testing.T) {
 	for path, want := range map[string]bool{
 		"/api/v1/events": true, "/api/v1/sessions/x/artifacts/main/merged": true, "/api/v1/sessions/x/artifacts/main/parts/1": true,
-		"/api/v1/sessions/x": false, "/api/v1/sessions/x/artifacts": false, "/api/v1/sessions/x/events": false,
+		"/api/v1/sessions/x": false, "/api/v1/sessions/x/artifacts": false, "/api/v1/sessions/x/events": false, "/api/v1/sessions/x/artifacts/manifest": false,
+		"/api/v1/admin/backup": true, "/debug/pprof/profile": true,
 	} {
 		if got := isLongLived(path); got != want {
 			t.Errorf("%s: %v", path, got)

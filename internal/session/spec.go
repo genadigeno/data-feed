@@ -186,6 +186,15 @@ type OutputSpec struct {
 	} `json:"relational,omitempty" yaml:"relational,omitempty"`
 }
 
+// Floors on how finely output is cut: below these, one record could cost a file, a database
+// row and a sync to disk.
+const (
+	minPartBytes   = 64 << 10
+	minPartRecords = 100
+	minUnitRecords = 100
+	minPartAge     = time.Second
+)
+
 // StoredLimits is what the Coordinator needs at run time, kept with the session.
 type StoredLimits struct {
 	Count           uint64            `json:"count,omitempty"`
@@ -317,16 +326,25 @@ func Compile(spec *Spec, cfg *config.Config, r Resolver, vocab snapshot.Vocabula
 		switch {
 		case err != nil:
 			add("output.part_max_bytes", "ERR_BAD_VALUE", err.Error())
-		case size > g.PartMaxBytes || size <= 0:
-			add("output.part_max_bytes", "ERR_LIMIT_EXCEEDED", fmt.Sprintf("must be between 1 and %s", g.PartMaxBytes))
+		case size > g.PartMaxBytes || size < minPartBytes:
+			add("output.part_max_bytes", "ERR_LIMIT_EXCEEDED", fmt.Sprintf("must be between %s and %s", config.Size(minPartBytes), g.PartMaxBytes))
 		default:
 			partBytes = size
 		}
 	}
-	if out.PartMaxRecords < 0 {
-		add("output.part_max_records", "ERR_BAD_VALUE", "must not be negative")
+	if out.PartMaxRecords != 0 && out.PartMaxRecords < minPartRecords {
+		add("output.part_max_records", "ERR_LIMIT_EXCEEDED", fmt.Sprintf("must be 0 for no limit, or at least %d", minPartRecords))
+	}
+	if out.CSV.ArrayColumns < 0 || out.CSV.ArrayColumns > schema.MaxColumns {
+		add("output.csv.array_columns", "ERR_LIMIT_EXCEEDED", fmt.Sprintf("must be between 0 and %d", schema.MaxColumns))
+	}
+	if spec.Execution.UnitRecords != 0 && spec.Execution.UnitRecords < minUnitRecords {
+		add("execution.unit_records", "ERR_LIMIT_EXCEEDED", fmt.Sprintf("must be 0 for the default, or at least %d", minUnitRecords))
 	}
 	partAge := time.Duration(out.PartMaxAge)
+	if out.PartMaxAge != 0 && partAge < minPartAge {
+		add("output.part_max_age", "ERR_LIMIT_EXCEEDED", fmt.Sprintf("must be 0 for the default, or at least %s", minPartAge))
+	}
 	if partAge == 0 && spec.Mode == ModeStream {
 		partAge = g.PartMaxAge
 	}

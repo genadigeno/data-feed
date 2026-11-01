@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/genadigeno/data-feed/internal/apperr"
 	"github.com/genadigeno/data-feed/internal/catalog"
+	"github.com/genadigeno/data-feed/internal/coord"
 	"github.com/genadigeno/data-feed/internal/ids"
 	"github.com/genadigeno/data-feed/internal/schema"
 	"github.com/genadigeno/data-feed/internal/session"
@@ -780,6 +782,14 @@ func (s *server) getWorker(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func (s *server) deleteWorker(w http.ResponseWriter, r *http.Request) error {
+	if err := s.o.Core.DeleteWorker(r.Context(), r.PathValue("id")); err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
 func (s *server) drainWorker(w http.ResponseWriter, r *http.Request) error {
 	if err := s.o.Core.DrainWorker(r.Context(), r.PathValue("id")); err != nil {
 		return err
@@ -884,5 +894,82 @@ func (s *server) revokeToken(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	w.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+// backup streams a consistent copy of the database. Output files are not included: they
+// are immutable, so copying them separately is safe, and they can be very large.
+func (s *server) backup(w http.ResponseWriter, r *http.Request) error {
+	if s.o.Backup == nil {
+		return apperr.New(apperr.Unavailable, "ERR_NOT_AVAILABLE", "backup is not available")
+	}
+	placeholder, err := s.o.Artifacts.StagingFile()
+	if err != nil {
+		return err
+	}
+	path := placeholder.Name() + ".db"
+	if err := errors.Join(placeholder.Close(), os.Remove(placeholder.Name())); err != nil {
+		return err
+	}
+	defer os.Remove(path)
+	if err := s.o.Backup(r.Context(), path); err != nil {
+		return err
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/vnd.sqlite3")
+	w.Header().Set("Content-Length", strconv.FormatInt(info.Size(), 10))
+	w.Header().Set("Content-Disposition", `attachment; filename="datafeed-backup.db"`)
+	noWriteDeadline(w)
+	_, err = io.Copy(w, f)
+	if err != nil && r.Context().Err() == nil {
+		s.o.Logger.Warn("send backup", "err", err)
+	}
+	return nil
+}
+
+// verify reads output files and compares them with their records, for one session or
+// every finished one. Only one runs at a time, as it reads everything from disk.
+func (s *server) verify(w http.ResponseWriter, r *http.Request) error {
+	select {
+	case s.verifying <- struct{}{}:
+		defer func() { <-s.verifying }()
+	default:
+		return apperr.New(apperr.Conflict, "ERR_VERIFY_RUNNING", "a verification is already running")
+	}
+	ids := []string{}
+	if id := r.URL.Query().Get("session"); id != "" {
+		ids = append(ids, id)
+	} else {
+		var rows []store.Session
+		err := s.o.DB.Read(r.Context(), func(ctx context.Context, tx store.Tx) error {
+			var err error
+			rows, err = tx.SessionsInStates(ctx, session.Completed, session.Stopped, session.Failed)
+			return err
+		})
+		if err != nil {
+			return err
+		}
+		for i := range rows {
+			ids = append(ids, rows[i].ID)
+		}
+	}
+	noWriteDeadline(w)
+	reports := make([]coord.VerifyReport, 0, len(ids))
+	for _, id := range ids {
+		report, err := s.o.Core.VerifySession(r.Context(), id)
+		if err != nil {
+			return err
+		}
+		reports = append(reports, report)
+	}
+	s.writeJSON(w, http.StatusOK, map[string]any{"items": reports})
 	return nil
 }

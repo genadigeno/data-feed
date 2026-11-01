@@ -442,6 +442,8 @@ type unitRun struct {
 	a       wire.Assignment
 	ctx     context.Context
 	cancel  context.CancelFunc
+	runCtx  context.Context // generation only, a child of ctx
+	stopRun context.CancelFunc
 	finish  chan struct{}
 	once    sync.Once
 	mode    atomic.Int32
@@ -456,7 +458,8 @@ type unitRun struct {
 
 func newUnitRun(parent context.Context, a wire.Assignment, now time.Time, window time.Duration) *unitRun {
 	ctx, cancel := context.WithCancel(parent)
-	return &unitRun{a: a, ctx: ctx, cancel: cancel, finish: make(chan struct{}), deadline: now.Add(window)}
+	runCtx, stopRun := context.WithCancel(ctx)
+	return &unitRun{a: a, ctx: ctx, cancel: cancel, runCtx: runCtx, stopRun: stopRun, finish: make(chan struct{}), deadline: now.Add(window)}
 }
 
 // ask ends the run at the next batch. The first request decides how.
@@ -520,6 +523,7 @@ func (r *Runtime) runUnit(u *unitRun) {
 
 	sink := newUploadSink(r, u, log)
 	go sink.loop()
+	defer func() { _ = sink.close() }() // also on a panic, or the upload loop would wait forever
 	result, runErr := r.generate(u, compiled, sink)
 	uploadErr := sink.close()
 
@@ -564,7 +568,7 @@ func (r *Runtime) generate(u *unitRun, compiled *snapshot.Compiled, sink *upload
 		}
 	}
 	sink.compression = compiled.Snapshot.Compression
-	return pipeline.Run(u.ctx, pipeline.Unit{
+	return pipeline.Run(u.runCtx, pipeline.Unit{
 		Generators: generators, Stream: u.a.Stream, From: u.a.ResumeFrom, End: u.a.RangeEnd, FirstSeq: u.a.NextPartSeq,
 		BatchSize: compiled.Snapshot.BatchSize, QueueCap: compiled.Snapshot.QueueCapacity, Encoder: enc, Sink: sink,
 		Limits: pipeline.PartLimits{

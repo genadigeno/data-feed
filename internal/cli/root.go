@@ -111,6 +111,7 @@ func newRootCommand(g *globals) *cobra.Command {
 		newJobCommand(g),
 		newTokenCommand(g),
 		newDashboardCommand(g),
+		newAdminCommand(g),
 	)
 	return root
 }

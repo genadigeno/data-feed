@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"slices"
 	"strings"
@@ -97,7 +98,7 @@ func CrossSiteRisk(method string, fromCookie bool, uiHeader string) bool {
 // login checks a token and keeps it in a cookie scripts can't read. Tokens are long and
 // random, so the rate limit here is only there to keep this from being a free load test.
 func (s *server) login(w http.ResponseWriter, r *http.Request) error {
-	if ok, _ := s.limiters.allow("login", s.o.Clock.Now()); !ok {
+	if ok, _ := s.limiters.allow("login:"+ClientIP(r.RemoteAddr), s.o.Clock.Now()); !ok {
 		return apperr.New(apperr.ResourceExhausted, "ERR_RATE_LIMITED", "too many attempts")
 	}
 	var req struct {
@@ -118,15 +119,28 @@ func (s *server) login(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	http.SetCookie(w, sessionCookie(strings.TrimSpace(req.Token), s.o.Config.Auth.WebSessionTTL, r.TLS != nil))
+	http.SetCookie(w, sessionCookie(strings.TrimSpace(req.Token), s.o.Config.Auth.WebSessionTTL, s.secureCookies(r)))
 	s.writeJSON(w, http.StatusOK, Principal{ID: row.ID, Name: row.Name, Role: row.Role})
 	return nil
 }
 
 func (s *server) logout(w http.ResponseWriter, r *http.Request) error {
-	http.SetCookie(w, sessionCookie("", -time.Hour, r.TLS != nil))
+	http.SetCookie(w, sessionCookie("", -time.Hour, s.secureCookies(r)))
 	w.WriteHeader(http.StatusNoContent)
 	return nil
+}
+
+func (s *server) secureCookies(r *http.Request) bool {
+	return r.TLS != nil || s.o.Config.Server.BehindTLSProxy
+}
+
+// ClientIP is the address part of a remote address.
+func ClientIP(remote string) string {
+	host, _, err := net.SplitHostPort(remote)
+	if err != nil {
+		return remote
+	}
+	return host
 }
 
 // sessionCookie is out of reach of scripts and other sites.

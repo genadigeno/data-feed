@@ -326,6 +326,15 @@ func (ps Problems) Error() string {
 	return fmt.Sprintf("%s (and %d more)", ps[0], len(ps)-1)
 }
 
+// maxProblems is plenty to fix a document by, and keeps a hostile one from filling memory.
+const maxProblems = 200
+
 func (ps *Problems) add(path, code, format string, args ...any) {
-	*ps = append(*ps, Problem{Path: path, Code: code, Message: fmt.Sprintf(format, args...)})
+	switch {
+	case len(*ps) > maxProblems:
+	case len(*ps) == maxProblems:
+		*ps = append(*ps, Problem{Code: CodeLimit, Message: "too many problems: fix these and check again"})
+	default:
+		*ps = append(*ps, Problem{Path: path, Code: code, Message: fmt.Sprintf(format, args...)})
+	}
 }

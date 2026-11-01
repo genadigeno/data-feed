@@ -120,14 +120,14 @@ func RunCoordinatorNotify(ctx context.Context, cfg *config.Config, logger *slog.
 			return readinessChecks(ctx, ready.Load(), db, dir, cfg.Storage.MinFreeBytes)
 		},
 		Config: cfg, DB: db.Store(), Core: plane.Core, Sessions: plane.Sessions, Catalogs: plane.Catalogs,
-		Artifacts: plane.Store, Logs: plane.Logs, Hub: plane.Hub, Done: shuttingDown, Extra: webHandler,
+		Artifacts: plane.Store, Logs: plane.Logs, Hub: plane.Hub, Done: shuttingDown, Extra: webHandler, Backup: db.Backup,
 	})
 	internalHandler := protocol.NewHandler(logger.With("component", "protocol"), buildinfo.Version, plane.Core)
 
 	// The internal listener opens first, as Workers must be able to connect by the
 	// time the Coordinator reports ready.
 	internal, err := startServer(cfg.Coordinator.Listen, internalTLS, &http.Server{
-		Handler:           internalHandler,
+		Handler:           api.GuardHost(cfg.Coordinator.Listen, internalHandler),
 		ReadHeaderTimeout: cfg.Server.ReadHeaderTimeout,
 		IdleTimeout:       cfg.Server.IdleTimeout,
 		MaxHeaderBytes:    int(cfg.Server.MaxHeaderBytes),
@@ -150,6 +150,9 @@ func RunCoordinatorNotify(ctx context.Context, cfg *config.Config, logger *slog.
 		return fmt.Errorf("public listener: %w", err)
 	}
 
+	if cfg.Application.Environment == config.EnvDevelopment && (!config.IsLoopback(cfg.Server.Listen) || !config.IsLoopback(cfg.Coordinator.Listen)) {
+		logger.Warn("running off loopback in the development environment, which relaxes security checks: set application.environment to production")
+	}
 	logger.Info("coordinator ready",
 		"version", buildinfo.Version,
 		"environment", cfg.Application.Environment,

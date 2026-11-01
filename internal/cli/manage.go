@@ -17,6 +17,7 @@ import (
 
 	"github.com/genadigeno/data-feed/internal/api"
 	"github.com/genadigeno/data-feed/internal/apiclient"
+	"github.com/genadigeno/data-feed/internal/apperr"
 	"github.com/genadigeno/data-feed/internal/vocab"
 )
 
@@ -829,6 +830,21 @@ func addWorkerManagement(g *globals, worker *cobra.Command) {
 		},
 	}
 	oneID(revoke)
+	del := &cobra.Command{
+		Use: "delete <id>", Short: "Forget a Worker that is no longer connected, freeing its registration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := g.confirm("forget worker " + args[0]); err != nil {
+				return err
+			}
+			return g.runRemote(cmd, func(ctx context.Context, c *apiclient.Client) error {
+				if err := c.DeleteWorker(ctx, args[0]); err != nil {
+					return err
+				}
+				return g.show(map[string]any{"deleted": args[0]}, func(w io.Writer) { fmt.Fprintf(w, "deleted %s\n", args[0]) })
+			})
+		},
+	}
+	oneID(del)
 	var ttl string
 	var maxUses int
 	tokenCreate := &cobra.Command{
@@ -847,7 +863,7 @@ func addWorkerManagement(g *globals, worker *cobra.Command) {
 	tokenCreate.Flags().IntVar(&maxUses, "max-uses", 0, "how many Workers it can register; default no limit")
 	token := &cobra.Command{Use: "token", Short: "Manage join tokens"}
 	token.AddCommand(tokenCreate)
-	worker.AddCommand(list, inspect, drain, revoke, token)
+	worker.AddCommand(list, inspect, drain, revoke, del, token)
 }
 
 func newTokenCommand(g *globals) *cobra.Command {
@@ -900,5 +916,68 @@ func newTokenCommand(g *globals) *cobra.Command {
 	}
 	oneID(revoke)
 	cmd.AddCommand(create, list, revoke)
+	return cmd
+}
+
+func newAdminCommand(g *globals) *cobra.Command {
+	cmd := &cobra.Command{Use: "admin", Short: "Back up the database and check stored output"}
+	backup := &cobra.Command{
+		Use: "backup <file>", Short: "Save a consistent copy of the database while the Coordinator runs",
+		Long: "Save a consistent copy of the database while the Coordinator runs. Output files are not included:\n" +
+			"copy <data_dir>/outputs separately, after this finishes. Restoring is described in the operations guide.",
+		Args: usageArgs(cobra.ExactArgs(1)),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if args[0] == "-" {
+				return usageError(errors.New("a backup goes to a file"))
+			}
+			if _, err := os.Stat(args[0]); err == nil {
+				return usageError(fmt.Errorf("%s already exists", args[0]))
+			}
+			return g.runRemote(cmd, func(ctx context.Context, c *apiclient.Client) error {
+				body, err := c.Backup(ctx)
+				if err != nil {
+					return err
+				}
+				return g.copyOut(body, args[0])
+			})
+		},
+	}
+	var sessionID string
+	verify := &cobra.Command{
+		Use: "verify", Short: "Compare stored output with its records (exit code 1 if anything differs)", Args: usageArgs(cobra.NoArgs),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return g.runRemote(cmd, func(ctx context.Context, c *apiclient.Client) error {
+				reports, err := c.Verify(ctx, sessionID)
+				if err != nil {
+					return err
+				}
+				parts, damaged := 0, 0
+				for i := range reports {
+					parts += reports[i].Parts
+					damaged += len(reports[i].Problems)
+				}
+				if err := g.show(map[string]any{"items": reports}, func(w io.Writer) {
+					var rows [][]string
+					for i := range reports {
+						for _, p := range reports[i].Problems {
+							rows = append(rows, []string{reports[i].SessionID, p.Stream, p.Reason, p.RelPath})
+						}
+					}
+					if len(rows) > 0 {
+						tabulate(w, []string{"SESSION", "STREAM", "PROBLEM", "PATH"}, rows)
+					}
+					fmt.Fprintf(w, "checked %d parts in %d sessions: %d damaged\n", parts, len(reports), damaged)
+				}); err != nil {
+					return err
+				}
+				if damaged > 0 {
+					return apperr.New(apperr.Internal, "ERR_VERIFY_FAILED", fmt.Sprintf("%d parts are damaged: a retry of the session regenerates the same bytes", damaged))
+				}
+				return nil
+			})
+		},
+	}
+	verify.Flags().StringVar(&sessionID, "session", "", "only this session; default every finished one")
+	cmd.AddCommand(backup, verify)
 	return cmd
 }

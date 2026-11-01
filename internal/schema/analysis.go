@@ -290,6 +290,9 @@ func Columns(fields []FieldDef, defs map[string]*Definition, separator string, a
 				walk(name+separator, defs[f.Schema].Fields, depth+1)
 			case f.Type == TypeArray && arrayColumns > 0:
 				for j := range arrayColumns {
+					if len(out) >= MaxColumns {
+						return
+					}
 					out = append(out, name+separator+strconv.Itoa(j))
 				}
 			default:

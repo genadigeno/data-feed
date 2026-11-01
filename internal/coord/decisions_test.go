@@ -216,6 +216,72 @@ func TestThroughputMeasuresBetweenReports(t *testing.T) {
 	}
 }
 
+func TestStranded(t *testing.T) {
+	started := epoch
+	active := epoch.Add(time.Minute)
+	running := func() *store.Session { return &store.Session{State: session.Running, StartedAt: &started} }
+	var boot time.Time
+	if Stranded(running(), 0, false, boot, epoch.Add(59*time.Second), time.Minute) {
+		t.Fatal("before the timeout")
+	}
+	if !Stranded(running(), 0, false, boot, epoch.Add(time.Minute), time.Minute) {
+		t.Fatal("at the timeout")
+	}
+	if Stranded(running(), 1, false, boot, epoch.Add(time.Hour), time.Minute) {
+		t.Fatal("a Worker is on it")
+	}
+	if Stranded(running(), 0, true, boot, epoch.Add(time.Hour), time.Minute) {
+		t.Fatal("an eligible Worker is only busy with something else")
+	}
+	if Stranded(running(), 0, false, epoch.Add(time.Hour), epoch.Add(time.Hour+time.Second), time.Minute) {
+		t.Fatal("the Coordinator just started: Workers haven't had time to return")
+	}
+	recent := running()
+	recent.LastActivityAt = &active
+	if Stranded(recent, 0, false, boot, epoch.Add(90*time.Second), time.Minute) {
+		t.Fatal("it was active more recently")
+	}
+	done := running()
+	done.Finishing = true
+	if Stranded(done, 0, false, boot, epoch.Add(time.Hour), time.Minute) {
+		t.Fatal("finishing")
+	}
+	paused := running()
+	paused.State = session.Paused
+	if Stranded(paused, 0, false, boot, epoch.Add(time.Hour), time.Minute) {
+		t.Fatal("waiting is what a paused session does")
+	}
+}
+
+func TestCheckPartMeta(t *testing.T) {
+	good := wire.PartMeta{FirstIndex: 10, EndIndex: 20, Records: 10, Bytes: 100, HeaderLen: 5, FooterLen: 5, Extension: "json"}
+	if msg := CheckPartMeta(&good); msg != "" {
+		t.Fatal(msg)
+	}
+	sparse := good
+	sparse.Records = 3
+	if msg := CheckPartMeta(&sparse); msg != "" {
+		t.Fatal(msg)
+	}
+	for name, change := range map[string]func(*wire.PartMeta){
+		"backwards": func(m *wire.PartMeta) { m.EndIndex = 5 },
+		"inflated":  func(m *wire.PartMeta) { m.Records = 11 },
+		"negative":  func(m *wire.PartMeta) { m.HeaderLen = -1 },
+		"oversize":  func(m *wire.PartMeta) { m.HeaderLen = 200 },
+	} {
+		m := good
+		change(&m)
+		if CheckPartMeta(&m) == "" {
+			t.Errorf("%s accepted", name)
+		}
+	}
+	gz := good
+	gz.Extension, gz.HeaderLen = "json.gz", 200 // lengths are before compression
+	if msg := CheckPartMeta(&gz); msg != "" {
+		t.Fatal(msg)
+	}
+}
+
 func TestCredentials(t *testing.T) {
 	id, secret, ok := ParseCredential("wrk_1.abc")
 	if !ok || id != "wrk_1" || secret != "abc" {

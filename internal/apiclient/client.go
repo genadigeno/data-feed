@@ -17,6 +17,7 @@ import (
 
 	"github.com/genadigeno/data-feed/internal/api"
 	"github.com/genadigeno/data-feed/internal/apperr"
+	"github.com/genadigeno/data-feed/internal/coord"
 	"github.com/genadigeno/data-feed/internal/obs"
 	"github.com/genadigeno/data-feed/internal/vocab"
 )
@@ -709,6 +710,11 @@ func (c *Client) GetWorker(ctx context.Context, id string) (api.WorkerDTO, error
 	return get[api.WorkerDTO](ctx, c, "/workers/"+url.PathEscape(id), nil)
 }
 
+// DeleteWorker forgets a Worker that is no longer connected.
+func (c *Client) DeleteWorker(ctx context.Context, id string) error {
+	return c.del(ctx, "/workers/"+url.PathEscape(id), nil)
+}
+
 // DrainWorker stops giving a Worker new units.
 func (c *Client) DrainWorker(ctx context.Context, id string) error {
 	_, err := c.call(ctx, request{method: http.MethodPost, path: "/workers/" + url.PathEscape(id) + "/drain"}, nil)
@@ -748,4 +754,20 @@ func (c *Client) ListTokens(ctx context.Context) ([]api.TokenDTO, error) {
 // RevokeToken revokes an API token.
 func (c *Client) RevokeToken(ctx context.Context, id string) error {
 	return c.del(ctx, "/tokens/"+url.PathEscape(id), nil)
+}
+
+// Backup streams a copy of the database.
+func (c *Client) Backup(ctx context.Context) (io.ReadCloser, error) {
+	return c.download(ctx, "/admin/backup")
+}
+
+// Verify compares stored output with its records, for one session or every finished one.
+func (c *Client) Verify(ctx context.Context, session string) ([]coord.VerifyReport, error) {
+	q := request{method: http.MethodPost, path: "/admin/verify", stream: true}
+	if session != "" {
+		q.query = url.Values{"session": {session}}
+	}
+	var out Items[coord.VerifyReport]
+	_, err := c.call(ctx, q, &out)
+	return out.Items, err
 }

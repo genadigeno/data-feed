@@ -88,7 +88,41 @@ func parseTree(data []byte, format Format) (*node, error) {
 	return parseYAML(data)
 }
 
-type budget struct{ nodes int }
+// Limits on what parsing may cost. Aliases let a small YAML document expand into a large
+// one, so these count what is produced, not what was received.
+const (
+	maxTreeTextBytes  = 16 << 20
+	maxNumberText     = 64
+	maxNumberExponent = 400 // beyond any float64; big.Rat's cost grows with this
+)
+
+type budget struct {
+	nodes int
+	text  int
+}
+
+// spendText charges keys and values.
+func (b *budget) spendText(n int) error {
+	b.text += n
+	if b.text > maxTreeTextBytes {
+		return fmt.Errorf("more than %d bytes of text once expanded", maxTreeTextBytes)
+	}
+	return nil
+}
+
+// checkNumber refuses numbers that are costly to work with and useless for generation.
+func checkNumber(text string) error {
+	if len(text) > maxNumberText {
+		return fmt.Errorf("a number with more than %d characters", maxNumberText)
+	}
+	if i := strings.IndexAny(text, "eE"); i >= 0 {
+		exp, err := strconv.Atoi(strings.TrimPrefix(text[i+1:], "+"))
+		if err == nil && (exp > maxNumberExponent || exp < -maxNumberExponent) {
+			return fmt.Errorf("a number with an exponent beyond %d", maxNumberExponent)
+		}
+	}
+	return nil
+}
 
 func (b *budget) spend(depth int) error {
 	if depth > maxTreeDepth {
@@ -143,6 +177,9 @@ func fromYAML(y *yaml.Node, depth int, b *budget) (*node, error) {
 			if k.Kind != yaml.ScalarNode || k.ShortTag() == "!!merge" {
 				return nil, fmt.Errorf("line %d: mapping keys must be plain scalars", k.Line)
 			}
+			if err := b.spendText(len(k.Value)); err != nil {
+				return nil, err
+			}
 			if n.get(k.Value) != nil {
 				return nil, fmt.Errorf("line %d: duplicate key %q", k.Line, k.Value)
 			}
@@ -154,7 +191,17 @@ func fromYAML(y *yaml.Node, depth int, b *budget) (*node, error) {
 		}
 		return n, nil
 	case yaml.ScalarNode:
-		return yamlScalar(y)
+		if err := b.spendText(len(y.Value)); err != nil {
+			return nil, err
+		}
+		n, err := yamlScalar(y)
+		if err == nil && n.kind == nodeNumber {
+			err = checkNumber(n.text)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", y.Line, err)
+		}
+		return n, nil
 	}
 	return nil, fmt.Errorf("line %d: unsupported YAML node", y.Line)
 }
@@ -235,8 +282,14 @@ func fromJSON(dec *json.Decoder, depth int, b *budget) (*node, error) {
 	case bool:
 		return &node{kind: nodeBool, text: strconv.FormatBool(v)}, nil
 	case json.Number:
+		if err := checkNumber(v.String()); err != nil {
+			return nil, err
+		}
 		return &node{kind: nodeNumber, text: v.String()}, nil
 	case string:
+		if err := b.spendText(len(v)); err != nil {
+			return nil, err
+		}
 		return &node{kind: nodeString, text: v}, nil
 	case json.Delim:
 		if v == '[' {

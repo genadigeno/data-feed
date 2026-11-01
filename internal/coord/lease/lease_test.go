@@ -27,7 +27,7 @@ func granted(t *testing.T, u store.Unit, worker, id string, at time.Time) (store
 
 func TestGrantAdvancesTheToken(t *testing.T) {
 	u, r1 := granted(t, pending(), "w1", "l1", t0)
-	if u.State != store.UnitLeased || r1.FencingToken != 1 || u.Attempts != 1 || !u.LeaseExpiresAt.Equal(t0.Add(d)) {
+	if u.State != store.UnitLeased || r1.FencingToken != 1 || u.Attempts != 0 || !u.LeaseExpiresAt.Equal(t0.Add(d)) {
 		t.Fatalf("%+v", u)
 	}
 	if _, err := Grant(u, "w2", "l2", t0, d); !errors.Is(err, ErrNotPending) {
@@ -100,7 +100,10 @@ func TestRenewExtends(t *testing.T) {
 		t.Fatalf("renewal did not extend: %v", err)
 	}
 	// Once expired, renewal is too late: the unit may be reassigned at any moment.
-	if _, err := Renew(u, r, t0.Add(time.Hour), d); !errors.Is(err, ErrFenced) {
+	if _, err := Renew(u, r, t0.Add(time.Hour), d); err != nil { // the reaper hasn't taken it back
+		t.Fatalf("renewal after a clock jump: %v", err)
+	}
+	if _, err := Renew(Revoke(u), r, t0, d); !errors.Is(err, ErrFenced) {
 		t.Fatalf("renew after expiry: %v", err)
 	}
 }
@@ -369,5 +372,64 @@ func TestOrphanResetsWhenReported(t *testing.T) {
 	o.Forget("w")
 	if got := o.Observe("w", []store.Unit{u}, nil, t0.Add(5*time.Second)); len(got) != 0 {
 		t.Fatalf("baseline forgotten, yet revoked: %+v", got)
+	}
+}
+
+func TestAttemptsCountFailuresNotGrants(t *testing.T) {
+	u := store.Unit{State: store.UnitPending}
+	const max = 3
+	// Pauses and restarts don't use attempts up.
+	for range 10 {
+		var err error
+		u, err = Grant(u, "w", "l", t0, d)
+		if err != nil {
+			t.Fatal(err)
+		}
+		u = Revoke(u)
+	}
+	if u.Attempts != 0 {
+		t.Fatalf("%d", u.Attempts)
+	}
+	for i := 1; i <= max; i++ {
+		var err error
+		u, err = Grant(u, "w", "l", t0, d)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var final bool
+		u, final = ExpireFinal(u, max)
+		if final != (i == max) {
+			t.Fatalf("expiry %d: final %v", i, final)
+		}
+	}
+	if u.State != store.UnitFailed || u.LastError == "" {
+		t.Fatalf("%+v", u)
+	}
+}
+
+func TestOrphanTrackerCountsOneHeartbeatOnce(t *testing.T) {
+	o := NewOrphanTracker(2)
+	held := []store.Unit{{ID: "u", LeaseID: "l", GrantedAt: t0.Add(-time.Hour)}}
+	o.Observe("w", held, nil, t0)
+	at := t0.Add(time.Second)
+	if got := o.Observe("w", held, nil, at); len(got) != 0 {
+		t.Fatalf("first miss: %+v", got)
+	}
+	if got := o.Observe("w", held, nil, at); len(got) != 0 { // the transaction was retried
+		t.Fatalf("counted twice: %+v", got)
+	}
+	if got := o.Observe("w", held, nil, at.Add(time.Second)); len(got) != 1 {
+		t.Fatalf("second miss: %+v", got)
+	}
+}
+
+func TestRetainDropsEndedLeases(t *testing.T) {
+	o := NewOrphanTracker(5)
+	held := []store.Unit{{LeaseID: "gone", GrantedAt: t0.Add(-time.Hour)}, {LeaseID: "kept", GrantedAt: t0.Add(-time.Hour)}}
+	o.Observe("w", held, nil, t0)
+	o.Observe("w", held, nil, t0.Add(time.Second))
+	o.Retain(func(id string) bool { return id == "kept" })
+	if _, ok := o.misses["gone"]; ok || o.misses["kept"] != 1 {
+		t.Fatalf("%v", o.misses)
 	}
 }

@@ -40,6 +40,8 @@ type ArtifactRemover interface {
 	RetainSession(session string) error
 	// PurgeSession deletes a session's files.
 	PurgeSession(session string) error
+	// RemoveSessionLogs deletes a session's log.
+	RemoveSessionLogs(session string) error
 }
 
 // Service holds the use cases. Every interface calls these; none has its own rules.
@@ -292,6 +294,7 @@ func (s *Service) Resume(ctx context.Context, id, actor string) (*store.Session,
 		if row.State == Paused && row.PausedAt != nil {
 			row.PausedTotal += now.Sub(*row.PausedAt)
 			row.PausedAt = nil
+			row.LastActivityAt = &now // waiting for a Worker starts now
 		}
 		return nil
 	})
@@ -301,6 +304,14 @@ func (s *Service) Resume(ctx context.Context, id, actor string) (*store.Session,
 // stop discards it at once.
 func (s *Service) Stop(ctx context.Context, id string, immediate bool, actor string) (*store.Session, error) {
 	return s.transition(ctx, id, EvStop, actor, func(ctx context.Context, tx store.Tx, row *store.Session, _ time.Time) error {
+		// A graceful stop that isn't getting anywhere can be made immediate.
+		if row.State == Stopping && immediate && !row.StopImmediate {
+			row.StopImmediate = true
+			if err := WithdrawUnits(ctx, tx, row.ID, true); err != nil {
+				return err
+			}
+			return tx.UpdateSession(ctx, row, row.Version)
+		}
 		if IsTerminal(row.State) || row.State == Stopping || row.State == Queued || row.State == Created {
 			return nil
 		}
@@ -332,28 +343,51 @@ func WithdrawUnits(ctx context.Context, tx store.Tx, session string, leased bool
 }
 
 // Delete removes a session that is not running. Its files stay on disk, outside managed
-// storage, unless purge is set.
+// storage, unless purge is set. They move before the row goes: the other way round, a crash
+// in between would leave files no row refers to, which startup deletes.
 func (s *Service) Delete(ctx context.Context, id string, purge bool) error {
-	err := s.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+	deletable := func(row *store.Session) error {
+		if !IsTerminal(row.State) && row.State != Created {
+			return apperr.New(apperr.Conflict, CodeInvalidTransition, fmt.Sprintf("cannot delete a session that is %s: stop it first", row.State))
+		}
+		return nil
+	}
+	err := s.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
 		row, err := getSession(ctx, tx, id)
 		if err != nil {
 			return err
 		}
-		if !IsTerminal(row.State) && row.State != Created {
-			return apperr.New(apperr.Conflict, CodeInvalidTransition, fmt.Sprintf("cannot delete a session that is %s: stop it first", row.State))
+		return deletable(row)
+	})
+	if err != nil {
+		return err
+	}
+	if s.Artifacts != nil {
+		move := s.Artifacts.RetainSession
+		if purge {
+			move = s.Artifacts.PurgeSession
+		}
+		if err := move(id); err != nil {
+			return apperr.Wrap(err, apperr.Unavailable, "ERR_FILES_BUSY", "the session's files can't be moved now, perhaps because a download is running: try again")
+		}
+	}
+	err = s.DB.Write(ctx, func(ctx context.Context, tx store.Tx) error {
+		row, err := getSession(ctx, tx, id)
+		if err != nil {
+			return err
+		}
+		if err := deletable(row); err != nil {
+			return err
 		}
 		return tx.DeleteSession(ctx, id)
 	})
 	if err != nil {
 		return err
 	}
-	if s.Artifacts == nil {
-		return nil
+	if s.Artifacts != nil {
+		_ = s.Artifacts.RemoveSessionLogs(id) // only a log: it mustn't fail what already happened
 	}
-	if purge {
-		return s.Artifacts.PurgeSession(id)
-	}
-	return s.Artifacts.RetainSession(id)
+	return nil
 }
 
 // Clone creates an editable session from another's specification, with a new seed unless

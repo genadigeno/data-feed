@@ -39,6 +39,9 @@ const (
 	maxSnapshotBytes = 1 << 30
 	callTimeout      = 30 * time.Second
 	leaseSlack       = 15 * time.Second
+	readTimeout      = 30 * time.Second
+	// minUploadBytesPerSecond is deliberately low: it catches stalling, not slow links.
+	minUploadBytesPerSecond = 128 << 10
 )
 
 // Part headers. Everything about a part except its bytes travels here, so the Coordinator
@@ -163,11 +166,21 @@ func (s *server) writeError(w http.ResponseWriter, r *http.Request, err error) {
 func badRequest(msg string) error { return apperr.New(apperr.InvalidArgument, "ERR_BAD_REQUEST", msg) }
 
 func (s *server) readJSON(w http.ResponseWriter, r *http.Request, v any) error {
+	rc := http.NewResponseController(w)
+	_ = rc.SetReadDeadline(time.Now().Add(readTimeout)) // not every writer can; the limit is a safeguard
+	// Cleared afterwards: a read deadline passing during a long poll would cancel the request.
+	defer func() { _ = rc.SetReadDeadline(time.Time{}) }()
 	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBytes)
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		return badRequest("invalid request body: " + err.Error())
 	}
 	return nil
+}
+
+// UploadDeadline is how long a part of a size may take: slower than this, a client is
+// holding one of the few upload slots for nothing.
+func UploadDeadline(size int64) time.Duration {
+	return readTimeout + time.Duration(size/minUploadBytesPerSecond)*time.Second
 }
 
 func (s *server) authed(next func(http.ResponseWriter, *http.Request, string) error) http.HandlerFunc {
@@ -279,6 +292,9 @@ func (s *server) partPut(w http.ResponseWriter, r *http.Request, worker string) 
 	if err != nil {
 		return err
 	}
+	rc := http.NewResponseController(w)
+	_ = rc.SetReadDeadline(time.Now().Add(UploadDeadline(meta.Bytes)))
+	defer func() { _ = rc.SetReadDeadline(time.Time{}) }()
 	result, err := s.b.UploadPart(r.Context(), worker, meta, wire.PartBody{Reader: r.Body})
 	if err != nil {
 		return err
