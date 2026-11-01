@@ -242,8 +242,7 @@ func newWorkerCommand(g *globals) *cobra.Command {
 		Use:   "run",
 		Short: "Run a Worker in the foreground; it connects to a Coordinator and stops on a signal",
 		Long: "Run a Worker in the foreground. It connects to a Coordinator over the worker protocol and\n" +
-			"never needs the Coordinator's database or files.\n\n" +
-			"This build verifies connectivity and protocol compatibility; task execution is not available yet.",
+			"never needs the Coordinator's database or files.",
 		Args: usageArgs(cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags := workerFlags(coordinator, name, fingerprint, caFile)
@@ -266,7 +265,7 @@ func newWorkerCommand(g *globals) *cobra.Command {
 	f.StringVar(&name, "name", "", "Worker name (worker.name, default: hostname)")
 	f.StringVar(&fingerprint, "coordinator-fingerprint", "", "pin the Coordinator's certificate: sha256:… (worker.coordinator_fingerprint)")
 	f.StringVar(&caFile, "coordinator-ca", "", "CA bundle that signed the Coordinator's certificate (worker.coordinator_ca_file)")
-	f.StringVar(&joinToken, "join-token", "", "join token for first registration; prefer env:NAME or file:PATH (worker.join_token)")
+	f.StringVar(&joinToken, "join-token", "", "join token for first registration: file:PATH, or '${NAME}' for an environment variable; a literal token works in development only (worker.join_token)")
 
 	var validateCoordinator string
 	validate := &cobra.Command{
