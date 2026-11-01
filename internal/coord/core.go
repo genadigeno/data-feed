@@ -1786,7 +1786,7 @@ func (c *Core) flushProgress(ctx context.Context) {
 	var rows []store.Session
 	err := c.o.DB.Read(ctx, func(ctx context.Context, tx store.Tx) error {
 		var err error
-		rows, err = tx.SessionsInStates(ctx, session.Running, session.Pausing, session.Stopping)
+		rows, err = tx.SessionsInStates(ctx, session.Running, session.Pausing, session.Paused, session.Stopping)
 		return err
 	})
 	if err != nil {
@@ -1804,6 +1804,11 @@ func (c *Core) flushProgress(ctx context.Context) {
 		if l == nil {
 			l = &liveStats{lastTotal: total, lastBytes: s.Bytes, bucket: now.Truncate(sampleInterval)}
 			c.live[s.ID] = l
+		}
+		if s.State == session.Paused {
+			l.throughput.Pause(total, now)
+			c.mu.Unlock()
+			continue
 		}
 		rate := l.throughput.Observe(total, now, staleAfterHeartbeats*c.cfg.Coordinator.HeartbeatInterval)
 		// History counts what was generated, as committed parts may be far apart in time.

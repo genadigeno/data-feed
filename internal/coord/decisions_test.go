@@ -342,3 +342,25 @@ func TestManifestForIsOrderedAndTotalled(t *testing.T) {
 		t.Fatalf("order: %+v", m.Parts)
 	}
 }
+
+func TestThroughputLeavesPausedTimeOut(t *testing.T) {
+	var th Throughput
+	const stale = time.Minute
+	at := func(seconds int) time.Time { return epoch.Add(time.Duration(seconds) * time.Second) }
+	th.Observe(0, at(0), stale)
+	if got := th.Observe(1000, at(1), stale); got != 1000 {
+		t.Fatal(got)
+	}
+	th.Pause(1000, at(2))
+	if th.Rate != 0 {
+		t.Fatalf("a paused session must not show its old rate: %v", th.Rate)
+	}
+	th.Pause(1000, at(100))
+	if got := th.Observe(1000, at(101), stale); got != 0 {
+		t.Fatalf("resumed, nothing reported yet: %v", got)
+	}
+	// 2,000 records over the 2 s since the last look while paused, not over 102 s.
+	if got := th.Observe(3000, at(102), stale); got != 1000 {
+		t.Fatalf("first report after a resume: %v", got)
+	}
+}

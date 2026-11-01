@@ -159,6 +159,12 @@ func (t *Throughput) Observe(total uint64, now time.Time, stale time.Duration) f
 	return t.Rate
 }
 
+// Pause says nothing is running at the moment, so the rate is 0 and the time until records
+// move again doesn't count towards the next measurement.
+func (t *Throughput) Pause(total uint64, now time.Time) {
+	t.Rate, t.baseline, t.at, t.started = 0, total, now, true
+}
+
 // Stranded reports a running session that nothing has been able to run for the timeout.
 // waitingSince is the latest of what could have changed that, and eligible says a connected
 // Worker could take its units: then it is only waiting for a free slot.
