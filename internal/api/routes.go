@@ -76,6 +76,13 @@ func (s *server) routes() []route {
 
 		{Method: "POST", Path: "/generate", Role: RoleOperator, Heavy: true, Handler: s.generate},
 
+		{Method: "POST", Path: "/feeds", Role: RoleOperator, Heavy: true, Idempotent: true, Handler: s.createFeed},
+		{Method: "GET", Path: "/feeds", Role: RoleViewer, Handler: s.listFeeds},
+		{Method: "GET", Path: "/feeds/{id}", Role: RoleViewer, Handler: s.getFeed},
+		{Method: "DELETE", Path: "/feeds/{id}", Role: RoleOperator, Handler: s.deleteFeed},
+		{Method: "GET", Path: "/feeds/{id}/records", Role: RoleViewer, Handler: s.feedRecords},
+		{Method: "GET", Path: "/feeds/{id}/stream", Role: RoleViewer, Stream: true, Handler: s.feedStream},
+
 		{Method: "POST", Path: "/schemas", Role: RoleOperator, Idempotent: true, Handler: s.createSchema},
 		{Method: "GET", Path: "/schemas", Role: RoleViewer, Handler: s.listSchemas},
 		{Method: "POST", Path: "/schemas/validate", Role: RoleViewer, Heavy: true, Handler: s.validateSchema},

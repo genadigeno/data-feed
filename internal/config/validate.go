@@ -295,6 +295,9 @@ func (c *Config) validateCoordinator(v *validator) {
 	}
 	v.positive("api.max_body_bytes", int64(a.MaxBodyBytes))
 	v.positive("api.max_sse_clients", int64(a.MaxSSEClients))
+	v.positive("api.feed_page_max_records", a.FeedPageMaxRecords)
+	v.positive("api.feed_max_streams", int64(a.FeedMaxStreams))
+	v.positive("api.feed_max_memory_bytes", int64(a.FeedMaxMemoryBytes))
 
 	g := c.Generation
 	v.positive("generation.max_concurrent_sessions", int64(g.MaxConcurrentSessions))

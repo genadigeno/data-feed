@@ -16,6 +16,7 @@ under test, without touching production data.
 - **Batch or stream:** a set quantity, or a steady rate until you stop it.
 - **Resilient:** sessions survive Worker crashes and Coordinator restarts, and no record is lost or duplicated.
 - **Three interfaces:** a CLI, a web interface and a versioned HTTP API.
+- **Feeds for your applications:** read data over HTTP by page or as a live stream, from any position, with nothing stored.
 - **Vocabulary catalogs:** built-in values, your own, or AI-generated drafts that you review before use (optional).
 - **Bounded memory:** a slow disk or network slows generation down rather than filling memory.
 
@@ -270,6 +271,35 @@ curl http://127.0.0.1:8080/api/v1/sessions
 ```
 
 On Windows PowerShell, use `curl.exe` and pass the JSON from a file with `-d "@session.json"`.
+
+### Feed data to your applications
+
+A feed freezes a schema, seed and format, so your applications can read the same data over HTTP whenever they need it. Nothing is
+stored: each read generates what it asks for. With `datafeed serve` running, create one:
+
+```bash
+datafeed feed create --schema customer.yaml --seed 42 --name customers
+```
+
+Read it a page at a time. Each page is a complete document, and the `X-Next-Offset` response header says where the next one starts:
+
+```bash
+curl -i "http://127.0.0.1:8080/api/v1/feeds/<feed-id>/records?offset=0&limit=1000"
+```
+
+Or stream it, at whatever rate you choose:
+
+```bash
+curl -N "http://127.0.0.1:8080/api/v1/feeds/<feed-id>/stream?from=0&rate=1000"
+```
+
+The stream goes on until the client disconnects, or until the feed ends if you gave it a `--count`. A slow client slows generation
+down. If a connection drops, reconnect with `from=` set to the number of records received so far: nothing is lost or repeated, and every
+client sees the same bytes at the same position.
+
+Streaming needs a feed in `ndjson` or `csv`. A table in a relational feed that has gaps between positions, such as child rows, can be
+read by page but not streamed. Feeds run on the Coordinator rather than Workers, and `api.feed_max_streams` limits how many streams can
+be open at once. `datafeed feed --help` lists the other commands.
 
 ## Going to production
 

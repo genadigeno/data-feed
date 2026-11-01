@@ -345,6 +345,92 @@ paths:
       responses:
         "200": {description: OK}
         default: {$ref: "#/components/responses/Error"}
+  /feeds:
+    post:
+      summary: "Freeze a specification as a feed that clients read from"
+      description: |
+        Takes a session specification without a mode. What only makes sense for a run, such as
+        limits.duration or part sizes, is refused. Without limits.count, a schema's feed has no end.
+      tags: [feeds]
+      x-required-role: operator
+      parameters:
+        - {$ref: "#/components/parameters/IdempotencyKey"}
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Feed"}}
+        default: {$ref: "#/components/responses/Error"}
+    get:
+      summary: "List feeds"
+      tags: [feeds]
+      x-required-role: viewer
+      responses:
+        "200": {description: OK}
+        default: {$ref: "#/components/responses/Error"}
+  /feeds/{id}:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Show a feed"
+      tags: [feeds]
+      x-required-role: viewer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/Feed"}}
+        default: {$ref: "#/components/responses/Error"}
+    delete:
+      summary: "Delete a feed"
+      tags: [feeds]
+      x-required-role: operator
+      responses:
+        "204": {description: Deleted}
+        default: {$ref: "#/components/responses/Error"}
+  /feeds/{id}/records:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "One page of data, as a complete document in the feed's format"
+      description: |
+        The same position always gives the same bytes. Carry on from X-Next-Offset, which is absent
+        at the end. In a sparse table a page can hold fewer records than its limit, or none.
+      tags: [feeds]
+      x-required-role: viewer
+      parameters:
+        - {name: offset, in: query, schema: {type: integer, minimum: 0, default: 0}}
+        - {name: limit, in: query, description: "Positions to cover, at most api.feed_page_max_records", schema: {type: integer, minimum: 1, default: 1000}}
+        - {name: table, in: query, description: "Which table, for a relational feed", schema: {type: string}}
+      responses:
+        "200":
+          description: The data
+          headers:
+            X-Next-Offset: {description: "Where the next page starts; absent at the end", schema: {type: string}}
+            X-Seed: {description: "The feed's seed", schema: {type: string}}
+        default: {$ref: "#/components/responses/Error"}
+  /feeds/{id}/stream:
+    parameters:
+      - {name: id, in: path, required: true, schema: {type: string}}
+    get:
+      summary: "Records as a continuous response, in ndjson or csv, for as long as the client reads"
+      description: |
+        A slow client slows generation. To resume, ask for from= plus the number of records received.
+        Sparse tables are refused, as counting records would not give the position; use /records.
+      tags: [feeds]
+      x-required-role: viewer
+      parameters:
+        - {name: from, in: query, schema: {type: integer, minimum: 0, default: 0}}
+        - {name: limit, in: query, description: "Stop after this many records; default the end of the stream", schema: {type: integer, minimum: 1}}
+        - {name: rate, in: query, description: "Records per second, 0 for no limit; default the feed's limits.rate", schema: {type: number, minimum: 0}}
+        - {name: table, in: query, description: "Which table, for a relational feed", schema: {type: string}}
+      responses:
+        "200":
+          description: The data
+          headers:
+            X-Start-Offset: {description: "The position of the first record", schema: {type: string}}
+            X-Seed: {description: "The feed's seed", schema: {type: string}}
+        default: {$ref: "#/components/responses/Error"}
   /schemas:
     post:
       summary: "Save a schema"
@@ -764,6 +850,30 @@ components:
       content:
         application/json: {schema: {$ref: "#/components/schemas/Error"}}
   schemas:
+    Feed:
+      type: object
+      required: [id, name, strategy, format, seed, reference_time, engine_version, streams, created_at]
+      properties:
+        id: {type: string}
+        name: {type: string}
+        description: {type: string}
+        strategy: {type: string}
+        format: {type: string}
+        seed: {type: string}
+        reference_time: {type: string, format: date-time}
+        engine_version: {type: integer}
+        rate: {type: number}
+        streams:
+          type: array
+          items:
+            type: object
+            required: [id, dense]
+            properties:
+              id: {type: string}
+              end: {type: string, description: "One past the last position; absent when the stream has no end"}
+              dense: {type: boolean, description: "Every position holds a record, so it can be streamed and resumed by counting"}
+        created_at: {type: string, format: date-time}
+        created_by: {type: string}
     Error:
       type: object
       required: [error]

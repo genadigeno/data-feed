@@ -176,6 +176,20 @@ type Sample struct {
 	Bytes     int64
 }
 
+// Feed is a frozen specification that clients read data from.
+type Feed struct {
+	ID, Name, Description string
+	Strategy, Format      string
+	SnapshotHash          string
+	Seed                  uint64
+	ReferenceTime         time.Time
+	EngineVersion         int
+	Rate                  float64
+	StreamsJSON           string
+	CreatedAt             time.Time
+	CreatedBy             string
+}
+
 // SchemaRow is one version of a saved schema.
 type SchemaRow struct {
 	ID         string
@@ -320,6 +334,12 @@ type Tx interface {
 	InsertJoinToken(ctx context.Context, t *JoinToken) error
 	FindJoinToken(ctx context.Context, hash []byte) (*JoinToken, error)
 	UpdateJoinTokenUses(ctx context.Context, id string, uses int) error
+
+	// Feeds
+	InsertFeed(ctx context.Context, f *Feed) error
+	GetFeed(ctx context.Context, id string) (*Feed, error)
+	ListFeeds(ctx context.Context, after string, limit int) ([]Feed, error)
+	DeleteFeed(ctx context.Context, id string) error
 
 	// Schemas
 	PutSchema(ctx context.Context, s *SchemaRow) error

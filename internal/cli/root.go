@@ -106,6 +106,7 @@ func newRootCommand(g *globals) *cobra.Command {
 		newWorkerCommand(g),
 		newSessionCommand(g),
 		newSchemaCommand(g),
+		newFeedCommand(g),
 		newDomainCommand(g),
 		newCatalogCommand(g),
 		newJobCommand(g),

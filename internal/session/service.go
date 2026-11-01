@@ -536,17 +536,22 @@ func (s *Service) LoadProgress(ctx context.Context, id string) (Progress, error)
 	return p, err
 }
 
+// StreamEnd is one past a stream's last position: an unbounded stream ends at the top of
+// the index space.
+func StreamEnd(spec gen.StreamSpec) uint64 {
+	if spec.Space == 0 {
+		return unboundedRows
+	}
+	return spec.Space
+}
+
 // StreamStatesFor builds a session's streams from its engine: the plan a Coordinator
-// follows lazily. Records in an unbounded stream end at the top of the index space.
+// follows lazily.
 func StreamStatesFor(session string, streams []gen.StreamSpec) []store.StreamState {
 	out := make([]store.StreamState, len(streams))
 	for i, spec := range streams {
-		end := spec.Space
-		if end == 0 {
-			end = unboundedRows
-		}
 		out[i] = store.StreamState{
-			SessionID: session, Stream: string(spec.ID), Position: i, End: end, PerParent: spec.PerParent,
+			SessionID: session, Stream: string(spec.ID), Position: i, End: StreamEnd(spec), PerParent: spec.PerParent,
 			ExpectedRows: spec.ExpectedRows, MaxRecordBytes: spec.MaxRecordBytes,
 		}
 	}

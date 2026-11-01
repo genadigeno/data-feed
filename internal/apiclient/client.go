@@ -435,6 +435,53 @@ func (c *Client) download(ctx context.Context, path string) (io.ReadCloser, erro
 	return streamBody{resp.Body, cancel}, nil
 }
 
+// CreateFeed freezes a specification as a feed.
+func (c *Client) CreateFeed(ctx context.Context, spec []byte) (api.FeedDTO, error) {
+	var out api.FeedDTO
+	_, err := c.call(ctx, request{method: http.MethodPost, path: "/feeds", body: spec, contentType: "application/yaml"}, &out)
+	return out, err
+}
+
+// ListFeeds lists feeds.
+func (c *Client) ListFeeds(ctx context.Context) (api.PageDTO[api.FeedDTO], error) {
+	return get[api.PageDTO[api.FeedDTO]](ctx, c, "/feeds", nil)
+}
+
+// GetFeed reads a feed.
+func (c *Client) GetFeed(ctx context.Context, id string) (api.FeedDTO, error) {
+	return get[api.FeedDTO](ctx, c, "/feeds/"+url.PathEscape(id), nil)
+}
+
+// DeleteFeed removes a feed.
+func (c *Client) DeleteFeed(ctx context.Context, id string) error {
+	return c.del(ctx, "/feeds/"+url.PathEscape(id), nil)
+}
+
+// FeedPage is one page of a feed's data.
+type FeedPage struct {
+	io.ReadCloser
+	// Next is where the following page starts, empty at the end.
+	Next string
+}
+
+// FeedRecords reads one page of a feed.
+func (c *Client) FeedRecords(ctx context.Context, id string, query url.Values) (FeedPage, error) {
+	resp, cancel, err := c.send(ctx, request{method: http.MethodGet, path: "/feeds/" + url.PathEscape(id) + "/records", query: query, stream: true})
+	if err != nil {
+		return FeedPage{}, err
+	}
+	return FeedPage{ReadCloser: streamBody{resp.Body, cancel}, Next: resp.Header.Get("X-Next-Offset")}, nil
+}
+
+// FeedStream reads a feed as a continuous response.
+func (c *Client) FeedStream(ctx context.Context, id string, query url.Values) (io.ReadCloser, error) {
+	resp, cancel, err := c.send(ctx, request{method: http.MethodGet, path: "/feeds/" + url.PathEscape(id) + "/stream", query: query, stream: true})
+	if err != nil {
+		return nil, err
+	}
+	return streamBody{resp.Body, cancel}, nil
+}
+
 // Generate runs small synchronous generation, returning the data.
 func (c *Client) Generate(ctx context.Context, spec []byte, table string) (io.ReadCloser, error) {
 	q := request{method: http.MethodPost, path: "/generate", body: spec, contentType: "application/yaml", stream: true}

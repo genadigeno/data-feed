@@ -97,6 +97,10 @@ type server struct {
 	slots      chan struct{}
 	verifying  chan struct{}
 	heavy      chan struct{}
+
+	feeds       feedCache
+	feedStreams atomic.Int64
+	feedMemory  atomic.Int64 // bytes reads from feeds may be holding
 }
 
 func (s *server) writeJSON(w http.ResponseWriter, status int, body any) {
@@ -212,6 +216,9 @@ func (s *server) wrap(rt route) http.Handler {
 func isLongLived(path string) bool {
 	if strings.Contains(path, "/artifacts/") {
 		return strings.HasSuffix(path, "/merged") || strings.Contains(path, "/parts/")
+	}
+	if strings.HasPrefix(path, prefix+"/feeds/") && strings.HasSuffix(path, "/stream") {
+		return true
 	}
 	return strings.HasSuffix(path, prefix+"/events") || strings.HasPrefix(path, prefix+"/admin/") || strings.HasPrefix(path, "/debug/pprof/")
 }

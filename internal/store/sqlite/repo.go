@@ -116,7 +116,7 @@ func (r *repo) GetSnapshot(ctx context.Context, hash string) ([]byte, error) {
 }
 
 func (r *repo) DeleteUnreferencedSnapshots(ctx context.Context, olderThan time.Time) (int64, error) {
-	res, err := r.q.ExecContext(ctx, `DELETE FROM snapshots WHERE created_at < ? AND hash NOT IN (SELECT snapshot_hash FROM sessions)`, ts(olderThan))
+	res, err := r.q.ExecContext(ctx, `DELETE FROM snapshots WHERE created_at < ? AND hash NOT IN (SELECT snapshot_hash FROM sessions) AND hash NOT IN (SELECT snapshot_hash FROM feeds)`, ts(olderThan))
 	if err != nil {
 		return 0, err
 	}
@@ -595,6 +595,45 @@ func (r *repo) ListSchemas(ctx context.Context, after string, limit int) ([]stor
 
 func (r *repo) DeleteSchema(ctx context.Context, id string) error {
 	return r.exec(ctx, `DELETE FROM schemas WHERE id = ?`, id)
+}
+
+// Feeds
+
+const feedColumns = `id, name, description, strategy, format, snapshot_hash, seed, reference_time, engine_version, rate, streams_json, created_at, created_by`
+
+func scanFeed(row scanner) (store.Feed, error) {
+	var f store.Feed
+	var seed int64
+	var refTime, createdAt string
+	err := row.Scan(&f.ID, &f.Name, &f.Description, &f.Strategy, &f.Format, &f.SnapshotHash, &seed, &refTime, &f.EngineVersion, &f.Rate, &f.StreamsJSON, &createdAt, &f.CreatedBy)
+	f.Seed = uint64(seed)
+	f.ReferenceTime, f.CreatedAt = parseTime(refTime), parseTime(createdAt)
+	return f, err
+}
+
+func (r *repo) InsertFeed(ctx context.Context, f *store.Feed) error {
+	return r.exec(ctx, `INSERT INTO feeds (`+feedColumns+`) VALUES (`+placeholders(13)+`)`,
+		f.ID, f.Name, f.Description, f.Strategy, f.Format, f.SnapshotHash, int64(f.Seed), ts(f.ReferenceTime), f.EngineVersion, f.Rate, f.StreamsJSON, ts(f.CreatedAt), f.CreatedBy)
+}
+
+func (r *repo) GetFeed(ctx context.Context, id string) (*store.Feed, error) {
+	f, err := scanFeed(r.q.QueryRowContext(ctx, `SELECT `+feedColumns+` FROM feeds WHERE id = ?`, id))
+	if err != nil {
+		return nil, notFound(err)
+	}
+	return &f, nil
+}
+
+func (r *repo) ListFeeds(ctx context.Context, after string, limit int) ([]store.Feed, error) {
+	rows, err := r.q.QueryContext(ctx, `SELECT `+feedColumns+` FROM feeds WHERE id > ? ORDER BY id LIMIT ?`, after, limit)
+	if err != nil {
+		return nil, err
+	}
+	return collect(rows, func(rows *sql.Rows) (store.Feed, error) { return scanFeed(rows) })
+}
+
+func (r *repo) DeleteFeed(ctx context.Context, id string) error {
+	return r.exec(ctx, `DELETE FROM feeds WHERE id = ?`, id)
 }
 
 // Vocabulary

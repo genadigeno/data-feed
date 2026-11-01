@@ -80,6 +80,9 @@ type API struct {
 	MaxSSEClients      int           `yaml:"max_sse_clients"`
 	SSEHeartbeat       time.Duration `yaml:"sse_heartbeat"`
 	MetricsRequireAuth bool          `yaml:"metrics_require_auth"`
+	FeedPageMaxRecords int64         `yaml:"feed_page_max_records"`
+	FeedMaxStreams     int           `yaml:"feed_max_streams"`
+	FeedMaxMemoryBytes Size          `yaml:"feed_max_memory_bytes"`
 }
 
 type Persistence struct {
@@ -248,6 +251,9 @@ func Defaults(environment string) Config {
 			MaxSSEClients:      256,
 			SSEHeartbeat:       15 * time.Second,
 			MetricsRequireAuth: true,
+			FeedPageMaxRecords: 10000,
+			FeedMaxStreams:     8,
+			FeedMaxMemoryBytes: 1024 * MiB,
 		},
 		Persistence: Persistence{
 			BusyTimeout:        5 * time.Second,

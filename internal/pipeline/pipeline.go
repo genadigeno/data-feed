@@ -73,6 +73,9 @@ type Unit struct {
 	Finish <-chan struct{}
 	// Control, if set, adjusts the run while it goes.
 	Control *Control
+	// FlushBatches passes each batch to the part as soon as it is encoded, for a reader
+	// waiting at the other end, rather than when the write buffer fills.
+	FlushBatches bool
 }
 
 // Control adjusts a running unit. A run that started without a rate has nothing to adjust.
@@ -461,6 +464,9 @@ func (p *partWriter) writeBatch(b *record.Batch) error {
 		p.total++
 		p.u.Stats.Records.Add(1)
 		p.u.Stats.Bytes.Add(p.count.n + int64(p.w.Buffered()) - before)
+	}
+	if p.u.FlushBatches && p.w != nil {
+		return p.w.Flush()
 	}
 	return nil
 }
