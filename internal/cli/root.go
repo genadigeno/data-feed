@@ -1,4 +1,4 @@
-// Package cli implements the datagen command line. Commands hold no application
+// Package cli implements the datafeed command line. Commands hold no application
 // logic: they load configuration and call the same services every role uses.
 package cli
 
@@ -64,7 +64,7 @@ func Execute(args []string, stdout, stderr io.Writer) int {
 
 func newRootCommand(g *globals) *cobra.Command {
 	root := &cobra.Command{
-		Use:           "datagen",
+		Use:           "datafeed",
 		Short:         "High-performance synthetic data generation platform",
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -78,8 +78,8 @@ func newRootCommand(g *globals) *cobra.Command {
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error { return usageError(err) })
 
 	f := root.PersistentFlags()
-	f.StringVar(&g.configPath, "config", "", "configuration file (default: $DATAGEN_CONFIG, then ./datagen.yaml if present)")
-	f.StringVar(&g.dataDir, "data-dir", "", "data directory (default: $DATAGEN_DATA_DIR, then ./data)")
+	f.StringVar(&g.configPath, "config", "", "configuration file (default: $DATAFEED_CONFIG, then ./datafeed.yaml if present)")
+	f.StringVar(&g.dataDir, "data-dir", "", "data directory (default: $DATAFEED_DATA_DIR, then ./data)")
 	f.StringVarP(&g.output, "output", "o", outputTable, "output format: table or json")
 	f.BoolVarP(&g.verbose, "verbose", "v", false, "log at debug level")
 	f.BoolVarP(&g.quiet, "quiet", "q", false, "log warnings and errors only")

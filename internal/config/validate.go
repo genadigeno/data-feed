@@ -50,7 +50,7 @@ func (c *Config) perSlotMemory() int64 {
 // for Validate to accept or reject.
 func (c *Config) Normalize(f Facts) {
 	if c.Persistence.SQLitePath == "" {
-		c.Persistence.SQLitePath = filepath.Join(c.Storage.DataDir, "datagen.db")
+		c.Persistence.SQLitePath = filepath.Join(c.Storage.DataDir, "datafeed.db")
 	}
 	if c.Worker.MaxMemoryBytes == 0 {
 		if f.MemoryBytes > 0 {

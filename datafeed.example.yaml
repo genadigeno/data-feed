@@ -1,5 +1,5 @@
-# Example configuration. Copy to datagen.yaml (git-ignored) and adjust.
-# `datagen config show` lists every setting with its value and source.
+# Example configuration. Copy to datafeed.yaml (git-ignored) and adjust.
+# `datafeed config show` lists every setting with its value and source.
 
 application:
   environment: development       # development | test | production
@@ -17,7 +17,7 @@ logging:
   level: info                    # debug | info | warn | error
   format: text                   # text | json
 
-# Worker role (`datagen worker run`):
+# Worker role (`datafeed worker run`):
 worker:
   coordinator_url: http://127.0.0.1:8081
   # coordinator_fingerprint: sha256:…   # pin a self-signed Coordinator certificate

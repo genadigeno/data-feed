@@ -86,7 +86,7 @@ func (g *globals) printVersion(short bool) error {
 	if g.output == outputJSON {
 		return writeJSON(g.stdout, v)
 	}
-	fmt.Fprintf(g.stdout, "datagen %s (commit %s, %s, engine %d, protocol %d)\n",
+	fmt.Fprintf(g.stdout, "datafeed %s (commit %s, %s, engine %d, protocol %d)\n",
 		v.Version, v.Commit, v.GoVersion, v.EngineVersion, v.ProtocolVersion)
 	return nil
 }
@@ -140,7 +140,7 @@ func newHealthCommand(g *globals) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&server, "server", "", "Coordinator URL (default: $DATAGEN_SERVER, then server.listen from the configuration)")
+	cmd.Flags().StringVar(&server, "server", "", "Coordinator URL (default: $DATAFEED_SERVER, then server.listen from the configuration)")
 	cmd.Flags().BoolVar(&ready, "ready", false, "check readiness instead of liveness")
 	cmd.Flags().DurationVar(&timeout, "timeout", 5*time.Second, "request timeout")
 	return cmd
@@ -148,7 +148,7 @@ func newHealthCommand(g *globals) *cobra.Command {
 
 // serverURL picks the Coordinator to talk to: flag, environment, then configuration.
 func (g *globals) serverURL(flag string) (string, error) {
-	if url := cmp.Or(flag, os.Getenv("DATAGEN_SERVER")); url != "" {
+	if url := cmp.Or(flag, os.Getenv("DATAFEED_SERVER")); url != "" {
 		return url, nil
 	}
 	loaded, err := g.loadConfig(config.RoleCoordinator, nil)

@@ -7,10 +7,10 @@ FUZZTIME ?= 30s
 .PHONY: build run fmt lint test test-short fuzz bench docker compose-up compose-down clean
 
 build:
-	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/datagen ./cmd/datagen
+	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/datafeed ./cmd/datafeed
 
 run:
-	go run ./cmd/datagen serve
+	go run ./cmd/datafeed serve
 
 fmt:
 	gofmt -w cmd internal
@@ -37,7 +37,7 @@ bench:
 	go test -run '^$$' -bench . -benchmem -benchtime 1s ./...
 
 docker:
-	docker build --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t datagen:$(VERSION) .
+	docker build --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t datafeed:$(VERSION) .
 
 compose-up:
 	docker compose --profile workers up --build

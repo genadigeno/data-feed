@@ -8,17 +8,17 @@
 services:
   coordinator:
     build: .
-    image: datagen:dev
+    image: datafeed:dev
     environment:
-      DATAGEN_APPLICATION__ENVIRONMENT: development
+      DATAFEED_APPLICATION__ENVIRONMENT: development
       # Published on loopback only (see ports); no authentication exists in this lab setup.
-      DATAGEN_AUTH__INSECURE_ALLOW_UNAUTHENTICATED: "true"
+      DATAFEED_AUTH__INSECURE_ALLOW_UNAUTHENTICATED: "true"
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
       - coordinator-data:/data
     healthcheck:
-      test: ["CMD", "/datagen", "health", "--ready", "--server", "http://127.0.0.1:8080"]
+      test: ["CMD", "/datafeed", "health", "--ready", "--server", "http://127.0.0.1:8080"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -26,13 +26,13 @@ services:
 
   worker:
     profiles: ["workers"]
-    image: datagen:dev
+    image: datafeed:dev
     command: ["worker", "run", "--coordinator", "https://coordinator:8081"]
     environment:
-      DATAGEN_APPLICATION__ENVIRONMENT: development
+      DATAFEED_APPLICATION__ENVIRONMENT: development
       # The Coordinator's certificate is generated at runtime, so it cannot be pinned
       # in this file. Allowed in development only; production pins it or uses a CA.
-      DATAGEN_WORKER__COORDINATOR_INSECURE_SKIP_VERIFY: "true"
+      DATAFEED_WORKER__COORDINATOR_INSECURE_SKIP_VERIFY: "true"
     depends_on:
       coordinator:
         condition: service_healthy

@@ -11,7 +11,7 @@ import (
 
 // Subdirectories of the data directory.
 const (
-	lockFile    = "datagen.lock"
+	lockFile    = "datafeed.lock"
 	dirSessions = "sessions"
 	dirOutputs  = "outputs"
 	dirStaging  = "staging"

@@ -15,19 +15,19 @@ import (
 )
 
 const (
-	envPrefix      = "DATAGEN_"
-	envConfigFile  = "DATAGEN_CONFIG"
-	envDataDir     = "DATAGEN_DATA_DIR"
-	defaultFile    = "datagen.yaml"
+	envPrefix      = "DATAFEED_"
+	envConfigFile  = "DATAFEED_CONFIG"
+	envDataDir     = "DATAFEED_DATA_DIR"
+	defaultFile    = "datafeed.yaml"
 	codeConfigFile = "ERR_CONFIG_FILE"
 )
 
-// envReserved lists DATAGEN_* variables that are not settings paths.
+// envReserved lists DATAFEED_* variables that are not settings paths.
 var envReserved = map[string]bool{
-	envConfigFile:    true,
-	envDataDir:       true,
-	"DATAGEN_SERVER": true,
-	"DATAGEN_TOKEN":  true,
+	envConfigFile:     true,
+	envDataDir:        true,
+	"DATAFEED_SERVER": true,
+	"DATAFEED_TOKEN":  true,
 }
 
 // Role selects which settings matter to the running process.
@@ -224,7 +224,7 @@ func environMap(environ []string) map[string]string {
 	return m
 }
 
-// envToPath maps DATAGEN_GENERATION__QUEUE_CAPACITY to generation.queue_capacity.
+// envToPath maps DATAFEED_GENERATION__QUEUE_CAPACITY to generation.queue_capacity.
 func envToPath(name string) string {
 	return strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, envPrefix), "__", "."))
 }

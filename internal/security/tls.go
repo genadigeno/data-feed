@@ -72,7 +72,7 @@ func writeSelfSigned(dir, certPath, keyPath string, now time.Time) error {
 	host, _ := os.Hostname()
 	tmpl := &x509.Certificate{
 		SerialNumber: serial,
-		Subject:      pkix.Name{CommonName: "datagen coordinator"},
+		Subject:      pkix.Name{CommonName: "datafeed coordinator"},
 		NotBefore:    now.Add(-time.Hour),
 		NotAfter:     now.AddDate(10, 0, 0),
 		KeyUsage:     x509.KeyUsageDigitalSignature,

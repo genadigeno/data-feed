@@ -35,10 +35,10 @@ go.work.sum
 # Project documentation (kept local only)
 docs/
 
-# datagen runtime files
+# datafeed runtime files
 /bin/
 /data/
 /worker-spool/
 /worker-credential
-/datagen.yaml
+/datafeed.yaml
 *.prof

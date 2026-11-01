@@ -1,4 +1,4 @@
-// Command datagen is the synthetic data generation platform: Coordinator, Worker and
+// Command datafeed is the synthetic data generation platform: Coordinator, Worker and
 // CLI in one binary.
 package main
 

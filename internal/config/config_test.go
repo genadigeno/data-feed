@@ -65,8 +65,8 @@ func TestPrecedenceDefaultsFileEnvFlags(t *testing.T) {
 		Path:     "c.yaml",
 		ReadFile: files(map[string]string{"c.yaml": file}),
 		Environ: []string{
-			"DATAGEN_GENERATION__DEFAULT_BATCH_SIZE=600",
-			"DATAGEN_GENERATION__MAX_BATCH_SIZE=8000",
+			"DATAFEED_GENERATION__DEFAULT_BATCH_SIZE=600",
+			"DATAFEED_GENERATION__MAX_BATCH_SIZE=8000",
 		},
 		Flags: map[string]string{"generation.max_batch_size": "7000"},
 	})
@@ -81,7 +81,7 @@ func TestPrecedenceDefaultsFileEnvFlags(t *testing.T) {
 
 	wantSources := map[string]string{
 		"generation.queue_capacity":     "file",
-		"generation.default_batch_size": "env:DATAGEN_GENERATION__DEFAULT_BATCH_SIZE",
+		"generation.default_batch_size": "env:DATAFEED_GENERATION__DEFAULT_BATCH_SIZE",
 		"generation.max_batch_size":     "flag",
 	}
 	for path, want := range wantSources {
@@ -113,7 +113,7 @@ func TestProfileDefaultsAreBelowFile(t *testing.T) {
 		t.Fatal("file did not override profile default")
 	}
 
-	l = load(t, Options{Environ: []string{"DATAGEN_APPLICATION__ENVIRONMENT=test"}})
+	l = load(t, Options{Environ: []string{"DATAFEED_APPLICATION__ENVIRONMENT=test"}})
 	if l.Config.Worker.LocalSlots != 1 {
 		t.Fatalf("environment from env var did not select the profile: %d", l.Config.Worker.LocalSlots)
 	}
@@ -133,8 +133,8 @@ func TestConfigFileDiscovery(t *testing.T) {
 	if _, err := Load(Options{Path: "missing.yaml", ReadFile: files(nil)}); err == nil {
 		t.Fatal("missing explicit file accepted")
 	}
-	if _, err := Load(Options{Environ: []string{"DATAGEN_CONFIG=missing.yaml"}, ReadFile: files(nil)}); err == nil {
-		t.Fatal("missing DATAGEN_CONFIG file accepted")
+	if _, err := Load(Options{Environ: []string{"DATAFEED_CONFIG=missing.yaml"}, ReadFile: files(nil)}); err == nil {
+		t.Fatal("missing DATAFEED_CONFIG file accepted")
 	}
 	// A read error other than not-exist is never ignored.
 	_, err := Load(Options{ReadFile: func(string) ([]byte, error) { return nil, errors.New("denied") }})
@@ -148,10 +148,10 @@ func TestInvalidInputsAreRejected(t *testing.T) {
 		"unknown file key": {Path: "c", ReadFile: files(map[string]string{"c": "generation:\n  queue_capacityy: 1\n"})},
 		"malformed yaml":   {Path: "c", ReadFile: files(map[string]string{"c": ":\n\t- x"})},
 		"bad size":         {Path: "c", ReadFile: files(map[string]string{"c": "generation:\n  part_max_bytes: lots\n"})},
-		"unknown env":      {Environ: []string{"DATAGEN_NOPE__X=1"}, ReadFile: files(nil)},
-		"section env":      {Environ: []string{"DATAGEN_GENERATION=1"}, ReadFile: files(nil)},
-		"bad env int":      {Environ: []string{"DATAGEN_GENERATION__QUEUE_CAPACITY=x"}, ReadFile: files(nil)},
-		"bad env duration": {Environ: []string{"DATAGEN_COORDINATION__LEASE_DURATION=30"}, ReadFile: files(nil)},
+		"unknown env":      {Environ: []string{"DATAFEED_NOPE__X=1"}, ReadFile: files(nil)},
+		"section env":      {Environ: []string{"DATAFEED_GENERATION=1"}, ReadFile: files(nil)},
+		"bad env int":      {Environ: []string{"DATAFEED_GENERATION__QUEUE_CAPACITY=x"}, ReadFile: files(nil)},
+		"bad env duration": {Environ: []string{"DATAFEED_COORDINATION__LEASE_DURATION=30"}, ReadFile: files(nil)},
 		"unknown flag":     {Flags: map[string]string{"no.such": "1"}, ReadFile: files(nil)},
 	}
 	for name, o := range cases {
@@ -163,7 +163,7 @@ func TestInvalidInputsAreRejected(t *testing.T) {
 
 func TestAllEnvProblemsReportedTogether(t *testing.T) {
 	_, err := Load(Options{
-		Environ:  []string{"DATAGEN_NOPE=1", "DATAGEN_GENERATION__QUEUE_CAPACITY=x"},
+		Environ:  []string{"DATAFEED_NOPE=1", "DATAFEED_GENERATION__QUEUE_CAPACITY=x"},
 		ReadFile: files(nil),
 	})
 	if got := len(problemsOf(t, err)); got != 2 {
@@ -172,19 +172,19 @@ func TestAllEnvProblemsReportedTogether(t *testing.T) {
 }
 
 func TestReservedEnvVarsAreNotSettings(t *testing.T) {
-	l := load(t, Options{Environ: []string{"DATAGEN_SERVER=http://x", "DATAGEN_TOKEN=abc", "DATAGEN_DATA_DIR=/d", "UNRELATED=1"}})
+	l := load(t, Options{Environ: []string{"DATAFEED_SERVER=http://x", "DATAFEED_TOKEN=abc", "DATAFEED_DATA_DIR=/d", "UNRELATED=1"}})
 	if l.Config.Storage.DataDir != "/d" {
-		t.Fatalf("DATAGEN_DATA_DIR not applied: %q", l.Config.Storage.DataDir)
+		t.Fatalf("DATAFEED_DATA_DIR not applied: %q", l.Config.Storage.DataDir)
 	}
 }
 
 func TestValueSyntaxFromEnv(t *testing.T) {
 	l := load(t, Options{Environ: []string{
-		"DATAGEN_COORDINATION__LEASE_DURATION=45s",
-		"DATAGEN_GENERATION__PART_MAX_BYTES=128MiB",
-		"DATAGEN_WORKER__SPOOL_ENABLED=false",
-		"DATAGEN_WORKER__LABELS=zone=eu, tier=gold",
-		"DATAGEN_API__RATE_LIMIT__REQUESTS_PER_SECOND=2.5",
+		"DATAFEED_COORDINATION__LEASE_DURATION=45s",
+		"DATAFEED_GENERATION__PART_MAX_BYTES=128MiB",
+		"DATAFEED_WORKER__SPOOL_ENABLED=false",
+		"DATAFEED_WORKER__LABELS=zone=eu, tier=gold",
+		"DATAFEED_API__RATE_LIMIT__REQUESTS_PER_SECOND=2.5",
 	}})
 	c := l.Config
 	if c.Coordinator.LeaseDuration != 45*time.Second {
@@ -229,7 +229,7 @@ func TestSecretsResolvedOnlyForRole(t *testing.T) {
 
 func TestEntriesNeverExposeSecrets(t *testing.T) {
 	l := load(t, Options{
-		Environ: []string{"DATAGEN_AUTH__BOOTSTRAP_ADMIN_TOKEN=${ADMIN}", "ADMIN=hunter2"},
+		Environ: []string{"DATAFEED_AUTH__BOOTSTRAP_ADMIN_TOKEN=${ADMIN}", "ADMIN=hunter2"},
 	})
 	if l.Config.Auth.BootstrapAdminToken.Reveal() != "hunter2" {
 		t.Fatal("secret not resolved")
@@ -260,7 +260,7 @@ func TestNormalizeResolvesAutomaticSettings(t *testing.T) {
 	c.Storage.DataDir = "base"
 	c.Normalize(bigHost)
 
-	if !strings.HasSuffix(strings.ReplaceAll(c.Persistence.SQLitePath, `\`, "/"), "base/datagen.db") {
+	if !strings.HasSuffix(strings.ReplaceAll(c.Persistence.SQLitePath, `\`, "/"), "base/datafeed.db") {
 		t.Errorf("sqlite path = %q", c.Persistence.SQLitePath)
 	}
 	if c.Worker.Slots != 8 || c.Worker.LocalSlots != 8 {
@@ -380,8 +380,8 @@ func TestAcceptedInsecureSetups(t *testing.T) {
 func TestLiteralSecretsOnlyInDevelopment(t *testing.T) {
 	apply := func(env string) []apperr.Problem {
 		l := load(t, Options{Environ: []string{
-			"DATAGEN_APPLICATION__ENVIRONMENT=" + env,
-			"DATAGEN_AUTH__BOOTSTRAP_ADMIN_TOKEN=literal",
+			"DATAFEED_APPLICATION__ENVIRONMENT=" + env,
+			"DATAFEED_AUTH__BOOTSTRAP_ADMIN_TOKEN=literal",
 		}})
 		l.Config.Normalize(bigHost)
 		return l.Config.Validate(RoleCoordinator)
