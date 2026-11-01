@@ -36,6 +36,7 @@ type Role int
 const (
 	RoleCoordinator Role = iota
 	RoleWorker
+	RoleDirect // session-less generation: no listeners, no secrets
 )
 
 // Options are the inputs to Load. Everything external is injected so loading is

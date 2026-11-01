@@ -86,6 +86,7 @@ func newRootCommand(g *globals) *cobra.Command {
 
 	root.AddCommand(
 		newServeCommand(g),
+		newGenerateCommand(g),
 		newVersionCommand(g),
 		newHealthCommand(g),
 		newConfigCommand(g),

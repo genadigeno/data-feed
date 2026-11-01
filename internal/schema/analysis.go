@@ -258,8 +258,11 @@ func (v *validator) uniqueFlatFields(path string, fields []FieldDef, maxRecords 
 	}
 }
 
-// MaxColumns bounds flattening, which shared definitions could otherwise multiply.
-const MaxColumns = 1 << 16
+// Bounds on flattening, which shared definitions could otherwise multiply.
+const (
+	MaxColumns     = 1 << 16
+	MaxColumnDepth = maxTreeDepth
+)
 
 // Columns lists the flat column names of fields for tabular output, in order. Objects
 // and nested schemas expand into dotted paths. Maps stay one column, and so do arrays

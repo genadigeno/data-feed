@@ -317,6 +317,9 @@ func (v *validator) hybrid(h *HybridSpec) {
 	if e := h.ExtraRandom; e != nil {
 		v.probability("extra_random.probability", e.Probability)
 		v.random("extra_random.spec", &e.Spec)
+		if v.opts.Output.Format == "csv" {
+			v.add("extra_random", CodeFormatIncompat, "CSV columns are fixed, so random extra fields would be lost: use JSON or XML, or remove extra_random")
+		}
 	}
 	if v.defCycle {
 		return
