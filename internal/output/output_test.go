@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -210,5 +211,123 @@ func TestWriterSinkPassesBytesThrough(t *testing.T) {
 	}
 	if err := p.Abort(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestFilePartKeepsOrderAcrossManyWrites(t *testing.T) {
+	for _, compression := range []string{CompressionNone, CompressionGzip} {
+		final := filepath.Join(t.TempDir(), "p.txt")
+		part, err := NewFilePart(final, compression)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var want bytes.Buffer
+		for i := range 2000 {
+			chunk := bytes.Repeat([]byte{byte(i)}, 1+i*37%5000)
+			want.Write(chunk)
+			if _, err := part.Write(chunk); err != nil {
+				t.Fatal(err)
+			}
+		}
+		big := bytes.Repeat([]byte("large"), partBufferBytes) // larger than a buffer
+		want.Write(big)
+		if _, err := part.Write(big); err != nil {
+			t.Fatal(err)
+		}
+		done, err := part.Commit()
+		if err != nil {
+			t.Fatal(err)
+		}
+		onDisk, err := os.ReadFile(final)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if done.Bytes != int64(len(onDisk)) || done.SHA256 != sha256.Sum256(onDisk) {
+			t.Fatalf("%s: size %d of %d, or wrong checksum", compression, done.Bytes, len(onDisk))
+		}
+		got := onDisk
+		if compression == CompressionGzip {
+			r, err := gzip.NewReader(bytes.NewReader(onDisk))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got, err = io.ReadAll(r); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if !bytes.Equal(got, want.Bytes()) {
+			t.Fatalf("%s: content differs", compression)
+		}
+	}
+}
+
+func TestFilePartCallerMayReuseItsBuffer(t *testing.T) {
+	final := filepath.Join(t.TempDir(), "p.txt")
+	part, err := NewFilePart(final, CompressionNone)
+	if err != nil {
+		t.Fatal(err)
+	}
+	buf := []byte("first")
+	if _, err := part.Write(buf); err != nil {
+		t.Fatal(err)
+	}
+	copy(buf, "XXXXX")
+	if _, err := part.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := os.ReadFile(final); string(got) != "first" {
+		t.Fatalf("%q", got)
+	}
+}
+
+func TestFilePartAbortStopsItsGoroutines(t *testing.T) {
+	dir := t.TempDir()
+	before := runtime.NumGoroutine()
+	for range 20 {
+		part, err := NewFilePart(filepath.Join(dir, "p.txt"), CompressionGzip)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := part.Write([]byte("data")); err != nil {
+			t.Fatal(err)
+		}
+		if err := part.Abort(); err != nil {
+			t.Fatal(err)
+		}
+		if err := part.Abort(); err != nil {
+			t.Fatalf("a second abort: %v", err)
+		}
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil || len(entries) != 0 {
+		t.Fatalf("%v %v", entries, err)
+	}
+	if after := runtime.NumGoroutine(); after > before {
+		t.Fatalf("goroutines %d -> %d", before, after)
+	}
+}
+
+func TestFilePartReportsWriteFailures(t *testing.T) {
+	final := filepath.Join(t.TempDir(), "p.txt")
+	part, err := NewFilePart(final, CompressionNone)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Closing the file under it makes every write fail.
+	if err := part.(*filePart).f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	var failed error
+	for range 100 {
+		if _, failed = part.Write([]byte("data")); failed != nil {
+			break
+		}
+	}
+	_, commitErr := part.Commit()
+	if failed == nil && commitErr == nil {
+		t.Fatal("a failed write went unnoticed")
+	}
+	if _, err := os.Stat(final); err == nil {
+		t.Fatal("a failed part appeared complete")
 	}
 }

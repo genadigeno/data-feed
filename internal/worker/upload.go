@@ -136,7 +136,13 @@ func (s *uploadSink) Open(ctx context.Context, r output.PartRequest) (output.Par
 		s.extension += ".gz"
 	}
 	name := fmt.Sprintf("%s-%06d.%s", s.u.a.UnitID, r.Seq, s.extension)
-	f, err := output.NewFilePart(filepath.Join(s.r.o.SpoolDir, name), s.compression)
+	// A remote Worker's spool is emptied at every start and the part regenerates if lost, so
+	// it needs no sync. The embedded worker's file is what the Coordinator commits.
+	start := output.NewScratchPart
+	if s.r.o.LocalFiles {
+		start = output.NewFilePart
+	}
+	f, err := start(filepath.Join(s.r.o.SpoolDir, name), s.compression)
 	if err != nil {
 		s.r.spool.Release(r.MaxBytes)
 		return nil, err

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"runtime"
 	"strings"
 	"sync"
@@ -806,6 +807,86 @@ func BenchmarkPipeline(b *testing.B) {
 				_, err := Run(context.Background(), Unit{
 					Generators: []gen.StreamGenerator{g}, Stream: gen.StreamMain, End: records,
 					BatchSize: 1000, QueueCap: 4, Encoder: enc, Sink: sink,
+				})
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+			b.ReportMetric(float64(records), "records/op")
+		})
+	}
+}
+
+const customerDoc = `
+kind: hybrid
+fields:
+  id: {type: uuid, unique: true}
+  name: {type: full_name}
+  email: {type: email}
+  phone: {type: phone}
+  age: {type: integer, min: 18, max: 90}
+  balance: {type: decimal, scale: 2, min: 0, max: 100000}
+  active: {type: boolean}
+  created_at: {type: timestamp}
+  city: {type: city}
+  note: {type: string, max_length: 80}
+`
+
+// BenchmarkPipelineToFiles is the whole path with real files and checksums, on a realistic
+// record, with one generator and with several.
+func BenchmarkPipelineToFiles(b *testing.B) {
+	for _, gens := range []int{1, 4, 8} {
+		b.Run(fmt.Sprintf("generators=%d", gens), func(b *testing.B) {
+			e := engineFor(b, customerDoc)
+			spec := e.Streams()[0]
+			enc, err := serial.New(serial.FormatNDJSON, serial.Options{}, serial.Stream{Fields: spec.Fields})
+			if err != nil {
+				b.Fatal(err)
+			}
+			generators := make([]gen.StreamGenerator, gens)
+			for i := range generators {
+				if generators[i], err = e.NewStreamGenerator(gen.StreamMain); err != nil {
+					b.Fatal(err)
+				}
+			}
+			dir := b.TempDir()
+			const records = 200000
+			for b.Loop() {
+				_, err := Run(context.Background(), Unit{
+					Generators: generators, Stream: gen.StreamMain, End: records, BatchSize: 1000, QueueCap: 4,
+					Encoder: enc, Sink: &output.DirSink{Dir: dir}, MaxRecordBytes: spec.MaxRecordBytes,
+				})
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+			b.ReportMetric(float64(records), "records/op")
+		})
+	}
+}
+
+// BenchmarkPipelineNoDisk shows what generation and encoding can do by themselves.
+func BenchmarkPipelineNoDisk(b *testing.B) {
+	for _, gens := range []int{1, 2, 4, 8, 12} {
+		b.Run(fmt.Sprintf("generators=%d", gens), func(b *testing.B) {
+			e := engineFor(b, customerDoc)
+			spec := e.Streams()[0]
+			enc, err := serial.New(serial.FormatNDJSON, serial.Options{}, serial.Stream{Fields: spec.Fields})
+			if err != nil {
+				b.Fatal(err)
+			}
+			generators := make([]gen.StreamGenerator, gens)
+			for i := range generators {
+				if generators[i], err = e.NewStreamGenerator(gen.StreamMain); err != nil {
+					b.Fatal(err)
+				}
+			}
+			const records = 200000
+			b.ReportAllocs()
+			for b.Loop() {
+				_, err := Run(context.Background(), Unit{
+					Generators: generators, Stream: gen.StreamMain, End: records, BatchSize: 1000, QueueCap: 4,
+					Encoder: enc, Sink: &discardSink{}, MaxRecordBytes: spec.MaxRecordBytes,
 				})
 				if err != nil {
 					b.Fatal(err)

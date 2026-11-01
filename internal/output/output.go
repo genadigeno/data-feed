@@ -13,6 +13,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 )
 
 // Compression names.
@@ -60,32 +62,62 @@ type Sink interface {
 	Accept(ctx context.Context, p FinishedPart) error
 }
 
+// Buffers and queue depth for a part's background work. They bound what a part can hold in
+// memory: writes block when both queues are full, which backs up into generation.
+const (
+	partBufferBytes = 1 << 20
+	partQueueDepth  = 2
+)
+
+var partBuffers = sync.Pool{New: func() any {
+	b := make([]byte, partBufferBytes)
+	return &b
+}}
+
 // filePart writes to a temporary name and renames on commit, so a crash or a cancelled
 // run never leaves a complete-looking file behind.
+//
+// Compressing, checksumming and writing cost more than encoding, and on the caller's
+// goroutine they would limit a whole run to what one core can do. So they happen behind the
+// caller: Write hands over a buffer, one goroutine compresses and checksums in order, and
+// another writes to the file.
 type filePart struct {
 	final string
 	f     *os.File
+	sync  bool
 	gz    *gzip.Writer
 	hash  hash.Hash
-	w     io.Writer
-	bytes int64
-	done  bool
+	bytes atomic.Int64
+
+	toHash  chan *[]byte
+	toWrite chan *[]byte
+	wg      sync.WaitGroup
+	failure atomic.Pointer[error]
+	closed  bool
+	done    bool
 }
 
-// countingWriter counts what reaches the file.
-type countingWriter struct {
-	w io.Writer
-	n *int64
+// handOff passes compressed output on to the file, in buffers of its own.
+type handOff struct{ p *filePart }
+
+func (h handOff) Write(b []byte) (int, error) {
+	h.p.hash.Write(b)
+	h.p.enqueueWrite(b)
+	return len(b), nil
 }
 
-func (c countingWriter) Write(b []byte) (int, error) {
-	n, err := c.w.Write(b)
-	*c.n += int64(n)
-	return n, err
-}
-
-// NewFilePart starts a part that will appear at final when committed.
+// NewFilePart starts a part that will appear at final when committed, safely on disk.
 func NewFilePart(final, compression string) (PartFile, error) {
+	return newFilePart(final, compression, true)
+}
+
+// NewScratchPart is NewFilePart for a file that will be regenerated if lost, which needs
+// no sync to disk.
+func NewScratchPart(final, compression string) (PartFile, error) {
+	return newFilePart(final, compression, false)
+}
+
+func newFilePart(final, compression string, durable bool) (PartFile, error) {
 	dir := filepath.Dir(final)
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return nil, fmt.Errorf("create output directory: %w", err)
@@ -94,32 +126,128 @@ func NewFilePart(final, compression string) (PartFile, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create part file: %w", err)
 	}
-	p := &filePart{final: final, f: f, hash: sha256.New()}
-	p.w = countingWriter{io.MultiWriter(f, p.hash), &p.bytes}
+	p := &filePart{
+		final: final, f: f, sync: durable, hash: sha256.New(),
+		toHash: make(chan *[]byte, partQueueDepth), toWrite: make(chan *[]byte, partQueueDepth),
+	}
 	if compression == CompressionGzip {
 		// BestSpeed: output volume is the point here, and parts stay reproducible.
-		gz, err := gzip.NewWriterLevel(p.w, gzip.BestSpeed)
+		gz, err := gzip.NewWriterLevel(handOff{p}, gzip.BestSpeed)
 		if err != nil {
 			_ = f.Close()
 			_ = os.Remove(f.Name())
 			return nil, err
 		}
 		p.gz = gz
-		p.w = gz
 	}
+	p.wg.Add(2)
+	go p.hashLoop()
+	go p.writeLoop()
 	return p, nil
 }
 
-func (p *filePart) Write(b []byte) (int, error) { return p.w.Write(b) }
+func (p *filePart) fail(err error) { p.failure.CompareAndSwap(nil, &err) }
 
-func (p *filePart) Commit() (FinishedPart, error) {
+func (p *filePart) failed() error {
+	if e := p.failure.Load(); e != nil {
+		return *e
+	}
+	return nil
+}
+
+func getBuffer(n int) *[]byte {
+	if n > partBufferBytes {
+		b := make([]byte, n)
+		return &b
+	}
+	b := partBuffers.Get().(*[]byte)
+	*b = (*b)[:n]
+	return b
+}
+
+func putBuffer(b *[]byte) {
+	if cap(*b) == partBufferBytes {
+		*b = (*b)[:partBufferBytes]
+		partBuffers.Put(b)
+	}
+}
+
+func (p *filePart) enqueueWrite(b []byte) {
+	for len(b) > 0 {
+		n := min(len(b), partBufferBytes)
+		buf := getBuffer(n)
+		copy(*buf, b[:n])
+		p.toWrite <- buf
+		b = b[n:]
+	}
+}
+
+func (p *filePart) hashLoop() {
+	defer p.wg.Done()
+	defer close(p.toWrite)
+	for buf := range p.toHash {
+		if p.gz != nil {
+			if _, err := p.gz.Write(*buf); err != nil {
+				p.fail(err)
+			}
+			putBuffer(buf)
+			continue
+		}
+		p.hash.Write(*buf)
+		p.toWrite <- buf
+	}
 	if p.gz != nil {
 		if err := p.gz.Close(); err != nil {
-			return FinishedPart{}, errors.Join(err, p.Abort())
+			p.fail(err)
 		}
 	}
-	if err := p.f.Sync(); err != nil {
-		return FinishedPart{}, errors.Join(fmt.Errorf("sync part: %w", err), p.Abort())
+}
+
+// writeLoop keeps draining after a failure, so that nothing upstream stays blocked.
+func (p *filePart) writeLoop() {
+	defer p.wg.Done()
+	for buf := range p.toWrite {
+		if p.failed() == nil {
+			n, err := p.f.Write(*buf)
+			p.bytes.Add(int64(n))
+			if err != nil {
+				p.fail(fmt.Errorf("write part: %w", err))
+			}
+		}
+		putBuffer(buf)
+	}
+}
+
+// Write takes a copy, so the caller can reuse b at once. A failure shows up on a later
+// Write or at Commit.
+func (p *filePart) Write(b []byte) (int, error) {
+	if err := p.failed(); err != nil {
+		return 0, err
+	}
+	buf := getBuffer(len(b))
+	copy(*buf, b)
+	p.toHash <- buf
+	return len(b), nil
+}
+
+// finish waits for everything handed over to be done.
+func (p *filePart) finish() {
+	if !p.closed {
+		p.closed = true
+		close(p.toHash)
+		p.wg.Wait()
+	}
+}
+
+func (p *filePart) Commit() (FinishedPart, error) {
+	p.finish()
+	if err := p.failed(); err != nil {
+		return FinishedPart{}, errors.Join(err, p.Abort())
+	}
+	if p.sync {
+		if err := p.f.Sync(); err != nil {
+			return FinishedPart{}, errors.Join(fmt.Errorf("sync part: %w", err), p.Abort())
+		}
 	}
 	if err := p.f.Close(); err != nil {
 		_ = os.Remove(p.f.Name())
@@ -131,12 +259,13 @@ func (p *filePart) Commit() (FinishedPart, error) {
 		_ = os.Remove(p.f.Name())
 		return FinishedPart{}, fmt.Errorf("finalize part: %w", err)
 	}
-	out := FinishedPart{Path: p.final, Bytes: p.bytes}
+	out := FinishedPart{Path: p.final, Bytes: p.bytes.Load()}
 	copy(out.SHA256[:], p.hash.Sum(nil))
 	return out, nil
 }
 
 func (p *filePart) Abort() error {
+	p.finish()
 	if p.done {
 		return nil
 	}
