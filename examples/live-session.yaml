@@ -1,0 +1,19 @@
+# A stream session meant to be read while it runs, for example with
+# examples/clients/follow_session.ps1:
+#   datafeed session create -f examples/live-session.yaml --start
+# It runs until you stop it: datafeed session stop <session-id>
+name: live-customers
+mode: stream
+schema:
+  inline:
+    kind: hybrid
+    fields:
+      id: {type: uuid, unique: true}
+      name: {type: full_name}
+      age: {type: integer, min: 18, max: 90}
+limits:
+  rate: 20          # records per second
+  max_workers: 1    # one work unit at a time: records arrive in order, and the rate holds
+output:
+  format: ndjson
+  part_max_age: 1s  # close a part every second, so readers see data within about a second (default 60s)
